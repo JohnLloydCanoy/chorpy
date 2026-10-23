@@ -29,7 +29,7 @@ Chorpy structures the household experience into two distinct phases: **Onboardin
 
 #### Phase 1: Onboarding & Family Circle Setup
 1. **Download the App:** Install the Chorpy mobile app on both the Parent and Child devices.
-2. **Create Your Account:** Register and authenticate using email and password via Supabase Auth.
+2. **Create Your Account:** Register and authenticate using email and password via Supabase Auth, capturing profile information (Full Name, Phone Number, Date of Birth, and Age).
 3. **Select Your Role:** Designate the device profile as either a **Parent** (Admin Node) or a **Child** (Enforcement Node).
 4. **Join or Create a Circle (Family):**
    - **Parent:** Creates a new household "Circle" (Family), which generates a unique 6-digit pairing PIN.
@@ -157,7 +157,7 @@ sequenceDiagram
 
 ### 5.1. Account Onboarding & Role Selection
 *These requirements define how users establish accounts and identify their permissions.*
-- **FR-1.1:** The system shall allow a user to register and authenticate an account utilizing an email and password via Supabase Auth.
+- **FR-1.1:** The system shall allow a user to register and authenticate an account utilizing an email and password via Supabase Auth, capturing personal profile details including full name, phone number, date of birth, and age.
 - **FR-1.2:** The system shall require the user to designate their profile as either a **Parent** (Admin Node) or a **Child** (Enforcement Node) upon initial profile creation.
 - **FR-1.3:** The system shall strictly route authenticated users to their designated role view (Parent Dashboard vs. Child Enforcement View).
 
@@ -294,6 +294,9 @@ erDiagram
         uuid household_id FK
         text email
         text full_name
+        text phone_number
+        date date_of_birth
+        int age
         text role "parent | child"
         timestamp created_at
     }
@@ -339,6 +342,9 @@ create table public.profiles (
     household_id uuid references public.households(id) on delete set null,
     email text not null,
     full_name text,
+    phone_number text,
+    date_of_birth date,
+    age integer,
     role text check (role in ('parent', 'child')) not null default 'child',
     created_at timestamp with time zone default timezone('utc'::text, now()) not null
 );

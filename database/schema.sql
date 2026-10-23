@@ -43,6 +43,9 @@ create table if not exists public.profiles (
     household_id uuid references public.households(id) on delete set null,
     email text not null,
     full_name text,
+    phone_number text,
+    date_of_birth date,
+    age integer,
     role text check (role in ('parent', 'child')) not null default 'child',
     created_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
@@ -73,11 +76,14 @@ create table if not exists public.chores (
 create or replace function public.handle_new_user()
 returns trigger as $$
 begin
-  insert into public.profiles (id, email, full_name, role)
+  insert into public.profiles (id, email, full_name, phone_number, date_of_birth, age, role)
   values (
     new.id,
     new.email,
     coalesce(new.raw_user_meta_data->>'full_name', 'User'),
+    new.raw_user_meta_data->>'phone_number',
+    (new.raw_user_meta_data->>'date_of_birth')::date,
+    (new.raw_user_meta_data->>'age')::integer,
     coalesce(new.raw_user_meta_data->>'role', 'child')
   );
   return new;
