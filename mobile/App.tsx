@@ -38,6 +38,21 @@ export default function App() {
   return (
     <AuthProvider>
       <SafeAreaView style={styles.safeArea}>
+        {/* Top Screen Preview Navigation Bar */}
+        <View style={styles.navBar}>
+          {(['home', 'auth', 'role', 'parent', 'child'] as ScreenName[]).map((tab) => (
+            <TouchableOpacity
+              key={tab}
+              onPress={() => setCurrentScreen(tab)}
+              style={[styles.navButton, currentScreen === tab && styles.navButtonActive]}
+            >
+              <Text style={[styles.navButtonText, currentScreen === tab && styles.navButtonTextActive]}>
+                {tab.toUpperCase()}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+
         <View style={styles.content}>
           {currentScreen === 'home' && (
             <View style={styles.homeContainer}>
@@ -59,21 +74,6 @@ export default function App() {
           {currentScreen === 'role' && <RoleScreen />}
           {currentScreen === 'parent' && <ParentDashboard />}
           {currentScreen === 'child' && <ChildLockScreen />}
-        </View>
-
-        {/* Screen Preview Navigation Bar */}
-        <View style={styles.navBar}>
-          {(['home', 'auth', 'role', 'parent', 'child'] as ScreenName[]).map((tab) => (
-            <TouchableOpacity
-              key={tab}
-              onPress={() => setCurrentScreen(tab)}
-              style={[styles.navButton, currentScreen === tab && styles.navButtonActive]}
-            >
-              <Text style={[styles.navButtonText, currentScreen === tab && styles.navButtonTextActive]}>
-                {tab.toUpperCase()}
-              </Text>
-            </TouchableOpacity>
-          ))}
         </View>
 
         <StatusBar style="auto" />
@@ -147,11 +147,12 @@ const styles = StyleSheet.create({
   navBar: {
     flexDirection: 'row',
     backgroundColor: '#FFFFFF',
-    borderTopWidth: 1,
-    borderTopColor: '#E2E8F0',
+    borderBottomWidth: 1,
+    borderBottomColor: '#E2E8F0',
     paddingVertical: 10,
     paddingHorizontal: 8,
     justifyContent: 'space-around',
+    zIndex: 10,
   },
   navButton: {
     paddingVertical: 6,
