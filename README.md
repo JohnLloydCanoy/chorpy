@@ -388,9 +388,23 @@ chorpy/
 │   └── schema.sql               # PostgreSQL schema, automatic RLS trigger, and security policies
 ├── mobile/                      # React Native / Expo application (SDK 58)
 │   ├── assets/                  # App icons, splash screens, and adaptive Android icons
+│   ├── src/
+│   │   ├── components/          # Reusable UI primitives (Button, Card)
+│   │   ├── context/             # Global application state (AuthContext)
+│   │   ├── hooks/               # Custom reactive hooks (useAuth, useChores, useDeviceLock)
+│   │   ├── lib/
+│   │   │   └── supabase.ts      # Supabase client and storage persistence
+│   │   ├── screens/
+│   │   │   ├── AuthScreen.tsx   # Sign Up & Sign In with extended profile fields
+│   │   │   ├── RoleScreen.tsx   # Parent vs. Child profile designation
+│   │   │   ├── ParentDashboard.tsx # Task assignment and proof verification
+│   │   │   └── ChildLockScreen.tsx # Screen enforcement and camera capture
+│   │   ├── services/            # Pure business logic & API services (auth, chores, circle, device)
+│   │   ├── theme/               # Global design tokens (colors, typography, spacing, borderRadius)
+│   │   └── types/               # TypeScript data models (Profile, Chore, Household, Device)
 │   ├── .env                     # Environment variables (Supabase URL & Anon Key)
 │   ├── app.json                 # Expo configuration (name: "Chorpy", package: "com.chorpy.app")
-│   ├── App.tsx                  # Root application entry component with brand layout
+│   ├── App.tsx                  # Root application entry component with preview switcher
 │   ├── index.ts                 # Main entry point registered by Expo
 │   ├── package.json             # Mobile dependencies (@supabase/supabase-js, async-storage, etc.)
 │   └── tsconfig.json            # TypeScript compiler configuration
