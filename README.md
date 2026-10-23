@@ -38,7 +38,7 @@ Chorpy operates on a hub-and-spoke real-time architecture connecting two distinc
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │                 PARENT CONTROL NODE                         │
-│         (Expo Web / Mobile Dashboard Interface)             │
+│            (Mobile Parent Dashboard Interface)              │
 │  - Task Assignment & Scheduling                            │
 │  - 6-Digit Household Pairing Code Generator                 │
 │  - Photo Proof Review & Remote Unlock Commands              │
@@ -133,7 +133,7 @@ $$\text{pending} \xrightarrow{\text{photo upload}} \text{awaiting\_approval} \xr
 
 ### 5.4. Maintainability & Portability
 - **Modularity (Separation of Concerns):** The codebase must strictly separate the React Native UI components from the Supabase data-fetching logic to ensure the system is easy to modify when transitioning to a self-hosted server later in the semester.
-- **Adaptability (Responsive Layouts):** The parent interface must utilize responsive layouts so that it functions cleanly whether viewed natively on a mobile device or displayed on a laptop projector during your capstone defense.
+- **Adaptability (Mobile-First Architecture):** The system operates strictly as a native mobile application (mobile-only, no web dependency), providing responsive layouts tailored specifically for mobile phone screens.
 - **Installability (Frictionless Deployment):** The child enforcement application must be compiled as a standalone Android `.apk` that can be directly sideloaded, allowing you to manually grant the `SYSTEM_ALERT_WINDOW` permission for the live demo without navigating Google Play Store red tape.
 
 ---
@@ -338,13 +338,13 @@ npx expo run:android
 
 When conducting a live demonstration before panel evaluators:
 
-1. **Stationary Node (Projector / Laptop):** Open the Parent Dashboard on a browser or secondary phone logged in as `parent@chorpy.local`.
-2. **Mobile Node (Presenter Hand):** Hold the physical Android device running Chorpy Dev Build logged in as `child@chorpy.local`.
-3. **Step 1 — Create Task:** From the parent dashboard, create a chore titled `"Clean Computer Desk"` and assign it to the child.
+1. **Parent Device (Mobile App):** Open the Chorpy mobile app on the parent's phone logged in as `parent@chorpy.local`.
+2. **Child Device (Mobile App):** Hold the physical Android device running the Chorpy Dev Build logged in as `child@chorpy.local`.
+3. **Step 1 — Create Task:** From the parent mobile app, create a chore titled `"Clean Computer Desk"` and assign it to the child.
 4. **Step 2 — Immediate Screen Hijack:** Show the audience that the child's phone screen instantly freezes and is overtaken by the full-screen non-dismissible Chorpy locking overlay. Attempting to press Home or Back returns to the lock screen.
-5. **Step 3 — Photo Submission:** Tap *"Take Photo Proof"* within the overlay container, take a picture of the desk, and hit submit. The child's UI transitions to `"Waiting for Parent Approval"`.
-6. **Step 4 — Realtime Parent Verification:** Point to the projector screen; without refreshing the page, the parent dashboard updates to display the uploaded photo proof.
-7. **Step 5 — Instant Unlock:** Tap *"Approve Task"*. Point back to the child device in your hand; the locking overlay immediately disappears, returning the phone to normal home screen access in sub-second time.
+5. **Step 3 — Photo Submission:** Tap *"Take Photo Proof"* within the overlay container on the child's phone, take a picture of the desk, and hit submit. The child's UI transitions to `"Waiting for Parent Approval"`.
+6. **Step 4 — Realtime Parent Verification:** Show the parent's phone screen; without refreshing or pulling down, the parent dashboard updates in real-time to display the uploaded photo proof.
+7. **Step 5 — Instant Unlock:** Tap *"Approve Task"* on the parent app. Point back to the child device in your hand; the locking overlay immediately disappears, returning the phone to normal home screen access in sub-second time.
 
 ---
 
