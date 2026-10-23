@@ -119,50 +119,72 @@ sequenceDiagram
 
 ## 4. Functional Requirements (FR) & Specifications
 
-### 4.1. User Authentication & Role Management
-*These requirements define how different users access and navigate the system.*
-- **FR-1.1:** The system shall allow a user to register an account utilizing an email and password.
-- **FR-1.2:** The system shall strictly route users to either a "Parent" dashboard or a "Child" enforcement view based on their assigned role upon login.
-- **FR-1.3:** The system shall generate a unique 6-digit PIN allowing parents to create a household "Circle" (Family) and children to join it.
-- **FR-1.4:** The system shall request and verify necessary permissions (Camera, Location, and Android `SYSTEM_ALERT_WINDOW` display over other apps) during initial onboarding.
+### 4.1. Account Onboarding & Role Selection
+*These requirements define how users establish accounts and identify their permissions.*
+- **FR-1.1:** The system shall allow a user to register and authenticate an account utilizing an email and password via Supabase Auth.
+- **FR-1.2:** The system shall require the user to designate their profile as either a **Parent** (Admin Node) or a **Child** (Enforcement Node) upon initial profile creation.
+- **FR-1.3:** The system shall strictly route authenticated users to their designated role view (Parent Dashboard vs. Child Enforcement View).
 
-### 4.2. Task Assignment & Data Processing
-*These requirements detail the specific workflows for creating and managing chores.*
-- **FR-2.1:** The system shall allow a parent user to create a new chore containing a title, assigned child, and status.
-- **FR-2.2:** The system shall update the chore's status from `'pending'` to `'awaiting_approval'` when a child submits a photo proof.
-- **FR-2.3:** The system shall capture and upload a `.jpg` image from the child's device camera to the cloud storage bucket (`chore-proofs`).
+### 4.2. Family Circle Management & Pairing
+*These requirements govern the establishment and grouping of household accounts.*
+- **FR-2.1:** The system shall allow a parent user to create a new household **"Circle" (Family)**, generating an auto-generated 6-digit alphanumeric pairing PIN.
+- **FR-2.2:** The system shall allow a child user to enter the 6-digit PIN to join the parent's household Circle and pair their physical device.
+- **FR-2.3:** The system shall display all connected child profiles and their registered device enforcement statuses on the parent dashboard in real time.
+
+### 4.3. Device Permissions & System Handshake
+*These requirements ensure mandatory hardware and OS-level capabilities are verified before enforcement.*
+- **FR-3.1:** The system shall request runtime permissions for **Camera & Photo Storage** on the child device to enable chore proof capture.
+- **FR-3.2:** The system shall request runtime **Location Services** permissions to support family circle proximity and household awareness.
+- **FR-3.3:** The system shall inspect and verify whether the child device has granted the **Android `SYSTEM_ALERT_WINDOW` ("Display over other apps")** permission.
+- **FR-3.4:** The system shall provide an in-app button that directly deep-links the child user to the Android Special App Access settings page if overlay permissions are absent.
+- **FR-3.5:** The system shall prevent a child device from entering standard operation until all mandatory enforcement permissions have been verified.
+
+### 4.4. Chore Creation & Task Management
+*These requirements detail the specific workflows for creating, scheduling, and tracking chores.*
+- **FR-4.1:** The system shall allow a parent user to create a chore containing a title, description, assigned child, and status.
+- **FR-4.2:** The system shall automatically set a newly assigned chore's status to `'pending'` upon creation.
+- **FR-4.3:** The system shall provide an embedded camera viewfinder within the child's enforcement view to capture photo proof of the completed task.
+- **FR-4.4:** The system shall compress and upload the captured image (`.jpg`) to the Supabase cloud storage bucket (`chore-proofs`).
+- **FR-4.5:** The system shall automatically update the chore status from `'pending'` to `'awaiting_approval'` immediately following successful photo upload.
 
 $$\text{pending} \xrightarrow{\text{photo upload}} \text{awaiting\_approval} \xrightarrow{\text{parent approval}} \text{approved / unlocked}$$
 
-### 4.3. Device Enforcement & State-Driven Actions
-*These requirements outline the core behavioral triggers of the application.*
-- **FR-3.1:** The system shall activate a non-dismissible `SYSTEM_ALERT_WINDOW` overlay on the child's Android device if a chore status is `'pending'`.
-- **FR-3.2:** The system shall instantly remove the locking overlay when the parent manually changes the device's `lock_status` to `'unlocked'`.
-- **FR-3.3:** The system shall push real-time state changes to the child's device over a WebSocket connection without requiring a manual page refresh.
+### 4.5. Hardware Device Enforcement & Verification Release
+*These requirements define the real-time locking and unlocking mechanics.*
+- **FR-5.1:** The system shall automatically trigger a full-screen, non-dismissible `SYSTEM_ALERT_WINDOW` overlay on the child's device whenever a chore is `'pending'`.
+- **FR-5.2:** The overlay shall trap and suppress Android navigation inputs (such as Back and Home buttons) to prevent the child from accessing other mobile apps while locked.
+- **FR-5.3:** The system shall display the submitted chore photo on the parent dashboard in real time without requiring a manual refresh.
+- **FR-5.4:** The system shall allow the parent to tap **"Approve"** (updating chore status to `'approved'` and device state to `'unlocked'`) or **"Reject"** (reverting chore status to `'pending'`).
+- **FR-5.5:** The system shall immediately dismiss the child's screen overlay and restore device access upon receiving the WebSocket `'unlocked'` broadcast.
 
 ---
 
 ## 5. Non-Functional Requirements (NFR)
 
-### 5.1. Performance & Efficiency
-- **Time Behavior (Latency):** The Supabase WebSocket connection must deliver the unlock payload to the child's device instantly to trigger the state change.
-- **Resource Utilization (Battery Overhead):** The background process listening for changes in the `devices` table must consume minimal battery overhead so the Android OS does not aggressively terminate the listener.
-- **Capacity:** The cloud storage and database must handle concurrent photo-proof uploads efficiently, specifically optimized for the planned 5–10 household stress test in Cagayan de Oro.
+### 5.1. Performance & Responsiveness
+- **Time Behavior (WebSocket Latency):** The Supabase WebSocket subscription must broadcast state transitions (e.g., Parent approval to Child unlock) in sub-second time (< 500 ms under standard 4G/Wi-Fi).
+- **Image Optimization & Upload Speed:** The mobile client must compress camera captures to `< 1.5 MB` prior to cloud storage upload to maintain responsive submissions even on low-bandwidth networks.
+- **Database Query Latency:** Real-time state lookups on the `devices` and `chores` tables must execute in `< 150 ms`.
 
-### 5.2. Security & Data Integrity
-- **Access Control (Authorization):** The PostgreSQL database must enforce strict policies ensuring that only an authenticated control node (the parent) can execute the `UPDATE` operations required to approve a chore and trigger an unlock.
-- **Data Confidentiality (Encryption):** The system must utilize secure HTTPS and WSS protocols to encrypt the transmission of the direct QR/PIN pairing codes and all submitted photo evidence.
-- **Integrity Validation (Tamper Resistance):** The `SYSTEM_ALERT_WINDOW` overlay must be non-dismissible, successfully bypassing standard Android navigation (like the home or back buttons) to safely mimic an OS-level lock.
+### 5.2. Battery & Resource Optimization
+- **Background Listener Efficiency:** The background service listening for state changes in the `devices` table must consume minimal CPU and maintain `< 3%` total battery drain over an 8-hour period.
+- **Battery-Conscious Location Polling:** Location services must utilize passive, geofence-based location requests rather than high-frequency GPS polling to conserve battery life.
 
-### 5.3. Reliability & Fault Tolerance
-- **Network Recovery (Auto-Reconnection):** If the child's device loses cellular or Wi-Fi connectivity, the application must automatically re-establish the Supabase real-time subscription the moment the network returns.
-- **Data Persistence (State Retention):** The system must retain the `'locked'` state locally on the device so that if a child attempts to bypass the lock by forcibly rebooting the Android phone, the overlay immediately re-engages upon startup.
-- **Fault Tolerance (Graceful Degradation):** The React Native architecture must implement strict error boundaries so that a failure in the Expo Camera module during photo capture does not crash the underlying background service enforcing the lock.
+### 5.3. Security, Authorization & Privacy
+- **Access Control (Row Level Security):** PostgreSQL Row Level Security (RLS) policies must strictly isolate data by `household_id`. Children may only view assigned chores; only authenticated parent users can update chore approval states and issue device unlock commands.
+- **Data Confidentiality & Transport Encryption:** All cloud communication (auth tokens, photo uploads, real-time WebSocket signals) must be encrypted via TLS 1.3 (HTTPS and WSS).
+- **Location Privacy:** Circle location coordinates must be accessible exclusively to verified members of the same household Circle and never exposed publicly.
+- **PIN Expiration & Tamper Resistance:** The 6-digit family pairing PIN must enforce uniqueness and secure expiration to prevent brute-force association.
 
-### 5.4. Maintainability & Portability
-- **Modularity (Separation of Concerns):** The codebase must strictly separate the React Native UI components from the Supabase data-fetching logic to ensure the system is easy to modify when transitioning to a self-hosted server later in the semester.
-- **Adaptability (Mobile-First Architecture):** The system operates strictly as a native mobile application (mobile-only, no web dependency), providing responsive layouts tailored specifically for mobile phone screens.
-- **Installability (Frictionless Deployment):** The child enforcement application must be compiled as a standalone Android `.apk` that can be directly sideloaded, allowing you to manually grant the `SYSTEM_ALERT_WINDOW` permission for the live demo without navigating Google Play Store red tape.
+### 5.4. Reliability, Persistence & Fault Tolerance
+- **Reboot Persistence (State Retention):** The `'locked'` state must be stored locally in persistent device storage. If a child attempts to bypass the lock by rebooting the Android device, a native boot receiver (`BOOT_COMPLETED`) must immediately re-engage the overlay upon system startup.
+- **Network Recovery (Auto-Reconnection):** If the device loses internet connectivity, the app must automatically re-establish the Supabase real-time WebSocket connection immediately upon network recovery and resynchronize state.
+- **Fault Tolerance (Graceful Degradation):** Camera module or network upload exceptions must be safely isolated using React error boundaries so that failures during photo capture never crash the background overlay enforcement service.
+
+### 5.5. Usability, Portability & Deployment
+- **Guided Permission Onboarding:** The app must provide an intuitive step-by-step onboarding wizard with explicit visual indicators and direct deep-links to Android system settings for granting overlay and location permissions.
+- **Mobile-First Responsive Layout:** UI styling must be strictly mobile-first, ensuring consistent presentation across standard Android device aspect ratios (16:9 to 20:9).
+- **Standalone Sideloading:** The child enforcement build must compile into a standalone Android `.apk` (via Expo Prebuild Dev Client) for straightforward installation and evaluation during academic project defenses.
 
 ---
 
