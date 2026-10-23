@@ -1,3 +1,5 @@
+<div align="center">
+
 # CHORPY
 ### A Networked Household Chore Management & Digital Wellbeing System
 
@@ -6,6 +8,8 @@
 [![Supabase](https://img.shields.io/badge/Supabase-Realtime_Postgres-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white)](https://supabase.com/)
 [![Android](https://img.shields.io/badge/Platform-Android_Enforcement-3DDC84?style=for-the-badge&logo=android&logoColor=white)](https://developer.android.com/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](https://opensource.org/licenses/MIT)
+
+</div>
 
 ---
 
@@ -58,7 +62,39 @@ Chorpy structures the household experience into two distinct phases: **Onboardin
 
 ---
 
-## 3. System Architecture & Data Flow
+## 3. Brand Identity & Mascot System
+
+### 3.1. Mascot Persona: "Chorpy the Maya"
+The app's mascot is modeled after the **Eurasian Tree Sparrow** (locally recognized across the Philippines as the ***Maya***). Renowned for its energetic morning presence and industrious habit of constantly collecting materials to build and tidy its nest, the Maya perfectly embodies domestic responsibility and active household habits.
+
+To move beyond traditional muted earthy tones into a vibrant, modern tech product aesthetic, Chorpy is stylized in a **Sky Blue & Bright Coral Orange** visual system:
+
+- **Silhouette:** A compact, round, approachable songbird with large expressive eyes designed for high readability at mobile app-icon scale.
+- **Cheek Spot:** The iconic cheek patch of the Eurasian Tree Sparrow, reimagined in sharp Slate Navy.
+- **Chest & Beak:** A vibrant Coral Orange chest patch and beak that pulse and glow during reward moments and celebratory unlocks.
+
+### 3.2. Color Palette & Design Tokens
+
+| Role | Token Name | Hex Code | Visual Feeling & UI Application |
+| :--- | :--- | :--- | :--- |
+| **Primary Base** | **Sky Blue** | `#38BDF8` | App headers, primary action buttons, feather body (clean, digital, calm) |
+| **Warm Accent** | **Bright Coral Orange** | `#FF6B4A` | Unlock CTAs, notification badges, chest patch (energetic, motivating warmth) |
+| **Contrast / Neutral** | **Slate Navy** | `#0F172A` | Signature cheek spots, headings, high-contrast typography |
+| **Surface** | **Cloud White** | `#F8FAFC` | Clean card containers, modals, and background surfaces |
+
+### 3.3. In-App Contextual Mascot States
+
+| App State | Screen / Context | Chorpy's Posture & Visual Cue |
+| :--- | :--- | :--- |
+| **🔒 Pending / Locked** | Full-Screen Overlay | Chorpy stands guard over a padlock: *"Chores first, screen time later!"* |
+| **📸 Photo Submission** | Camera Viewfinder | Chorpy peers through a magnifying glass: *"Snap a clear picture of your work!"* |
+| **⏳ Awaiting Review** | Awaiting Approval | Chorpy sips tea beside a timer: *"Sent to parent! Awaiting review..."* |
+| **🎉 Approved / Unlocked** | Realtime Unlock Dissolve | Chorpy takes flight with keys in beak amidst confetti: *"All clean! Enjoy screen time!"* |
+| **👨‍👩‍👧 Family Circle** | Circle Members List | Chorpy perched in a stylized nest displaying the household pairing PIN. |
+
+---
+
+## 4. System Architecture & Data Flow
 
 Chorpy operates on a hub-and-spoke real-time architecture connecting two distinct application roles through a managed cloud backend.
 
@@ -117,21 +153,21 @@ sequenceDiagram
 
 ---
 
-## 4. Functional Requirements (FR) & Specifications
+## 5. Functional Requirements (FR) & Specifications
 
-### 4.1. Account Onboarding & Role Selection
+### 5.1. Account Onboarding & Role Selection
 *These requirements define how users establish accounts and identify their permissions.*
 - **FR-1.1:** The system shall allow a user to register and authenticate an account utilizing an email and password via Supabase Auth.
 - **FR-1.2:** The system shall require the user to designate their profile as either a **Parent** (Admin Node) or a **Child** (Enforcement Node) upon initial profile creation.
 - **FR-1.3:** The system shall strictly route authenticated users to their designated role view (Parent Dashboard vs. Child Enforcement View).
 
-### 4.2. Family Circle Management & Pairing
+### 5.2. Family Circle Management & Pairing
 *These requirements govern the establishment and grouping of household accounts.*
 - **FR-2.1:** The system shall allow a parent user to create a new household **"Circle" (Family)**, generating an auto-generated 6-digit alphanumeric pairing PIN.
 - **FR-2.2:** The system shall allow a child user to enter the 6-digit PIN to join the parent's household Circle and pair their physical device.
 - **FR-2.3:** The system shall display all connected child profiles and their registered device enforcement statuses on the parent dashboard in real time.
 
-### 4.3. Device Permissions & System Handshake
+### 5.3. Device Permissions & System Handshake
 *These requirements ensure mandatory hardware and OS-level capabilities are verified before enforcement.*
 - **FR-3.1:** The system shall request runtime permissions for **Camera & Photo Storage** on the child device to enable chore proof capture.
 - **FR-3.2:** The system shall request runtime **Location Services** permissions to support family circle proximity and household awareness.
@@ -139,7 +175,7 @@ sequenceDiagram
 - **FR-3.4:** The system shall provide an in-app button that directly deep-links the child user to the Android Special App Access settings page if overlay permissions are absent.
 - **FR-3.5:** The system shall prevent a child device from entering standard operation until all mandatory enforcement permissions have been verified.
 
-### 4.4. Chore Creation & Task Management
+### 5.4. Chore Creation & Task Management
 *These requirements detail the specific workflows for creating, scheduling, and tracking chores.*
 - **FR-4.1:** The system shall allow a parent user to create a chore containing a title, description, assigned child, and status.
 - **FR-4.2:** The system shall automatically set a newly assigned chore's status to `'pending'` upon creation.
@@ -149,7 +185,7 @@ sequenceDiagram
 
 $$\text{pending} \xrightarrow{\text{photo upload}} \text{awaiting\_approval} \xrightarrow{\text{parent approval}} \text{approved / unlocked}$$
 
-### 4.5. Hardware Device Enforcement & Verification Release
+### 5.5. Hardware Device Enforcement & Verification Release
 *These requirements define the real-time locking and unlocking mechanics.*
 - **FR-5.1:** The system shall automatically trigger a full-screen, non-dismissible `SYSTEM_ALERT_WINDOW` overlay on the child's device whenever a chore is `'pending'`.
 - **FR-5.2:** The overlay shall trap and suppress Android navigation inputs (such as Back and Home buttons) to prevent the child from accessing other mobile apps while locked.
@@ -159,36 +195,36 @@ $$\text{pending} \xrightarrow{\text{photo upload}} \text{awaiting\_approval} \xr
 
 ---
 
-## 5. Non-Functional Requirements (NFR)
+## 6. Non-Functional Requirements (NFR)
 
-### 5.1. Performance & Responsiveness
+### 6.1. Performance & Responsiveness
 - **Time Behavior (WebSocket Latency):** The Supabase WebSocket subscription must broadcast state transitions (e.g., Parent approval to Child unlock) in sub-second time (< 500 ms under standard 4G/Wi-Fi).
 - **Image Optimization & Upload Speed:** The mobile client must compress camera captures to `< 1.5 MB` prior to cloud storage upload to maintain responsive submissions even on low-bandwidth networks.
 - **Database Query Latency:** Real-time state lookups on the `devices` and `chores` tables must execute in `< 150 ms`.
 
-### 5.2. Battery & Resource Optimization
+### 6.2. Battery & Resource Optimization
 - **Background Listener Efficiency:** The background service listening for state changes in the `devices` table must consume minimal CPU and maintain `< 3%` total battery drain over an 8-hour period.
 - **Battery-Conscious Location Polling:** Location services must utilize passive, geofence-based location requests rather than high-frequency GPS polling to conserve battery life.
 
-### 5.3. Security, Authorization & Privacy
+### 6.3. Security, Authorization & Privacy
 - **Access Control (Row Level Security):** PostgreSQL Row Level Security (RLS) policies must strictly isolate data by `household_id`. Children may only view assigned chores; only authenticated parent users can update chore approval states and issue device unlock commands.
 - **Data Confidentiality & Transport Encryption:** All cloud communication (auth tokens, photo uploads, real-time WebSocket signals) must be encrypted via TLS 1.3 (HTTPS and WSS).
 - **Location Privacy:** Circle location coordinates must be accessible exclusively to verified members of the same household Circle and never exposed publicly.
 - **PIN Expiration & Tamper Resistance:** The 6-digit family pairing PIN must enforce uniqueness and secure expiration to prevent brute-force association.
 
-### 5.4. Reliability, Persistence & Fault Tolerance
+### 6.4. Reliability, Persistence & Fault Tolerance
 - **Reboot Persistence (State Retention):** The `'locked'` state must be stored locally in persistent device storage. If a child attempts to bypass the lock by rebooting the Android device, a native boot receiver (`BOOT_COMPLETED`) must immediately re-engage the overlay upon system startup.
 - **Network Recovery (Auto-Reconnection):** If the device loses internet connectivity, the app must automatically re-establish the Supabase real-time WebSocket connection immediately upon network recovery and resynchronize state.
 - **Fault Tolerance (Graceful Degradation):** Camera module or network upload exceptions must be safely isolated using React error boundaries so that failures during photo capture never crash the background overlay enforcement service.
 
-### 5.5. Usability, Portability & Deployment
+### 6.5. Usability, Portability & Deployment
 - **Guided Permission Onboarding:** The app must provide an intuitive step-by-step onboarding wizard with explicit visual indicators and direct deep-links to Android system settings for granting overlay and location permissions.
 - **Mobile-First Responsive Layout:** UI styling must be strictly mobile-first, ensuring consistent presentation across standard Android device aspect ratios (16:9 to 20:9).
 - **Standalone Sideloading:** The child enforcement build must compile into a standalone Android `.apk` (via Expo Prebuild Dev Client) for straightforward installation and evaluation during academic project defenses.
 
 ---
 
-## 6. Developer Dual-Workflow (Expo Go vs. Dev Build)
+## 7. Developer Dual-Workflow (Expo Go vs. Dev Build)
 
 To balance rapid UI development with low-level Android native permissions, Chorpy utilizes a **two-tier development strategy**:
 
@@ -213,7 +249,7 @@ To balance rapid UI development with low-level Android native permissions, Chorp
 
 ---
 
-## 7. Project Roadmap
+## 8. Project Roadmap
 
 ### Phase 1: Academic Defense MVP (Current Scope)
 - [x] Comprehensive architecture design & repository initialization.
@@ -235,7 +271,7 @@ To balance rapid UI development with low-level Android native permissions, Chorp
 
 ---
 
-## 8. Database Schema & Data Models
+## 9. Database Schema & Data Models
 
 ### Database Entity-Relationship Overview
 
@@ -336,7 +372,7 @@ alter publication supabase_realtime add table public.devices;
 
 ---
 
-## 9. Project Directory Structure
+## 10. Project Directory Structure
 
 ```text
 chorpy/
@@ -348,15 +384,15 @@ chorpy/
 
 ---
 
-## 10. Getting Started
+## 11. Getting Started
 
-### 10.1. Prerequisites
+### 11.1. Prerequisites
 - [Node.js](https://nodejs.org/) (v18.x or v20.x LTS)
 - [Expo CLI](https://docs.expo.dev/get-started/installation/) (`npm install -g expo-cli eas-cli`)
 - [Android Studio](https://developer.android.com/studio) (configured with Android SDK platform-tools & emulator, or a physical Android device connected via USB/Wi-Fi)
 - A free [Supabase](https://supabase.com/) project account
 
-### 10.2. Environment Configuration
+### 11.2. Environment Configuration
 Create a `.env` file in the project root:
 
 ```env
@@ -364,7 +400,7 @@ EXPO_PUBLIC_SUPABASE_URL=https://your-supabase-project.supabase.co
 EXPO_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key
 ```
 
-### 10.3. Installation
+### 11.3. Installation
 
 ```bash
 # Clone the repository
@@ -375,7 +411,7 @@ cd chorpy
 npm install
 ```
 
-### 10.4. Running the Development Server
+### 11.4. Running the Development Server
 
 #### Running with Expo Go (UI & Logic Prototyping)
 ```bash
@@ -396,7 +432,7 @@ npx expo run:android
 
 ---
 
-## 11. Academic Defense Live Demo Walkthrough
+## 12. Academic Defense Live Demo Walkthrough
 
 When conducting a live demonstration before panel evaluators:
 
@@ -410,7 +446,7 @@ When conducting a live demonstration before panel evaluators:
 
 ---
 
-## 12. Technology Stack
+## 13. Technology Stack
 
 - **Framework:** [React Native](https://reactnative.dev/) with [Expo](https://expo.dev/) (Managed Workflow + Prebuild Dev Clients)
 - **Language:** [TypeScript](https://www.typescriptlang.org/)
@@ -424,7 +460,7 @@ When conducting a live demonstration before panel evaluators:
 
 ---
 
-## 13. Authors & Academic Acknowledgments
+## 14. Authors & Academic Acknowledgments
 
 Developed as an Academic Capstone Project for Mobile Programming.
 
@@ -434,6 +470,6 @@ Developed as an Academic Capstone Project for Mobile Programming.
 
 ---
 
-## 14. License
+## 15. License
 
 This project is licensed under the [MIT License](LICENSE) — see the LICENSE file for details.
