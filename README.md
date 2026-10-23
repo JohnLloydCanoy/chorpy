@@ -19,6 +19,33 @@ Unlike traditional chore charts that are passive and easily ignored, or generic 
 2. **The Lock:** If a mandatory chore is pending, the child's Android device is immediately locked via a hardware-level, non-dismissible screen overlay (`SYSTEM_ALERT_WINDOW`).
 3. **The Proof:** To restore screen access, the child captures and submits photo evidence of the completed chore. Once the parent reviews and approves the submission, the lock is instantly dissolved via real-time WebSocket state synchronization.
 
+### 1.1. End-to-End Application Flow
+
+Chorpy structures the household experience into two distinct phases: **Onboarding & Family Circle Setup** followed by the **Daily Chore Enforcement Loop**:
+
+#### Phase 1: Onboarding & Family Circle Setup
+1. **Download the App:** Install the Chorpy mobile app on both the Parent and Child devices.
+2. **Create Your Account:** Register and authenticate using email and password via Supabase Auth.
+3. **Select Your Role:** Designate the device profile as either a **Parent** (Admin Node) or a **Child** (Enforcement Node).
+4. **Join or Create a Circle (Family):**
+   - **Parent:** Creates a new household "Circle" (Family), which generates a unique 6-digit pairing PIN.
+   - **Child:** Enters the 6-digit family PIN to join the household Circle.
+5. **Enable Device Permissions:**
+   - **Camera & Storage Access:** Required for taking and uploading photo evidence of chores.
+   - **Location Access:** Enables family circle proximity and location-aware household features.
+   - **Display Over Other Apps (`SYSTEM_ALERT_WINDOW`):** *(Child device only)* Required to enforce non-dismissible screen overlays when chores are pending.
+
+#### Phase 2: Daily Chore Lifecycle & Enforcement Loop
+6. **Manage & Assign Chores (The Lock):**
+   - The parent creates and assigns a chore (status: `pending`).
+   - In real-time via WebSockets, the child’s Android device freezes behind a full-screen, non-dismissible overlay, blocking access to apps and the home screen.
+7. **Photo Proof Submitted (The Proof):**
+   - Within the locked overlay, the child accesses the camera, snaps a photo of the completed chore, and submits it.
+   - The chore status automatically updates to `awaiting_approval`.
+8. **Parent Verification & Unlock (The Release):**
+   - The parent reviews the photo proof in real time from their dashboard.
+   - Tapping **"Approve"** immediately broadcasts an unlock event over WebSockets, dissolving the screen overlay on the child's phone and restoring device access.
+
 ---
 
 ## 2. Problem Statement & Motivation
@@ -96,7 +123,8 @@ sequenceDiagram
 *These requirements define how different users access and navigate the system.*
 - **FR-1.1:** The system shall allow a user to register an account utilizing an email and password.
 - **FR-1.2:** The system shall strictly route users to either a "Parent" dashboard or a "Child" enforcement view based on their assigned role upon login.
-- **FR-1.3:** The system shall generate a unique 6-digit PIN to pair a new child device securely to the parent's household network.
+- **FR-1.3:** The system shall generate a unique 6-digit PIN allowing parents to create a household "Circle" (Family) and children to join it.
+- **FR-1.4:** The system shall request and verify necessary permissions (Camera, Location, and Android `SYSTEM_ALERT_WINDOW` display over other apps) during initial onboarding.
 
 ### 4.2. Task Assignment & Data Processing
 *These requirements detail the specific workflows for creating and managing chores.*
@@ -286,15 +314,27 @@ alter publication supabase_realtime add table public.devices;
 
 ---
 
-## 9. Getting Started
+## 9. Project Directory Structure
 
-### 9.1. Prerequisites
+```text
+chorpy/
+├── database/               # Database definitions, SQL migrations, and seed scripts
+├── mobile/                 # React Native / Expo application (Parent & Child UI, native overlay)
+├── server/                 # Backend services, API logic, and Supabase Edge Functions
+└── README.md               # Project documentation & architectural specification
+```
+
+---
+
+## 10. Getting Started
+
+### 10.1. Prerequisites
 - [Node.js](https://nodejs.org/) (v18.x or v20.x LTS)
 - [Expo CLI](https://docs.expo.dev/get-started/installation/) (`npm install -g expo-cli eas-cli`)
 - [Android Studio](https://developer.android.com/studio) (configured with Android SDK platform-tools & emulator, or a physical Android device connected via USB/Wi-Fi)
 - A free [Supabase](https://supabase.com/) project account
 
-### 9.2. Environment Configuration
+### 10.2. Environment Configuration
 Create a `.env` file in the project root:
 
 ```env
@@ -302,7 +342,7 @@ EXPO_PUBLIC_SUPABASE_URL=https://your-supabase-project.supabase.co
 EXPO_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key
 ```
 
-### 9.3. Installation
+### 10.3. Installation
 
 ```bash
 # Clone the repository
@@ -313,7 +353,7 @@ cd chorpy
 npm install
 ```
 
-### 9.4. Running the Development Server
+### 10.4. Running the Development Server
 
 #### Running with Expo Go (UI & Logic Prototyping)
 ```bash
@@ -334,7 +374,7 @@ npx expo run:android
 
 ---
 
-## 10. Academic Defense Live Demo Walkthrough
+## 11. Academic Defense Live Demo Walkthrough
 
 When conducting a live demonstration before panel evaluators:
 
@@ -348,7 +388,7 @@ When conducting a live demonstration before panel evaluators:
 
 ---
 
-## 11. Technology Stack
+## 12. Technology Stack
 
 - **Framework:** [React Native](https://reactnative.dev/) with [Expo](https://expo.dev/) (Managed Workflow + Prebuild Dev Clients)
 - **Language:** [TypeScript](https://www.typescriptlang.org/)
@@ -362,7 +402,7 @@ When conducting a live demonstration before panel evaluators:
 
 ---
 
-## 12. Authors & Academic Acknowledgments
+## 13. Authors & Academic Acknowledgments
 
 Developed as an Academic Capstone Project for Mobile Programming.
 
@@ -372,6 +412,6 @@ Developed as an Academic Capstone Project for Mobile Programming.
 
 ---
 
-## 13. License
+## 14. License
 
 This project is licensed under the [MIT License](LICENSE) — see the LICENSE file for details.
