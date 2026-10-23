@@ -376,10 +376,20 @@ alter publication supabase_realtime add table public.devices;
 
 ```text
 chorpy/
-├── database/               # Database definitions, SQL migrations, and seed scripts
-├── mobile/                 # React Native / Expo application (Parent & Child UI, native overlay)
-├── server/                 # Backend services, API logic, and Supabase Edge Functions
-└── README.md               # Project documentation & architectural specification
+├── .agents/
+│   └── skills/                  # Workspace agent skills & runbooks
+├── database/
+│   └── schema.sql               # PostgreSQL schema, automatic RLS trigger, and security policies
+├── mobile/                      # React Native / Expo application (SDK 58)
+│   ├── assets/                  # App icons, splash screens, and adaptive Android icons
+│   ├── .env                     # Environment variables (Supabase URL & Anon Key)
+│   ├── app.json                 # Expo configuration (name: "Chorpy", package: "com.chorpy.app")
+│   ├── App.tsx                  # Root application entry component with brand layout
+│   ├── index.ts                 # Main entry point registered by Expo
+│   ├── package.json             # Mobile dependencies (@supabase/supabase-js, async-storage, etc.)
+│   └── tsconfig.json            # TypeScript compiler configuration
+├── server/                      # Backend microservices & Supabase Edge Functions
+└── README.md                    # Project documentation & architectural specification
 ```
 
 ---
@@ -393,11 +403,14 @@ chorpy/
 - A free [Supabase](https://supabase.com/) project account
 
 ### 11.2. Environment Configuration
-Create a `.env` file in the project root:
+Create a `.env` file inside the `mobile/` folder:
 
 ```env
-EXPO_PUBLIC_SUPABASE_URL=https://your-supabase-project.supabase.co
-EXPO_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key
+# Supabase Project URL (Settings -> API -> Project URL)
+EXPO_PUBLIC_SUPABASE_URL=https://your-project-id.supabase.co
+
+# Supabase Anon / Publishable Key (Settings -> API -> Project API keys -> anon public)
+EXPO_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 ```
 
 ### 11.3. Installation
