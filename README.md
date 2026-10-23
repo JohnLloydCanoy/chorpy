@@ -405,7 +405,7 @@ EXPO_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key
 ```bash
 # Clone the repository
 git clone https://github.com/JohnLloydCanoy/chorpy.git
-cd chorpy
+cd chorpy/mobile
 
 # Install project dependencies
 npm install
@@ -460,7 +460,31 @@ When conducting a live demonstration before panel evaluators:
 
 ---
 
-## 14. Authors & Academic Acknowledgments
+## 14. Installed Dependencies & Packages
+
+The mobile application ([`mobile/package.json`](file:///C:/Users/Nitro/Desktop/Projects/School/chorpy/mobile/package.json)) currently includes the following foundational packages:
+
+### 14.1. Production Dependencies
+
+| Package | Version | Purpose & Architectural Role |
+| :--- | :--- | :--- |
+| [`@supabase/supabase-js`](https://supabase.com/docs/reference/javascript) | `^2.118.0` | Official client SDK for PostgreSQL queries, Supabase Auth, Realtime WebSockets, and Storage. |
+| [`@react-native-async-storage/async-storage`](https://react-native-async-storage.github.io/async-storage/) | `2.2.0` | Persistent on-device key-value store for Auth JWT tokens and offline tamper-resistant lock state retention. |
+| [`react-native-url-polyfill`](https://github.com/charpeni/react-native-url-polyfill) | `^4.0.0` | WHATWG URL standard polyfill required for Supabase Realtime WebSocket connections in React Native. |
+| [`expo`](https://docs.expo.dev/) | `~58.0.17` | Managed React Native mobile platform and build toolchain. |
+| [`react`](https://react.dev/) / [`react-native`](https://reactnative.dev/) | `19.3.0` / `0.88.0` | Core UI rendering framework and native device bridge. |
+| [`expo-status-bar`](https://docs.expo.dev/versions/latest/sdk/status-bar/) | `~58.0.4` | System status bar theme and appearance manager. |
+
+### 14.2. Development Dependencies
+
+| Package | Version | Purpose |
+| :--- | :--- | :--- |
+| [`typescript`](https://www.typescriptlang.org/) | `~6.0.3` | Static type checking and compile-time error detection. |
+| [`@types/react`](https://www.npmjs.com/package/@types/react) | `~19.3.0` | Type declarations for React 19 components and hooks. |
+
+---
+
+## 15. Authors & Academic Acknowledgments
 
 Developed as an Academic Capstone Project for Mobile Programming.
 
@@ -470,6 +494,6 @@ Developed as an Academic Capstone Project for Mobile Programming.
 
 ---
 
-## 15. License
+## 16. License
 
 This project is licensed under the [MIT License](LICENSE) — see the LICENSE file for details.
