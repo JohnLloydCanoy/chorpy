@@ -114,7 +114,31 @@ $$\text{pending} \xrightarrow{\text{photo upload}} \text{awaiting\_approval} \xr
 
 ---
 
-## 5. Developer Dual-Workflow (Expo Go vs. Dev Build)
+## 5. Non-Functional Requirements (NFR)
+
+### 5.1. Performance & Efficiency
+- **Time Behavior (Latency):** The Supabase WebSocket connection must deliver the unlock payload to the child's device instantly to trigger the state change.
+- **Resource Utilization (Battery Overhead):** The background process listening for changes in the `devices` table must consume minimal battery overhead so the Android OS does not aggressively terminate the listener.
+- **Capacity:** The cloud storage and database must handle concurrent photo-proof uploads efficiently, specifically optimized for the planned 5–10 household stress test in Cagayan de Oro.
+
+### 5.2. Security & Data Integrity
+- **Access Control (Authorization):** The PostgreSQL database must enforce strict policies ensuring that only an authenticated control node (the parent) can execute the `UPDATE` operations required to approve a chore and trigger an unlock.
+- **Data Confidentiality (Encryption):** The system must utilize secure HTTPS and WSS protocols to encrypt the transmission of the direct QR/PIN pairing codes and all submitted photo evidence.
+- **Integrity Validation (Tamper Resistance):** The `SYSTEM_ALERT_WINDOW` overlay must be non-dismissible, successfully bypassing standard Android navigation (like the home or back buttons) to safely mimic an OS-level lock.
+
+### 5.3. Reliability & Fault Tolerance
+- **Network Recovery (Auto-Reconnection):** If the child's device loses cellular or Wi-Fi connectivity, the application must automatically re-establish the Supabase real-time subscription the moment the network returns.
+- **Data Persistence (State Retention):** The system must retain the `'locked'` state locally on the device so that if a child attempts to bypass the lock by forcibly rebooting the Android phone, the overlay immediately re-engages upon startup.
+- **Fault Tolerance (Graceful Degradation):** The React Native architecture must implement strict error boundaries so that a failure in the Expo Camera module during photo capture does not crash the underlying background service enforcing the lock.
+
+### 5.4. Maintainability & Portability
+- **Modularity (Separation of Concerns):** The codebase must strictly separate the React Native UI components from the Supabase data-fetching logic to ensure the system is easy to modify when transitioning to a self-hosted server later in the semester.
+- **Adaptability (Responsive Layouts):** The parent interface must utilize responsive layouts so that it functions cleanly whether viewed natively on a mobile device or displayed on a laptop projector during your capstone defense.
+- **Installability (Frictionless Deployment):** The child enforcement application must be compiled as a standalone Android `.apk` that can be directly sideloaded, allowing you to manually grant the `SYSTEM_ALERT_WINDOW` permission for the live demo without navigating Google Play Store red tape.
+
+---
+
+## 6. Developer Dual-Workflow (Expo Go vs. Dev Build)
 
 To balance rapid UI development with low-level Android native permissions, Chorpy utilizes a **two-tier development strategy**:
 
@@ -139,7 +163,7 @@ To balance rapid UI development with low-level Android native permissions, Chorp
 
 ---
 
-## 6. Project Roadmap
+## 7. Project Roadmap
 
 ### Phase 1: Academic Defense MVP (Current Scope)
 - [x] Comprehensive architecture design & repository initialization.
@@ -161,7 +185,7 @@ To balance rapid UI development with low-level Android native permissions, Chorp
 
 ---
 
-## 7. Database Schema & Data Models
+## 8. Database Schema & Data Models
 
 ### Database Entity-Relationship Overview
 
@@ -262,15 +286,15 @@ alter publication supabase_realtime add table public.devices;
 
 ---
 
-## 8. Getting Started
+## 9. Getting Started
 
-### 8.1. Prerequisites
+### 9.1. Prerequisites
 - [Node.js](https://nodejs.org/) (v18.x or v20.x LTS)
 - [Expo CLI](https://docs.expo.dev/get-started/installation/) (`npm install -g expo-cli eas-cli`)
 - [Android Studio](https://developer.android.com/studio) (configured with Android SDK platform-tools & emulator, or a physical Android device connected via USB/Wi-Fi)
 - A free [Supabase](https://supabase.com/) project account
 
-### 8.2. Environment Configuration
+### 9.2. Environment Configuration
 Create a `.env` file in the project root:
 
 ```env
@@ -278,7 +302,7 @@ EXPO_PUBLIC_SUPABASE_URL=https://your-supabase-project.supabase.co
 EXPO_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key
 ```
 
-### 8.3. Installation
+### 9.3. Installation
 
 ```bash
 # Clone the repository
@@ -289,7 +313,7 @@ cd chorpy
 npm install
 ```
 
-### 8.4. Running the Development Server
+### 9.4. Running the Development Server
 
 #### Running with Expo Go (UI & Logic Prototyping)
 ```bash
@@ -310,7 +334,7 @@ npx expo run:android
 
 ---
 
-## 9. Academic Defense Live Demo Walkthrough
+## 10. Academic Defense Live Demo Walkthrough
 
 When conducting a live demonstration before panel evaluators:
 
@@ -324,7 +348,7 @@ When conducting a live demonstration before panel evaluators:
 
 ---
 
-## 10. Technology Stack
+## 11. Technology Stack
 
 - **Framework:** [React Native](https://reactnative.dev/) with [Expo](https://expo.dev/) (Managed Workflow + Prebuild Dev Clients)
 - **Language:** [TypeScript](https://www.typescriptlang.org/)
@@ -338,7 +362,7 @@ When conducting a live demonstration before panel evaluators:
 
 ---
 
-## 11. Authors & Academic Acknowledgments
+## 12. Authors & Academic Acknowledgments
 
 Developed as an Academic Capstone Project for Mobile Programming.
 
@@ -348,6 +372,6 @@ Developed as an Academic Capstone Project for Mobile Programming.
 
 ---
 
-## 12. License
+## 13. License
 
 This project is licensed under the [MIT License](LICENSE) — see the LICENSE file for details.
