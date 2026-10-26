@@ -336,30 +336,37 @@ To accommodate complex domestic caregiving arrangements (including co-parenting,
 
 ## 7. Non-Functional Requirements (NFR)
 
-### 7.1. Performance & Responsiveness
-- **Time Behavior (WebSocket Latency):** The Supabase WebSocket subscription must broadcast state transitions (e.g., Parent approval to Child unlock) in sub-second time (< 500 ms under standard 4G/Wi-Fi).
-- **Image Optimization & Upload Speed:** The mobile client must compress camera captures to `< 1.5 MB` prior to cloud storage upload to maintain responsive submissions even on low-bandwidth networks.
-- **Database Query Latency:** Real-time state lookups on the `devices` and `chores` tables must execute in `< 150 ms`.
+*The system adheres to the **ISO/IEC 25010 Software Quality Standards**, defining strict quantitative performance, security, life-safety, and reliability benchmarks.*
 
-### 7.2. Battery & Resource Optimization
-- **Background Listener Efficiency:** The background service listening for state changes in the `devices` table must consume minimal CPU and maintain `< 3%` total battery drain over an 8-hour period.
-- **Battery-Conscious Location Polling:** Location services must utilize passive, geofence-based location requests rather than high-frequency GPS polling to conserve battery life.
+### 7.1. Performance Efficiency & Real-Time Latency
+- **NFR-1.1 (Sub-Second WebSocket Propagation):** The Supabase Realtime WebSocket engine must broadcast and deliver critical state transitions (parent chore approval to child device lock dissolution) within a round-trip latency of $< 500\text{ ms}$ over standard 4G/5G and Wi-Fi networks.
+- **NFR-1.2 (Client-Side Image Optimization):** The mobile camera module must compress captured verification photographs (`.jpg`) to $\le 1.2\text{ MB}$ with an image resolution target of $1080\times 1920\text{ px}$ prior to storage upload, ensuring upload completion within $< 2.5\text{ seconds}$ on low-bandwidth ($< 5\text{ Mbps}$) domestic networks.
+- **NFR-1.3 (Database Query SLA):** All primary operational queries on `chores`, `profiles`, and `devices` tables must execute with an internal PostgreSQL query latency of $< 150\text{ ms}$ under simulated concurrent household loads.
 
-### 7.3. Security, Authorization & Privacy
-- **Access Control (Row Level Security):** PostgreSQL Row Level Security (RLS) policies must strictly isolate data by `household_id`. Children may only view assigned chores; only authenticated parent users can update chore approval states and issue device unlock commands.
-- **Data Confidentiality & Transport Encryption:** All cloud communication (auth tokens, photo uploads, real-time WebSocket signals) must be encrypted via TLS 1.3 (HTTPS and WSS).
-- **Location Privacy:** Circle location coordinates must be accessible exclusively to verified members of the same household Circle and never exposed publicly.
-- **PIN Expiration & Tamper Resistance:** The 6-digit family pairing PIN must enforce uniqueness and secure expiration to prevent brute-force association.
+### 7.2. Life-Safety & High-Availability (SOS System)
+- **NFR-2.1 (Instantaneous Emergency Dialing SLA):** The Emergency SOS action on `ChildLockScreen.tsx` must dispatch the native Android system telephone intent (`tel:911` or parent speed dial) in $< 100\text{ ms}$ from touch down, maintaining non-blocking asynchronous execution that never waits for network or cloud connectivity.
+- **NFR-2.2 (Life-Safety Telemetry Priority):** Emergency SOS panic payloads (GPS coordinates and panic timestamp) must be prioritized over ordinary task updates, utilizing high-priority WebSocket broadcast queues with automatic persistent retries upon network drops.
 
-### 7.4. Reliability, Persistence & Fault Tolerance
-- **Reboot Persistence (State Retention):** The `'locked'` state must be stored locally in persistent device storage. If a child attempts to bypass the lock by rebooting the Android device, a native boot receiver (`BOOT_COMPLETED`) must immediately re-engage the overlay upon system startup.
-- **Network Recovery (Auto-Reconnection):** If the device loses internet connectivity, the app must automatically re-establish the Supabase real-time WebSocket connection immediately upon network recovery and resynchronize state.
-- **Fault Tolerance (Graceful Degradation):** Camera module or network upload exceptions must be safely isolated using React error boundaries so that failures during photo capture never crash the background overlay enforcement service.
+### 7.3. Security, Zero-Trust & Anti-Evasion Hardening
+- **NFR-3.1 (Multi-Tenant Row-Level Boundary Isolation):** PostgreSQL Row Level Security (RLS) policies must guarantee 100% data isolation by `household_id`. Client session tokens must be rejected via fail-closed `HTTP 403 Forbidden` responses if any attempt is made to access cross-circle data.
+- **NFR-3.2 (Transport & Storage Cryptography):** All data in transit (API requests, WebSocket streams, photo uploads) must enforce TLS 1.3 encryption (HTTPS / WSS). All sensitive identifiers (PIN hashes, tokens) stored locally must use hardware-backed Android Keystore / `AsyncStorage` encryption.
+- **NFR-3.3 (System Clock Tampering Resistance):** The mobile enforcement service shall detect and counteract device system clock changes (e.g., if a child manually alters Android time to bypass scheduled locks) by cross-referencing server-issued UTC timestamps via NTP handshakes.
+- **NFR-3.4 (Brute-Force Rate Limiting):** Household PIN pairing entry endpoints must enforce automated IP and device-level rate limiting, locking verification attempts for 60 seconds following five (5) consecutive invalid inputs.
 
-### 7.5. Usability, Portability & Deployment
-- **Guided Permission Onboarding:** The app must provide an intuitive step-by-step onboarding wizard with explicit visual indicators and direct deep-links to Android system settings for granting overlay and location permissions.
-- **Mobile-First Responsive Layout:** UI styling must be strictly mobile-first, ensuring consistent presentation across standard Android device aspect ratios (16:9 to 20:9).
-- **Standalone Sideloading:** The child enforcement build must compile into a standalone Android `.apk` (via Expo Prebuild Dev Client) for straightforward installation and evaluation during academic project defenses.
+### 7.4. Reliability, Persistence & Fail-Closed Fault Tolerance
+- **NFR-4.1 (Boot-Time Overlay Restoration SLA):** If a child reboots the physical Android device while under an active `'locked'` chore state, the native `BOOT_COMPLETED` broadcast receiver must re-engage the `SYSTEM_ALERT_WINDOW` overlay within $\le 3\text{ seconds}$ of system home launcher initialization.
+- **NFR-4.2 (Fail-Closed Offline Default):** In the event of total network disconnection (Airplane Mode, Wi-Fi disabling, or DNS failure), the application router must maintain the last-known highest restriction state (`'locked'`), prohibiting automatic fail-open access without verified server cryptographic approval.
+- **NFR-4.3 (Graceful Error Isolation & Boundaries):** Hardware camera, storage, or geolocation exceptions must be isolated using React Error Boundaries and try-catch crash barriers, preventing client application crashes from killing the background native enforcement process.
+
+### 7.5. Resource, Memory & Energy Optimization
+- **NFR-5.1 (Battery Drain Constraint):** The background enforcement service and passive location listener must consume $< 3\%$ of total battery capacity over a continuous 8-hour testing period.
+- **NFR-5.2 (RAM Consumption Ceiling):** The mobile client application must maintain an active memory footprint of $< 90\text{ MB}$ RAM on standard Android devices, preventing Android Low Memory Killer (LMK) from prematurely terminating background overlay services.
+- **NFR-5.3 (Passive Geofencing vs. High-Frequency Polling):** Geolocation services must prioritize passive Android Geofence APIs rather than continuous high-accuracy GPS polling, activating fine-location hardware exclusively during photo submission and SOS trigger events.
+
+### 7.6. Ergonomics, Usability & Cross-Device Portability
+- **NFR-6.1 (Child-Centric Touch Targets):** All child-facing interactive elements (camera trigger, digit inputs, Emergency SOS button) must maintain a minimum touch target dimension of $48\times 48\text{ dp}$ in accordance with Material Design accessibility guidelines.
+- **NFR-6.2 (Aspect Ratio & Resolution Adaptability):** Mobile UI layouts must render responsively across standard modern Android aspect ratios ranging from 16:9 to 21:9 and screen densities from `hdpi` to `xxxhdpi` without content clipping or element overlap.
+- **NFR-6.3 (Standalone Sideload Compilation):** The child enforcement application build must successfully compile into an installable, standalone Android `.apk` (via Expo Prebuild Dev Client) without requiring active Metro bundler connections during live defense evaluation.
 
 ---
 
