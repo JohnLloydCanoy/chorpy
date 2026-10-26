@@ -31,9 +31,9 @@ Chorpy structures the household experience into two distinct phases: **Onboardin
 1. **Download the App:** Install the Chorpy mobile app on both the Parent and Child devices.
 2. **Create Your Account:** Register and authenticate using email and password via Supabase Auth, capturing profile details (Full Name, Phone Number, Date of Birth, and dynamically derived Age).
 3. **Select Your Role:** Designate the device profile as either a **Parent** (Admin Node) or a **Child** (Enforcement Node).
-4. **Join or Create a Circle (Family):**
-   - **Parent:** Creates a new household "Circle" (Family), which generates a unique 6-digit pairing PIN.
-   - **Child:** Enters the 6-digit family PIN to join the household Circle.
+4. **Automated Circle Provisioning & PIN Pairing:**
+   - **Parent:** Automatically provisions a new household Circle upon account registration, instantly generating a unique 6-digit pairing PIN displayed on their dashboard.
+   - **Child:** Enters the parent's 6-digit PIN to immediately pair their device with the household Circle.
 5. **Enable Device Permissions:**
    - **Camera & Storage Access:** Required for taking and uploading photo evidence of chores.
    - **Location Access:** Enables family circle proximity and location-aware household features.
@@ -166,9 +166,9 @@ sequenceDiagram
   - **FR-1.2.2 (Role Immutability & Hardware Binding):** Once a profile and its physical device are successfully bound to a household Circle, the assigned role shall be immutable on the local device and can only be modified or revoked by an authenticated Parent Node.
 - **FR-1.3 (Adaptive State-Driven Navigation & Fail-Closed Routing):** The system shall deterministically route authenticated users through a state-machine-driven navigation hierarchy based on role, household association, and real-time chore enforcement states:
   - **FR-1.3.1 (Multi-Stage Lifecycle Routing):** The router shall evaluate pre-requisite milestones before rendering primary views:
-    1. *Unpaired Profile* $\rightarrow$ Route to **Circle Setup / 6-Digit PIN Pairing Screen**.
+    1. *Unpaired Child Node* $\rightarrow$ Route to **6-Digit PIN Pairing Screen** (to connect to the Parent's auto-generated Circle).
     2. *Incomplete System Permissions* $\rightarrow$ Route to **Hardware Handshake Wizard** (Overlay, Camera, and Location).
-    3. *Parent Node* $\rightarrow$ Route to **Parent Command Dashboard** (chore creation, real-time device telemetry, and proof reviews).
+    3. *Parent Node* $\rightarrow$ Route directly to **Parent Command Dashboard** (featuring the auto-generated 6-digit pairing PIN, real-time device telemetry, chore creation, and proof reviews).
     4. *Child Node (Active / Pending Chores)* $\rightarrow$ Instantly engage the **Non-Dismissible Screen Lock (`SYSTEM_ALERT_WINDOW`)**.
     5. *Child Node (Chores Cleared / Approved)* $\rightarrow$ Route to **Digital Wellbeing Companion View** (displaying earned screen time and chore stats).
   - **FR-1.3.2 (Fail-Closed Offline Enforcement):** The router shall persist the active enforcement state locally in secure storage; during network drops, airplane mode, or device restarts, navigation shall fail-closed by maintaining screen overlay lock until verified online.
@@ -177,10 +177,12 @@ sequenceDiagram
   - **FR-1.4.1 (Email Format Standardization):** The system shall validate email address inputs against standard RFC 5322 syntax (requiring a valid recipient name, an `@` symbol, and a top-level domain e.g., `user@domain.com`), rejecting malformed submissions with immediate inline error feedback.
   - **FR-1.4.2 (Password Complexity & Entropy Rules):** The system shall require passwords to be at least eight (8) characters in length and enforce a composition policy containing at least one uppercase letter (`A-Z`), one lowercase letter (`a-z`), and one numeric digit (`0-9`), accompanied by visual real-time requirement feedback as the user types.
 
-### 5.2. Family Circle Management & Pairing
-*These requirements govern the establishment and grouping of household accounts.*
-- **FR-2.1:** The system shall allow a parent user to create a new household **"Circle" (Family)**, generating an auto-generated 6-digit alphanumeric pairing PIN.
-- **FR-2.2:** The system shall allow a child user to enter the 6-digit PIN to join the parent's household Circle and pair their physical device.
+### 5.2. Family Circle Management & Automated Pairing
+*These requirements govern the automated establishment, pairing, and grouping of household accounts.*
+- **FR-2.1 (Zero-Click Automated Household Circle Provisioning):** The system shall automatically provision a new household Circle for a parent account immediately upon successful registration and role designation:
+  - **FR-2.1.1 (Automatic Unique 6-Digit PIN Generation):** The system shall automatically generate a cryptographically random, collision-free 6-digit alphanumeric pairing PIN and bind it to the newly created household.
+  - **FR-2.1.2 (Instant Admin Binding & Zero-Friction Routing):** The system shall immediately link the parent’s profile as the Circle Owner/Admin and bypass manual household configuration forms, directly routing the parent to the Parent Dashboard with the generated 6-digit PIN ready for pairing.
+- **FR-2.2 (Child Circle Pairing):** The system shall allow a child user to enter the 6-digit PIN to pair their physical device with the parent's household Circle.
 - **FR-2.3:** The system shall display all connected child profiles and their registered device enforcement statuses on the parent dashboard in real time.
 
 ### 5.3. Device Permissions & System Handshake
@@ -208,6 +210,13 @@ $$\text{pending} \xrightarrow{\text{photo upload}} \text{awaiting\_approval} \xr
 - **FR-5.3:** The system shall display the submitted chore photo on the parent dashboard in real time without requiring a manual refresh.
 - **FR-5.4:** The system shall allow the parent to tap **"Approve"** (updating chore status to `'approved'` and device state to `'unlocked'`) or **"Reject"** (reverting chore status to `'pending'`).
 - **FR-5.5:** The system shall immediately dismiss the child's screen overlay and restore device access upon receiving the WebSocket `'unlocked'` broadcast.
+
+### 5.6. Household Geolocation, Geofencing & Life-Safety SOS
+*These requirements govern real-time family location awareness, geofenced chore verification, and emergency safety overrides.*
+- **FR-6.1 (Emergency SOS & Life-Safety Call Bypass):** The system shall maintain an accessible, non-dismissible Emergency SOS action on the child device overlay during active lock states, enabling the child to immediately place outgoing phone calls to pre-configured parent contacts or national emergency services (`911`) without encountering screen lock restrictions.
+- **FR-6.2 (Real-Time Panic Telemetry & GPS Broadcast):** Upon activation of the Emergency SOS trigger, the child node shall immediately transmit high-accuracy geolocation coordinates, a timestamp, and an urgent alert payload to the parent dashboard via high-priority Supabase Realtime broadcast.
+- **FR-6.3 (Household Presence & Geofenced Chore Verification):** The system shall evaluate the child device’s geolocation against the household circle's registered coordinates at the moment of chore submission, tagging the proof review card with a verified home presence indicator (`Within Household Perimeter` vs. `Remote Submission`) to prevent deceptive remote submissions.
+- **FR-6.4 (Passive Family Circle Telemetry):** The system shall provide a family location map on the parent dashboard displaying passive, battery-conscious location updates and battery level indicators for paired child devices.
 
 ---
 
