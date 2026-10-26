@@ -30,10 +30,13 @@ Chorpy structures the household experience into two distinct phases: **Onboardin
 #### Phase 1: Onboarding & Family Circle Setup
 1. **Download the App:** Install the Chorpy mobile app on both the Parent and Child devices.
 2. **Create Your Account:** Register and authenticate using email and password via Supabase Auth, capturing profile details (Full Name, Phone Number, Date of Birth, and dynamically derived Age).
-3. **Select Your Role:** Designate the device profile as either a **Parent** (Admin Node) or a **Child** (Enforcement Node).
-4. **Automated Circle Provisioning & PIN Pairing:**
-   - **Parent:** Automatically provisions a new household Circle upon account registration, instantly generating a unique 6-digit pairing PIN displayed on their dashboard.
-   - **Child:** Enters the parent's 6-digit PIN to immediately pair their device with the household Circle.
+3. **Select Your Role:** Designate the profile role:
+   - **Adult (Admin / Guardian Node):** Choose between establishing a new household (**Primary Parent**) or joining an existing Circle as a secondary guardian (**Co-Parent, Grandparent, or Caregiver/Nanny**).
+   - **Child (Enforcement Node):** Restricted node that pairs to the household for chore tracking and device screen enforcement.
+4. **Automated Circle Provisioning & Dual-PIN Pairing:**
+   - **Primary Parent (Creator):** Automatically provisions a new household Circle upon account registration, generating two distinct codes: a **Child Pairing PIN** and a **Guardian Invite PIN/QR**.
+   - **Co-Parents / Caregivers (Dad, Grandma, Nanny):** Enter the **Guardian Invite PIN** to join the existing household without creating duplicate circles, instantly sharing chore management and approval capabilities.
+   - **Child:** Enters the **Child Pairing PIN** to pair their physical device with the household Circle.
 5. **Enable Device Permissions:**
    - **Camera & Storage Access:** Required for taking and uploading photo evidence of chores.
    - **Location Access:** Enables family circle proximity and location-aware household features.
