@@ -29,7 +29,7 @@ Chorpy structures the household experience into two distinct phases: **Onboardin
 
 #### Phase 1: Onboarding & Family Circle Setup
 1. **Download the App:** Install the Chorpy mobile app on both the Parent and Child devices.
-2. **Create Your Account:** Register and authenticate using email and password via Supabase Auth, capturing profile information (Full Name, Phone Number, Date of Birth, and Age).
+2. **Create Your Account:** Register and authenticate using email and password via Supabase Auth, capturing profile details (Full Name, Phone Number, Date of Birth, and dynamically derived Age).
 3. **Select Your Role:** Designate the device profile as either a **Parent** (Admin Node) or a **Child** (Enforcement Node).
 4. **Join or Create a Circle (Family):**
    - **Parent:** Creates a new household "Circle" (Family), which generates a unique 6-digit pairing PIN.
@@ -156,10 +156,23 @@ sequenceDiagram
 ## 5. Functional Requirements (FR) & Specifications
 
 ### 5.1. Account Onboarding & Role Selection
-*These requirements define how users establish accounts and identify their permissions.*
-- **FR-1.1:** The system shall allow a user to register and authenticate an account utilizing an email and password via Supabase Auth, capturing personal profile details including full name, phone number, date of birth, and age.
-- **FR-1.2:** The system shall require the user to designate their profile as either a **Parent** (Admin Node) or a **Child** (Enforcement Node) upon initial profile creation.
-- **FR-1.3:** The system shall strictly route authenticated users to their designated role view (Parent Dashboard vs. Child Enforcement View).
+*These requirements define how users establish accounts, ingest verified profile data, and identify their permissions.*
+- **FR-1.1 (Account Registration & Profile Ingestion):** The system shall allow a user to register and authenticate an account utilizing an email and password via Supabase Auth, capturing personal profile details (full name, phone number, and date of birth) with intelligent field handling:
+  - **FR-1.1.1 (Dynamic Age Derivation):** The user’s age shall be computed automatically in real time from the inputted `date_of_birth`, eliminating redundant manual inputs and temporal data drift.
+  - **FR-1.1.2 (Age-Aware Role Recommendation):** The system shall evaluate the calculated age to intelligently suggest or enforce the appropriate role profile (e.g., `< 18` automatically pre-selects/defaults to **Child Node**; `≥ 18` pre-selects **Parent Admin Node**).
+  - **FR-1.1.3 (Smart Input Masking & Sanitization):** The phone number field shall feature automatic input masking (standardizing to E.164 international format) and auto-trimming/title-casing for full names.
+- **FR-1.2 (Intelligent Role Designation & Anti-Escalation Safeguard):** The system shall require the user to configure their profile role as either a **Parent (Admin Node)** or a **Child (Enforcement Node)**, secured by contextual validation:
+  - **FR-1.2.1 (Age-Gated Role Authorization):** If the derived age is under 18, the system shall restrict the selection to a **Child Node** by default; claiming a **Parent Node** shall require administrative verification to prevent unauthorized privilege escalation by minors.
+  - **FR-1.2.2 (Role Immutability & Hardware Binding):** Once a profile and its physical device are successfully bound to a household Circle, the assigned role shall be immutable on the local device and can only be modified or revoked by an authenticated Parent Node.
+- **FR-1.3 (Adaptive State-Driven Navigation & Fail-Closed Routing):** The system shall deterministically route authenticated users through a state-machine-driven navigation hierarchy based on role, household association, and real-time chore enforcement states:
+  - **FR-1.3.1 (Multi-Stage Lifecycle Routing):** The router shall evaluate pre-requisite milestones before rendering primary views:
+    1. *Unpaired Profile* $\rightarrow$ Route to **Circle Setup / 6-Digit PIN Pairing Screen**.
+    2. *Incomplete System Permissions* $\rightarrow$ Route to **Hardware Handshake Wizard** (Overlay, Camera, and Location).
+    3. *Parent Node* $\rightarrow$ Route to **Parent Command Dashboard** (chore creation, real-time device telemetry, and proof reviews).
+    4. *Child Node (Active / Pending Chores)* $\rightarrow$ Instantly engage the **Non-Dismissible Screen Lock (`SYSTEM_ALERT_WINDOW`)**.
+    5. *Child Node (Chores Cleared / Approved)* $\rightarrow$ Route to **Digital Wellbeing Companion View** (displaying earned screen time and chore stats).
+  - **FR-1.3.2 (Fail-Closed Offline Enforcement):** The router shall persist the active enforcement state locally in secure storage; during network drops, airplane mode, or device restarts, navigation shall fail-closed by maintaining screen overlay lock until verified online.
+  - **FR-1.3.3 (Server-Side Authorization Parity):** PostgreSQL Row Level Security (RLS) policies shall mirror client routing states, guaranteeing that Child tokens cannot execute Parent mutations even if client-side navigation is manipulated.
 
 ### 5.2. Family Circle Management & Pairing
 *These requirements govern the establishment and grouping of household accounts.*
