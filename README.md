@@ -226,36 +226,68 @@ $$\text{pending} \xrightarrow{\text{photo upload}} \text{awaiting\_approval} \xr
 
 ---
 
-## 6. Non-Functional Requirements (NFR)
+## 6. Role-Based Access Control (RBAC) & Authority Matrix
 
-### 6.1. Performance & Responsiveness
+To accommodate complex domestic caregiving arrangements (including co-parenting, multi-generational households, and domestic caregivers/nannies) without compromising system integrity, Chorpy implements a **Four-Tier Role-Based Access Control (RBAC)** architecture.
+
+### 6.1. Household Authority Tiers
+
+1. **👑 Primary Parent (Circle Owner):**
+   - The creator and root administrator of the Household Circle.
+   - Holds exclusive privileges to delete the Circle, regenerate Guardian Invite PINs, and revoke membership access for secondary guardians.
+2. **🛡️ Co-Parent (Admin Node):**
+   - Full operational co-administrator (e.g., Mom or Dad).
+   - Holds full operational authority to create chores, approve/reject photo submissions, release device locks, and monitor live location telemetry.
+3. **🤝 Caregiver / Nanny / Grandparent (Supervisor Node):**
+   - Delegated domestic supervisor.
+   - Granted everyday task management rights (assigning routine chores, inspecting photo proofs, and approving device unlocks), but restricted from altering circle configurations or removing members.
+4. **🔒 Child (Enforcement Node):**
+   - Strictly restricted subject node.
+   - Constrained to viewing assigned tasks, uploading verification camera proof, and accessing the Emergency SOS life-safety trigger. All administrative controls and external application access (during active chores) are locked out.
+
+### 6.2. Role-Based Permission Matrix
+
+| Household Permission / Action | Primary Parent (Owner) | Co-Parent (Admin) | Caregiver / Nanny / Grandparent | Child (Enforcement Node) |
+| :--- | :---: | :---: | :---: | :---: |
+| **Assign & Schedule Chores** | ✅ Full | ✅ Full | ✅ Full | ❌ None |
+| **Review Proof & Unlock Screen** | ✅ Full | ✅ Full | ✅ Full | ❌ None |
+| **Trigger Emergency SOS Response** | ✅ Receives Alert | ✅ Receives Alert | ✅ Receives Alert | 🚨 Can Trigger |
+| **View Family Live Location Map** | ✅ Full | ✅ Full | ✅ Delegated Access | ❌ Restricted |
+| **Invite Members (View PINs / QR)** | ✅ Full | ✅ Full | ❌ Restricted | ❌ None |
+| **Delete Circle / Remove Members** | 👑 Owner Only | ❌ Restricted | ❌ Restricted | ❌ None |
+
+---
+
+## 7. Non-Functional Requirements (NFR)
+
+### 7.1. Performance & Responsiveness
 - **Time Behavior (WebSocket Latency):** The Supabase WebSocket subscription must broadcast state transitions (e.g., Parent approval to Child unlock) in sub-second time (< 500 ms under standard 4G/Wi-Fi).
 - **Image Optimization & Upload Speed:** The mobile client must compress camera captures to `< 1.5 MB` prior to cloud storage upload to maintain responsive submissions even on low-bandwidth networks.
 - **Database Query Latency:** Real-time state lookups on the `devices` and `chores` tables must execute in `< 150 ms`.
 
-### 6.2. Battery & Resource Optimization
+### 7.2. Battery & Resource Optimization
 - **Background Listener Efficiency:** The background service listening for state changes in the `devices` table must consume minimal CPU and maintain `< 3%` total battery drain over an 8-hour period.
 - **Battery-Conscious Location Polling:** Location services must utilize passive, geofence-based location requests rather than high-frequency GPS polling to conserve battery life.
 
-### 6.3. Security, Authorization & Privacy
+### 7.3. Security, Authorization & Privacy
 - **Access Control (Row Level Security):** PostgreSQL Row Level Security (RLS) policies must strictly isolate data by `household_id`. Children may only view assigned chores; only authenticated parent users can update chore approval states and issue device unlock commands.
 - **Data Confidentiality & Transport Encryption:** All cloud communication (auth tokens, photo uploads, real-time WebSocket signals) must be encrypted via TLS 1.3 (HTTPS and WSS).
 - **Location Privacy:** Circle location coordinates must be accessible exclusively to verified members of the same household Circle and never exposed publicly.
 - **PIN Expiration & Tamper Resistance:** The 6-digit family pairing PIN must enforce uniqueness and secure expiration to prevent brute-force association.
 
-### 6.4. Reliability, Persistence & Fault Tolerance
+### 7.4. Reliability, Persistence & Fault Tolerance
 - **Reboot Persistence (State Retention):** The `'locked'` state must be stored locally in persistent device storage. If a child attempts to bypass the lock by rebooting the Android device, a native boot receiver (`BOOT_COMPLETED`) must immediately re-engage the overlay upon system startup.
 - **Network Recovery (Auto-Reconnection):** If the device loses internet connectivity, the app must automatically re-establish the Supabase real-time WebSocket connection immediately upon network recovery and resynchronize state.
 - **Fault Tolerance (Graceful Degradation):** Camera module or network upload exceptions must be safely isolated using React error boundaries so that failures during photo capture never crash the background overlay enforcement service.
 
-### 6.5. Usability, Portability & Deployment
+### 7.5. Usability, Portability & Deployment
 - **Guided Permission Onboarding:** The app must provide an intuitive step-by-step onboarding wizard with explicit visual indicators and direct deep-links to Android system settings for granting overlay and location permissions.
 - **Mobile-First Responsive Layout:** UI styling must be strictly mobile-first, ensuring consistent presentation across standard Android device aspect ratios (16:9 to 20:9).
 - **Standalone Sideloading:** The child enforcement build must compile into a standalone Android `.apk` (via Expo Prebuild Dev Client) for straightforward installation and evaluation during academic project defenses.
 
 ---
 
-## 7. Developer Dual-Workflow (Expo Go vs. Dev Build)
+## 8. Developer Dual-Workflow (Expo Go vs. Dev Build)
 
 To balance rapid UI development with low-level Android native permissions, Chorpy utilizes a **two-tier development strategy**:
 
@@ -280,7 +312,7 @@ To balance rapid UI development with low-level Android native permissions, Chorp
 
 ---
 
-## 8. Project Roadmap
+## 9. Project Roadmap
 
 ### Phase 1: Academic Defense MVP (Current Scope)
 - [x] Comprehensive architecture design & repository initialization.
@@ -302,7 +334,7 @@ To balance rapid UI development with low-level Android native permissions, Chorp
 
 ---
 
-## 9. Database Schema & Data Models
+## 10. Database Schema & Data Models
 
 ### Database Entity-Relationship Overview
 
@@ -411,7 +443,7 @@ alter publication supabase_realtime add table public.devices;
 
 ---
 
-## 10. Project Directory Structure
+## 11. Project Directory Structure
 
 ```text
 chorpy/
