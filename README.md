@@ -187,20 +187,7 @@ sequenceDiagram
   - **FR-2.1.2 (Instant Admin Binding & Zero-Friction Routing):** The system shall immediately link the registering parent as the Circle Owner/Admin and bypass manual household forms, directly routing them to the Parent Dashboard with pairing codes ready for distribution.
 - **FR-2.2 (Child Circle Pairing):** The system shall allow a child user to enter the 6-digit Child PIN to pair their physical device with the parent's household Circle.
 - **FR-2.3 (Multi-Guardian Household Federation):** The system shall allow secondary adult users (e.g., Co-Parent/Dad, Grandparent, Caregiver/Nanny) to join an existing household Circle by entering the **Guardian Invite PIN** or scanning the Primary Parent's QR code, preventing fragmented or duplicate households.
-- **FR-2.4 (Role-Based Access Control - RBAC for Guardians):** The system shall enforce tiered permissions among adult household members:
-  - **Primary Parent (Owner):** Unrestricted administrative control (chore management, proof approvals, device lock/unlock, member removal, and Circle deletion).
-  - **Co-Parent (Admin):** Full operational control (chore creation, proof approvals, device lock/unlock, and location telemetry).
-  - **Caregiver / Nanny / Grandparent (Supervisor):** Delegated task authority (can assign routine chores, inspect photo submissions, and approve device unlocks, but restricted from altering household settings or removing circle members).
-
-| Household Permission / Action | Primary Parent (Owner) | Co-Parent (Admin) | Caregiver / Nanny / Grandparent | Child (Enforcement Node) |
-| :--- | :---: | :---: | :---: | :---: |
-| **Assign & Schedule Chores** | ✅ Full | ✅ Full | ✅ Full | ❌ None |
-| **Review Proof & Unlock Screen** | ✅ Full | ✅ Full | ✅ Full | ❌ None |
-| **Trigger Emergency SOS Response** | ✅ Receives Alert | ✅ Receives Alert | ✅ Receives Alert | 🚨 Can Trigger |
-| **View Family Live Location Map** | ✅ Full | ✅ Full | ✅ Delegated Access | ❌ Restricted |
-| **Invite Members (View PINs / QR)** | ✅ Full | ✅ Full | ❌ Restricted | ❌ None |
-| **Delete Circle / Remove Members** | 👑 Owner Only | ❌ Restricted | ❌ Restricted | ❌ None |
-
+- **FR-2.4 (Role-Based Access Control - RBAC for Guardians):** The system shall enforce tiered permissions among adult household members (Primary Parent, Co-Parent, and Caregiver/Nanny) as defined in the system RBAC specification, preventing unauthorized privilege escalation.
 - **FR-2.5 (Real-Time Collaborative Approval Synchronization):** When any authorized adult (Parent, Co-Parent, or Caregiver) approves or rejects a chore, the system shall broadcast a real-time event across all active guardian dashboards attributing the action (e.g., *"Approved by Dad"*), instantly updating chore and device lock states to prevent duplicate review collisions.
 - **FR-2.6 (Live Circle Telemetry Roster):** The system shall display all connected child profiles, their registered device enforcement statuses, and active guardian members on the parent dashboard in real time.
 
