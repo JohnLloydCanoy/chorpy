@@ -267,11 +267,21 @@ $$\text{pending} \xrightarrow{\text{photo upload}} \text{awaiting\_approval} \xr
 
 ### 5.5. Hardware Device Enforcement & Verification Release
 *These requirements define the real-time locking and unlocking mechanics.*
-- **FR-5.1:** The system shall automatically trigger a full-screen, non-dismissible `SYSTEM_ALERT_WINDOW` overlay on the child's device whenever a chore is `'pending'`.
-- **FR-5.2:** The overlay shall trap and suppress Android navigation inputs (such as Back and Home buttons) to prevent the child from accessing other mobile apps while locked.
-- **FR-5.3:** The system shall display the submitted chore photo on the parent dashboard in real time without requiring a manual refresh.
-- **FR-5.4:** The system shall allow the parent to tap **"Approve"** (updating chore status to `'approved'` and device state to `'unlocked'`) or **"Reject"** (reverting chore status to `'pending'`).
-- **FR-5.5:** The system shall immediately dismiss the child's screen overlay and restore device access upon receiving the WebSocket `'unlocked'` broadcast.
+- **FR-5.1 (Hardware Screen Hijack & System Overlay Inflation):** The system shall enforce non-dismissible hardware-level screen locks on the child device upon pending chore assignment:
+  - **FR-5.1.1 (WebSocket Trigger & Foreground Service Wakeup):** When an active chore status transitions to `'pending'`, the native background service on the child device shall receive a high-priority WebSocket broadcast and inflate the enforcement window within 500 ms.
+  - **FR-5.1.2 (Android WindowManager Flag Configuration):** The system overlay shall attach via Android `WindowManager` with explicit parameters (`TYPE_APPLICATION_OVERLAY`, `FLAG_NOT_TOUCH_MODAL`, `FLAG_FULLSCREEN`), intercepting all display touches and fully occluding third-party recreational applications.
+- **FR-5.2 (Navigation Trapping & System UI Suppression):** The overlay interface (`ChildLockScreen.tsx`) shall suppress Android system-level navigation controls to prevent escape or evasion:
+  - **FR-5.2.1 (Hardware Key Intercept):** The overlay shall consume native key events (`KeyEvent.KEYCODE_BACK` and `KEYCODE_APP_SWITCH`), preventing the child from backing out to the home launcher or switching tasks via the Recent Apps carousel.
+  - **FR-5.2.2 (System UI Kiosk Emulation):** The overlay shall apply immersive sticky flags (`SYSTEM_UI_FLAG_IMMERSIVE_STICKY` and `SYSTEM_UI_FLAG_HIDE_NAVIGATION`), auto-collapsing the Android status bar and notification shade if pulled down.
+- **FR-5.3 (Real-Time Proof Ingestion & Verification Telemetry):** The system shall deliver submitted chore evidence to adult dashboards without latency:
+  - **FR-5.3.1 (Zero-Refresh Storage Hydration):** When the child uploads a chore image, Supabase Realtime shall push an immediate update to `ParentDashboard.tsx`, dynamically rendering the photo proof card via Supabase Storage CDN without requiring a page pull-down or reload.
+  - **FR-5.3.2 (Metadata & Presence Audit Card):** The review card shall render the proof photo alongside verified operational metadata: submission timestamp, child device identifier, and the geofence presence indicator (`Within Household Perimeter` 📍 vs. `Remote Submission` ⚠️).
+- **FR-5.4 (Collaborative Decision Matrix & Remediation Loop):** Authorized guardians shall execute verifiable review actions from the dashboard review card:
+  - **FR-5.4.1 (Atomic Approval Transaction):** Tapping *"Approve Task"* shall execute an atomic database transaction updating `chores.status = 'approved'`, recording `chores.approved_by_id`, and setting `devices.lock_status = 'unlocked'`.
+  - **FR-5.4.2 (Remediation Rejection with Parent Feedback):** Tapping *"Reject Task"* shall prompt the guardian for an optional rejection reason (e.g., *"Table still dirty"*, *"Photo too dark"*), reverting chore status to `'pending'` and displaying the explanation directly on the child's locked overlay.
+- **FR-5.5 (Hardware Dissolution & Sub-Second Unlock Handshake):** The system shall dissolve the hardware screen lock instantly upon parent approval:
+  - **FR-5.5.1 (Sub-Second Window Teardown):** Upon receiving the WebSocket `'unlocked'` broadcast on the child device, the native module shall invoke `WindowManager.removeView()`, destroying the overlay and restoring full device access in $< 500$ ms.
+  - **FR-5.5.2 (Celebratory Release & Companion Transition):** The client shall display a celebratory mascot unlock cue (Chorpy flying with keys amidst confetti) and smoothly transition to the unlocked `DigitalWellbeingCompanionView.tsx`.
 
 ### 5.6. Household Geolocation, Geofencing & Life-Safety SOS
 *These requirements govern real-time family location awareness, geofenced chore verification, and emergency safety overrides.*
