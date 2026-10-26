@@ -206,6 +206,14 @@ sequenceDiagram
 - **FR-4.3:** The system shall provide an embedded camera viewfinder within the child's enforcement view to capture photo proof of the completed task.
 - **FR-4.4:** The system shall compress and upload the captured image (`.jpg`) to the Supabase cloud storage bucket (`chore-proofs`).
 - **FR-4.5:** The system shall automatically update the chore status from `'pending'` to `'awaiting_approval'` immediately following successful photo upload.
+- **FR-4.6 (Collaborative Chore Deduplication & Concurrency Guard):** The system shall evaluate real-time chore assignments across co-parents and caregivers to detect, prevent, and resolve duplicate or conflicting tasks:
+  - **FR-4.6.1 (Active Task Collision Detection & Fuzzy Matching):** When an adult drafts a chore for a specific child, the system shall execute fuzzy text matching against all currently active tasks (`'pending'` or `'awaiting_approval'`) assigned to that same child to identify identical or highly similar task scopes (e.g., *"Wash the dishes"* vs. *"Do dishes"*).
+  - **FR-4.6.2 (Guardian Conflict Warning & Action Intercept):** If a potential collision is detected, the system shall intercept submission and display a real-time conflict modal identifying the assigning guardian and creation timestamp (e.g., *"Assigned by Mom 10m ago"*), offering three resolution actions:
+    1. *View Existing Chore* (aborts duplicate submission and displays current active chore).
+    2. *Merge Requirements* (links assignments under a unified proof requirement).
+    3. *Create as Separate Task* (proceeds with submission upon explicit guardian confirmation).
+  - **FR-4.6.3 (Single-Proof Collaborative Merging):** When duplicate chores are merged, the child shall be required to submit only a single photo proof to satisfy both assignments, allowing any authorized guardian to approve the consolidated task.
+  - **FR-4.6.4 (Multi-Task Queueing & Aggregate Progress Tracking):** If multiple distinct chores are legitimately assigned concurrently (e.g., *"Clean Bedroom"* and *"Take Out Trash"*), the enforcement overlay shall bundle them into a synchronized task queue displaying real-time progress (e.g., *"1 of 2 Chores Completed"*), holding device screen lock until all assigned queue items are approved.
 
 $$\text{pending} \xrightarrow{\text{photo upload}} \text{awaiting\_approval} \xrightarrow{\text{parent approval}} \text{approved / unlocked}$$
 
@@ -479,15 +487,15 @@ chorpy/
 
 ---
 
-## 11. Getting Started
+## 12. Getting Started
 
-### 11.1. Prerequisites
+### 12.1. Prerequisites
 - [Node.js](https://nodejs.org/) (v18.x or v20.x LTS)
 - [Expo CLI](https://docs.expo.dev/get-started/installation/) (`npm install -g expo-cli eas-cli`)
 - [Android Studio](https://developer.android.com/studio) (configured with Android SDK platform-tools & emulator, or a physical Android device connected via USB/Wi-Fi)
 - A free [Supabase](https://supabase.com/) project account
 
-### 11.2. Environment Configuration
+### 12.2. Environment Configuration
 Create a `.env` file inside the `mobile/` folder:
 
 ```env
@@ -498,7 +506,7 @@ EXPO_PUBLIC_SUPABASE_URL=https://your-project-id.supabase.co
 EXPO_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 ```
 
-### 11.3. Installation
+### 12.3. Installation
 
 ```bash
 # Clone the repository
@@ -509,7 +517,7 @@ cd chorpy/mobile
 npm install
 ```
 
-### 11.4. Running the Development Server
+### 12.4. Running the Development Server
 
 #### Running with Expo Go (UI & Logic Prototyping)
 ```bash
@@ -530,7 +538,7 @@ npx expo run:android
 
 ---
 
-## 12. Academic Defense Live Demo Walkthrough
+## 13. Academic Defense Live Demo Walkthrough
 
 When conducting a live demonstration before panel evaluators:
 
@@ -544,7 +552,7 @@ When conducting a live demonstration before panel evaluators:
 
 ---
 
-## 13. Technology Stack
+## 14. Technology Stack
 
 - **Framework:** [React Native](https://reactnative.dev/) with [Expo](https://expo.dev/) (Managed Workflow + Prebuild Dev Clients)
 - **Language:** [TypeScript](https://www.typescriptlang.org/)
@@ -558,11 +566,11 @@ When conducting a live demonstration before panel evaluators:
 
 ---
 
-## 14. Installed Dependencies & Packages
+## 15. Installed Dependencies & Packages
 
 The mobile application ([`mobile/package.json`](file:///C:/Users/Nitro/Desktop/Projects/School/chorpy/mobile/package.json)) currently includes the following foundational packages:
 
-### 14.1. Production Dependencies
+### 15.1. Production Dependencies
 
 | Package | Version | Purpose & Architectural Role |
 | :--- | :--- | :--- |
@@ -573,7 +581,7 @@ The mobile application ([`mobile/package.json`](file:///C:/Users/Nitro/Desktop/P
 | [`react`](https://react.dev/) / [`react-native`](https://reactnative.dev/) | `19.3.0` / `0.88.0` | Core UI rendering framework and native device bridge. |
 | [`expo-status-bar`](https://docs.expo.dev/versions/latest/sdk/status-bar/) | `~58.0.4` | System status bar theme and appearance manager. |
 
-### 14.2. Development Dependencies
+### 15.2. Development Dependencies
 
 | Package | Version | Purpose |
 | :--- | :--- | :--- |
@@ -582,7 +590,7 @@ The mobile application ([`mobile/package.json`](file:///C:/Users/Nitro/Desktop/P
 
 ---
 
-## 15. Authors & Academic Acknowledgments
+## 16. Authors & Academic Acknowledgments
 
 Developed as an Academic Capstone Project for Mobile Programming.
 
@@ -592,6 +600,6 @@ Developed as an Academic Capstone Project for Mobile Programming.
 
 ---
 
-## 16. License
+## 17. License
 
 This project is licensed under the [MIT License](LICENSE) — see the LICENSE file for details.
