@@ -103,11 +103,11 @@ Chorpy operates on a hub-and-spoke real-time architecture connecting two distinc
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                 PARENT CONTROL NODE                         │
-│            (Mobile Parent Dashboard Interface)              │
-│  - Task Assignment & Scheduling                            │
-│  - 6-Digit Household Pairing Code Generator                 │
-│  - Photo Proof Review & Remote Unlock Commands              │
+│             PARENT & GUARDIAN CONTROL NODES                 │
+│     (Mom, Dad, Grandparent, Nanny - RBAC Delegated)         │
+│  - Task Assignment & Multi-Guardian Scheduling              │
+│  - Dual-PIN Household Pairing Generator (Child & Guardian)  │
+│  - Collaborative Proof Review & Remote Unlock Commands      │
 └──────────────────────────────┬──────────────────────────────┘
                                │ HTTP / WebSocket
                                ▼
@@ -180,13 +180,19 @@ sequenceDiagram
   - **FR-1.4.1 (Email Format Standardization):** The system shall validate email address inputs against standard RFC 5322 syntax (requiring a valid recipient name, an `@` symbol, and a top-level domain e.g., `user@domain.com`), rejecting malformed submissions with immediate inline error feedback.
   - **FR-1.4.2 (Password Complexity & Entropy Rules):** The system shall require passwords to be at least eight (8) characters in length and enforce a composition policy containing at least one uppercase letter (`A-Z`), one lowercase letter (`a-z`), and one numeric digit (`0-9`), accompanied by visual real-time requirement feedback as the user types.
 
-### 5.2. Family Circle Management & Automated Pairing
-*These requirements govern the automated establishment, pairing, and grouping of household accounts.*
-- **FR-2.1 (Zero-Click Automated Household Circle Provisioning):** The system shall automatically provision a new household Circle for a parent account immediately upon successful registration and role designation:
-  - **FR-2.1.1 (Automatic Unique 6-Digit PIN Generation):** The system shall automatically generate a cryptographically random, collision-free 6-digit alphanumeric pairing PIN and bind it to the newly created household.
-  - **FR-2.1.2 (Instant Admin Binding & Zero-Friction Routing):** The system shall immediately link the parent’s profile as the Circle Owner/Admin and bypass manual household configuration forms, directly routing the parent to the Parent Dashboard with the generated 6-digit PIN ready for pairing.
-- **FR-2.2 (Child Circle Pairing):** The system shall allow a child user to enter the 6-digit PIN to pair their physical device with the parent's household Circle.
-- **FR-2.3:** The system shall display all connected child profiles and their registered device enforcement statuses on the parent dashboard in real time.
+### 5.2. Family Circle Management, Multi-Guardian Pairing & RBAC
+*These requirements govern the automated establishment, multi-guardian federation, and role-based permissions across household accounts.*
+- **FR-2.1 (Zero-Click Automated Household Circle Provisioning):** The system shall automatically provision a new household Circle for an initial parent account immediately upon successful registration and role designation:
+  - **FR-2.1.1 (Dual-PIN Architecture Generation):** The system shall generate two distinct, cryptographically collision-free codes for each household: a **Child Pairing PIN** (for device enforcement binding) and a **Guardian Invite PIN / QR code** (for secondary adult onboarding).
+  - **FR-2.1.2 (Instant Admin Binding & Zero-Friction Routing):** The system shall immediately link the registering parent as the Circle Owner/Admin and bypass manual household forms, directly routing them to the Parent Dashboard with pairing codes ready for distribution.
+- **FR-2.2 (Child Circle Pairing):** The system shall allow a child user to enter the 6-digit Child PIN to pair their physical device with the parent's household Circle.
+- **FR-2.3 (Multi-Guardian Household Federation):** The system shall allow secondary adult users (e.g., Co-Parent/Dad, Grandparent, Caregiver/Nanny) to join an existing household Circle by entering the **Guardian Invite PIN** or scanning the Primary Parent's QR code, preventing fragmented or duplicate households.
+- **FR-2.4 (Role-Based Access Control - RBAC for Guardians):** The system shall enforce tiered permissions among adult household members:
+  - **Primary Parent (Owner):** Unrestricted administrative control (chore management, proof approvals, device lock/unlock, member removal, and Circle deletion).
+  - **Co-Parent (Admin):** Full operational control (chore creation, proof approvals, device lock/unlock, and location telemetry).
+  - **Caregiver / Nanny / Grandparent (Supervisor):** Delegated task authority (can assign routine chores, inspect photo submissions, and approve device unlocks, but restricted from altering household settings or removing circle members).
+- **FR-2.5 (Real-Time Collaborative Approval Synchronization):** When any authorized adult (Parent, Co-Parent, or Caregiver) approves or rejects a chore, the system shall broadcast a real-time event across all active guardian dashboards attributing the action (e.g., *"Approved by Dad"*), instantly updating chore and device lock states to prevent duplicate review collisions.
+- **FR-2.6 (Live Circle Telemetry Roster):** The system shall display all connected child profiles, their registered device enforcement statuses, and active guardian members on the parent dashboard in real time.
 
 ### 5.3. Device Permissions & System Handshake
 *These requirements ensure mandatory hardware and OS-level capabilities are verified before enforcement.*
@@ -314,6 +320,7 @@ erDiagram
         uuid id PK
         text name
         text pairing_pin
+        text guardian_pin
         timestamp created_at
     }
 
@@ -325,7 +332,7 @@ erDiagram
         text phone_number
         date date_of_birth
         int age
-        text role "parent | child"
+        text role "parent | co_parent | caregiver | child"
         timestamp created_at
     }
 
@@ -356,15 +363,16 @@ erDiagram
 -- Enable UUID extension
 create extension if not exists "uuid-ossp";
 
--- Households
+-- Households (Family Circles)
 create table public.households (
     id uuid primary key default uuid_generate_v4(),
     name text not null,
-    pairing_pin varchar(6) not null unique,
+    pairing_pin varchar(6) not null unique,        -- Child device pairing PIN
+    guardian_pin varchar(6) not null unique,       -- Secondary adult (Co-Parent / Nanny) invite PIN
     created_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
 
--- Profiles (Users mapped from auth.users)
+-- Profiles (Users mapped from auth.users with RBAC)
 create table public.profiles (
     id uuid primary key references auth.users on delete cascade,
     household_id uuid references public.households(id) on delete set null,
@@ -373,7 +381,7 @@ create table public.profiles (
     phone_number text,
     date_of_birth date,
     age integer,
-    role text check (role in ('parent', 'child')) not null default 'child',
+    role text check (role in ('parent', 'co_parent', 'caregiver', 'child')) not null default 'child',
     created_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
 
