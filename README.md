@@ -231,11 +231,21 @@ sequenceDiagram
 
 ### 5.3. Device Permissions & System Handshake
 *These requirements ensure mandatory hardware and OS-level capabilities are verified before enforcement.*
-- **FR-3.1:** The system shall request runtime permissions for **Camera & Photo Storage** on the child device to enable chore proof capture.
-- **FR-3.2:** The system shall request runtime **Location Services** permissions to support family circle proximity and household awareness.
-- **FR-3.3:** The system shall inspect and verify whether the child device has granted the **Android `SYSTEM_ALERT_WINDOW` ("Display over other apps")** permission.
-- **FR-3.4:** The system shall provide an in-app button that directly deep-links the child user to the Android Special App Access settings page if overlay permissions are absent.
-- **FR-3.5:** The system shall prevent a child device from entering standard operation until all mandatory enforcement permissions have been verified.
+- **FR-3.1 (Camera & Media Storage Access for Verification Proof):** The system shall manage hardware camera and storage permissions on `PermissionHandshakeScreen.tsx` to support verifiable domestic chore submissions:
+  - **FR-3.1.1 (Runtime Camera & Storage Handshake):** The mobile client shall invoke native runtime permission dialogs via `expo-camera` (`Camera.requestCameraPermissionsAsync()`) and `expo-media-library` with explicit user-facing explanations that access is exclusively utilized for capturing chore evidence.
+  - **FR-3.1.2 (Settings Redirection Fallback):** If permissions are denied or configured to "Don't ask again", the handshake card shall replace the grant button with a deep-link trigger invoking `Linking.openSettings()`, accompanied by visual instructions.
+- **FR-3.2 (Geolocation & Presence Verification Permissions):** The system shall manage device location permissions to support geofenced chore verification and life-safety SOS telemetry:
+  - **FR-3.2.1 (Foreground & Geofence Location Authorization):** The client shall request foreground location permissions via `expo-location` (`Location.requestForegroundPermissionsAsync()`), displaying a live status badge (`Not Granted` ❌ $\rightarrow$ `Granted` ✅) upon user confirmation.
+  - **FR-3.2.2 (Passive Telemetry Disclosure):** The handshake wizard shall display a privacy disclosure informing the user that GPS is sampled passively during chore photo uploads and emergency SOS broadcasts to minimize battery consumption.
+- **FR-3.3 (Android SYSTEM_ALERT_WINDOW Hardware Overlay Inspection):** The system shall verify whether the child device possesses native window-drawing privileges required for non-dismissible screen locking:
+  - **FR-3.3.1 (Native Overlay Capability Check):** The application shall query the native Android API bridge (`Settings.canDrawOverlays(context)`) to determine whether the app is authorized to render system-level alert windows over third-party applications.
+  - **FR-3.3.2 (Lifecycle AppState Re-Inspection):** The client shall register an `AppState` event listener (`'active'` event); when the child returns to Chorpy from external Android system menus, the app shall re-evaluate overlay status and dynamically update checklist badges without requiring a manual refresh.
+- **FR-3.4 (Automated Android Special App Access Deep-Linking):** The system shall provide automated navigation shortcuts to Android's special permissions settings:
+  - **FR-3.4.1 (Direct Intent Launch to App Overlay Settings):** If overlay permissions are absent, tapping *"Grant Overlay Permission"* on `PermissionHandshakeScreen.tsx` shall dispatch an explicit Android intent (`android.settings.action.MANAGE_OVERLAY_PERMISSION` with URI `package:com.chorpy.app`), opening Chorpy’s specific overlay toggle screen directly.
+  - **FR-3.4.2 (Visual Guided Walkthrough):** The handshake screen shall display an illustrated animated graphic showing the user how to locate and toggle the *"Allow display over other apps"* switch within system settings.
+- **FR-3.5 (Fail-Closed Hardware Gateway & Anti-Revocation Guard):** The system shall enforce a strict operational barrier to prevent unverified or tampered child devices from running recreational applications:
+  - **FR-3.5.1 (Blocking Hardware Gatekeeper):** The application router shall lock the user inside `PermissionHandshakeScreen.tsx`, disabling the *"Complete Setup & Enter Chorpy"* CTA until Camera, Location, and `SYSTEM_ALERT_WINDOW` permissions are all simultaneously confirmed as `GRANTED`.
+  - **FR-3.5.2 (Persistent Anti-Revocation Observer):** If a child navigates into Android Settings at any later time to revoke overlay or location permissions, the app's background observer shall detect the permission revocation, lock application features, and immediately re-engage the `PermissionHandshakeScreen.tsx` wizard until compliance is restored.
 
 ### 5.4. Chore Creation & Task Management
 *These requirements detail the specific workflows for creating, scheduling, and tracking chores.*
