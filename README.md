@@ -285,10 +285,20 @@ $$\text{pending} \xrightarrow{\text{photo upload}} \text{awaiting\_approval} \xr
 
 ### 5.6. Household Geolocation, Geofencing & Life-Safety SOS
 *These requirements govern real-time family location awareness, geofenced chore verification, and emergency safety overrides.*
-- **FR-6.1 (Emergency SOS & Life-Safety Call Bypass):** The system shall maintain an accessible, non-dismissible Emergency SOS action on the child device overlay during active lock states, enabling the child to immediately place outgoing phone calls to pre-configured parent contacts or national emergency services (`911`) without encountering screen lock restrictions.
-- **FR-6.2 (Real-Time Panic Telemetry & GPS Broadcast):** Upon activation of the Emergency SOS trigger, the child node shall immediately transmit high-accuracy geolocation coordinates, a timestamp, and an urgent alert payload to the parent dashboard via high-priority Supabase Realtime broadcast.
-- **FR-6.3 (Household Presence & Geofenced Chore Verification):** The system shall evaluate the child device’s geolocation against the household circle's registered coordinates at the moment of chore submission, tagging the proof review card with a verified home presence indicator (`Within Household Perimeter` vs. `Remote Submission`) to prevent deceptive remote submissions.
-- **FR-6.4 (Passive Family Circle Telemetry):** The system shall provide a family location map on the parent dashboard displaying passive, battery-conscious location updates and battery level indicators for paired child devices.
+- **FR-6.1 (Emergency SOS & Life-Safety Call Bypass):** The system shall maintain an accessible, non-dismissible Emergency SOS trigger on `ChildLockScreen.tsx` during active lock enforcement:
+  - **FR-6.1.1 (Persistent UI Layer & Touch Priority):** The lock overlay shall render a persistent, high-contrast Emergency SOS trigger (`EmergencySOSButton.tsx`) that retains touch responsiveness above all input-suppression layers.
+  - **FR-6.1.2 (Direct System Dialer Handshake):** Tapping the SOS action shall invoke the native device dialer via `Linking.openURL('tel:911')` or prompt a bottom sheet allowing direct one-tap speed dialing to registered parent phone numbers.
+  - **FR-6.1.3 (Zero-Lock Interruption):** The dialer intent shall launch without terminating or compromising the underlying `SYSTEM_ALERT_WINDOW` enforcement service; upon call conclusion, the child device shall immediately return to the locked chore screen.
+- **FR-6.2 (Real-Time Panic Telemetry & GPS Broadcast):** Upon activation of the Emergency SOS trigger, the child node shall immediately broadcast emergency telemetry across the household:
+  - **FR-6.2.1 (Instant High-Accuracy GPS Ingestion):** The client shall immediately sample coordinates using `expo-location` (`Location.Accuracy.Highest`) alongside current battery percentage and device timestamp.
+  - **FR-6.2.2 (High-Priority Realtime WebSocket Alert):** The client shall broadcast an urgent panic payload across the Supabase channel `household:{household_id}:alerts` to all connected parent and guardian nodes.
+  - **FR-6.2.3 (Audible Alarm & Full-Screen Parent Alert Modal):** Connected guardian devices (`ParentDashboard.tsx`) shall trigger an immediate audible alert sound and force open an `EmergencyAlertModal.tsx` displaying the child's real-time map location with direct turn-by-turn navigation deep-links.
+- **FR-6.3 (Household Presence & Geofenced Chore Verification):** The system shall verify physical presence during task submission using spatial geofencing:
+  - **FR-6.3.1 (Haversine Distance Verification):** During photo submission on `ChildLockScreen.tsx`, the client shall compute the distance between the device’s current coordinates and the household anchor (`households.latitude`, `households.longitude`) against `geofence_radius_meters` (default: 150 m).
+  - **FR-6.3.2 (Visual Presence Audit Stamp):** The system shall record `is_within_geofence` in `public.chores` and display a verified presence badge (`Within Household Perimeter` 🏡) or an alert flag (`Remote Submission: X km away` ⚠️) on the parent review card.
+- **FR-6.4 (Passive Family Circle Telemetry & Device Health):** The system shall maintain a battery-conscious location and device telemetry overview on the parent dashboard:
+  - **FR-6.4.1 (Battery-Conscious Geofence Polling):** The child client shall utilize passive geofence transition listeners and significant-motion triggers rather than high-frequency continuous GPS polling, targeting $< 3\%$ battery consumption over 8 hours.
+  - **FR-6.4.2 (Interactive Circle Map View):** The parent dashboard shall provide a dedicated map view (`FamilyMapView.tsx`) rendering custom avatar pins for each child node with live battery level badges and last-seen timestamps.
 
 ---
 
