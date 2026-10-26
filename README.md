@@ -42,16 +42,20 @@ Chorpy structures the household experience into two distinct phases: **Onboardin
    - **Location Access:** Enables family circle proximity and location-aware household features.
    - **Display Over Other Apps (`SYSTEM_ALERT_WINDOW`):** *(Child device only)* Required to enforce non-dismissible screen overlays when chores are pending.
 
-#### Phase 2: Daily Chore Lifecycle & Enforcement Loop
-6. **Manage & Assign Chores (The Lock):**
-   - The parent creates and assigns a chore (status: `pending`).
-   - In real-time via WebSockets, the child’s Android device freezes behind a full-screen, non-dismissible overlay, blocking access to apps and the home screen.
-7. **Photo Proof Submitted (The Proof):**
+#### Phase 2: Daily Chore Lifecycle, Enforcement & Safety Loop
+6. **Manage & Assign Chores (The Lock & Concurrency Guard):**
+   - An authorized adult (Parent, Co-Parent, or Caregiver) creates a chore. If multiple chores are assigned, they are bundled into a sequential queue (`1 of 2 chores`).
+   - If an adult attempts to assign a duplicate task, the concurrency guard prompts them to merge or view the existing chore.
+   - In real-time via WebSockets, the child’s Android device freezes behind a full-screen, non-dismissible overlay (`SYSTEM_ALERT_WINDOW`), blocking access to apps and the home screen.
+7. **Photo Proof Submitted (The Proof & Geofence Check):**
    - Within the locked overlay, the child accesses the camera, snaps a photo of the completed chore, and submits it.
+   - The submission automatically verifies and tags physical presence against the household geofence (`Within Household Perimeter`).
    - The chore status automatically updates to `awaiting_approval`.
-8. **Parent Verification & Unlock (The Release):**
-   - The parent reviews the photo proof in real time from their dashboard.
-   - Tapping **"Approve"** immediately broadcasts an unlock event over WebSockets, dissolving the screen overlay on the child's phone and restoring device access.
+8. **Collaborative Verification & Unlock (The Release):**
+   - Any authorized adult (Mom, Dad, or Nanny) reviews the photo proof in real time from their dashboard.
+   - Tapping **"Approve"** broadcasts an unlock event attributing the reviewer (*"Approved by Dad"*), dissolving the screen overlay on the child's phone in sub-second time.
+9. **Emergency SOS Life-Safety Override (The Safety Anchor):**
+   - At any moment during active lock enforcement, the child can tap the persistent **"🚨 Emergency SOS"** action to place instant phone calls to parent contacts or `911` and broadcast real-time panic GPS telemetry to all guardian dashboards.
 
 ---
 
@@ -93,6 +97,7 @@ To move beyond traditional muted earthy tones into a vibrant, modern tech produc
 | **📸 Photo Submission** | Camera Viewfinder | Chorpy peers through a magnifying glass: *"Snap a clear picture of your work!"* |
 | **⏳ Awaiting Review** | Awaiting Approval | Chorpy sips tea beside a timer: *"Sent to parent! Awaiting review..."* |
 | **🎉 Approved / Unlocked** | Realtime Unlock Dissolve | Chorpy takes flight with keys in beak amidst confetti: *"All clean! Enjoy screen time!"* |
+| **🚨 Emergency SOS** | Lock Screen Emergency Action | Chorpy equipped with a rescue megaphone: *"Help is on the way! Calling family & broadcasting GPS..."* |
 | **👨‍👩‍👧 Family Circle** | Circle Members List | Chorpy perched in a stylized nest displaying the household pairing PIN. |
 
 ---
@@ -325,8 +330,12 @@ To balance rapid UI development with low-level Android native permissions, Chorp
 ### Phase 1: Academic Defense MVP (Current Scope)
 - [x] Comprehensive architecture design & repository initialization.
 - [ ] Supabase PostgreSQL schema, RLS policies, and storage bucket configuration.
-- [ ] 6-Digit PIN pairing logic bridging parents and children across networks.
-- [ ] React Native Parent Dashboard with real-time approvals.
+- [ ] Dual-PIN Household Pairing logic (Child Enforcement PIN vs. Guardian Invite PIN / QR).
+- [ ] Multi-Guardian RBAC architecture & real-time collaborative approval sync.
+- [ ] Real-time chore deduplication & concurrency guard with fuzzy keyword matching.
+- [ ] Emergency SOS life-safety overlay button & instant panic GPS telemetry broadcast.
+- [ ] Household geofencing & location-aware chore presence verification.
+- [ ] React Native Parent & Guardian Dashboard with live telemetry and approvals.
 - [ ] Android native module / config plugin for `SYSTEM_ALERT_WINDOW` overlay enforcement.
 - [ ] End-to-end WebSocket loop validation (Create $\rightarrow$ Lock $\rightarrow$ Capture $\rightarrow$ Approve $\rightarrow$ Unlock).
 
@@ -358,6 +367,9 @@ erDiagram
         text name
         text pairing_pin
         text guardian_pin
+        float latitude
+        float longitude
+        int geofence_radius_meters
         timestamp created_at
     }
 
@@ -385,10 +397,15 @@ erDiagram
         uuid id PK
         uuid household_id FK
         uuid assigned_child_id FK
+        uuid created_by_id FK
+        uuid approved_by_id FK
         text title
         text description
         text status "pending | awaiting_approval | approved | rejected"
         text proof_image_url
+        float submission_lat
+        float submission_lng
+        boolean is_within_geofence
         timestamp created_at
         timestamp updated_at
     }
@@ -406,6 +423,9 @@ create table public.households (
     name text not null,
     pairing_pin varchar(6) not null unique,        -- Child device pairing PIN
     guardian_pin varchar(6) not null unique,       -- Secondary adult (Co-Parent / Nanny) invite PIN
+    latitude double precision,                     -- Household anchor coordinates for geofencing
+    longitude double precision,
+    geofence_radius_meters integer default 150 not null,
     created_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
 
@@ -436,10 +456,15 @@ create table public.chores (
     id uuid primary key default uuid_generate_v4(),
     household_id uuid not null references public.households(id) on delete cascade,
     assigned_child_id uuid not null references public.profiles(id) on delete cascade,
+    created_by_id uuid references public.profiles(id) on delete set null,    -- Assigning guardian
+    approved_by_id uuid references public.profiles(id) on delete set null,   -- Reviewing guardian
     title text not null,
     description text,
     status text check (status in ('pending', 'awaiting_approval', 'approved', 'rejected')) default 'pending' not null,
     proof_image_url text,
+    submission_lat double precision,               -- Telemetry at proof upload
+    submission_lng double precision,
+    is_within_geofence boolean default true,       -- Verified home presence
     created_at timestamp with time zone default timezone('utc'::text, now()) not null,
     updated_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
@@ -540,15 +565,35 @@ npx expo run:android
 
 ## 13. Academic Defense Live Demo Walkthrough
 
-When conducting a live demonstration before panel evaluators:
+When conducting a live demonstration before panel evaluators, follow this sequence to showcase the full range of core enforcement, life-safety, and multi-guardian features:
 
-1. **Parent Device (Mobile App):** Open the Chorpy mobile app on the parent's phone logged in as `parent@chorpy.local`.
-2. **Child Device (Mobile App):** Hold the physical Android device running the Chorpy Dev Build logged in as `child@chorpy.local`.
-3. **Step 1 — Create Task:** From the parent mobile app, create a chore titled `"Clean Computer Desk"` and assign it to the child.
-4. **Step 2 — Immediate Screen Hijack:** Show the audience that the child's phone screen instantly freezes and is overtaken by the full-screen non-dismissible Chorpy locking overlay. Attempting to press Home or Back returns to the lock screen.
-5. **Step 3 — Photo Submission:** Tap *"Take Photo Proof"* within the overlay container on the child's phone, take a picture of the desk, and hit submit. The child's UI transitions to `"Waiting for Parent Approval"`.
-6. **Step 4 — Realtime Parent Verification:** Show the parent's phone screen; without refreshing or pulling down, the parent dashboard updates in real-time to display the uploaded photo proof.
-7. **Step 5 — Instant Unlock:** Tap *"Approve Task"* on the parent app. Point back to the child device in your hand; the locking overlay immediately disappears, returning the phone to normal home screen access in sub-second time.
+1. **Demonstration Device Setup:**
+   - **Primary Parent Phone (Mom / Owner):** Running the Chorpy app on the Parent Command Dashboard.
+   - **Secondary Guardian Phone (Dad / Co-Parent):** Paired into the household via the 6-digit **Guardian Invite PIN**.
+   - **Child Enforcement Device:** Physical Android phone running the Chorpy Dev Build, paired via the **Child Pairing PIN**.
+
+2. **Step 1 — Create Task & Concurrency Guard Demo:**
+   - From Mom's phone, create a chore titled `"Clean Computer Desk"` and assign it to the child.
+   - On Dad's phone, show that without refreshing, the pending task appears in real time over WebSockets.
+   - *(Optional Collision Test):* Attempt to create a duplicate chore `"Clean Desk"` on Dad's phone to trigger the **Deduplication Warning Modal**, proving active collision detection.
+
+3. **Step 2 — Immediate Hardware Screen Hijack:**
+   - Show the audience the child's physical Android phone. The screen immediately freezes behind the non-dismissible Chorpy locking overlay (`SYSTEM_ALERT_WINDOW`).
+   - Demonstrate that pressing Android **Home**, **Back**, or **Recent Apps** is completely suppressed.
+
+4. **Step 3 — Life-Safety Emergency SOS Demonstration (Defense Highlight):**
+   - Tap the persistent **"🚨 Emergency SOS"** button on the locked child screen.
+   - Demonstrate that the phone immediately initiates an emergency dialer (`tel:`) to parent contacts without unlocking recreational apps.
+   - Point to both Mom's and Dad's dashboards to show the **high-priority panic notification and live GPS coordinate map pin** received in real time.
+
+5. **Step 4 — Photo Proof Submission & Geofence Check:**
+   - On the child's screen, tap *"Take Photo Proof"*, capture a photo of the desk, and submit.
+   - Show that the submission automatically verifies physical presence against the household geofence (`Within Household Perimeter`). The child's UI transitions to *"Waiting for Review"*.
+
+6. **Step 5 — Collaborative Realtime Approval & Instant Unlock:**
+   - Show Dad's phone screen: the photo proof and verified geofence badge appear instantly.
+   - Dad taps **"Approve Task"**. Show that Mom's dashboard updates in real time to show *"Approved by Dad"*.
+   - Point back to the child device: the locking overlay immediately dissolves in sub-second time, restoring full device screen access.
 
 ---
 
