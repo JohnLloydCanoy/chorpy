@@ -173,6 +173,9 @@ sequenceDiagram
     5. *Child Node (Chores Cleared / Approved)* $\rightarrow$ Route to **Digital Wellbeing Companion View** (displaying earned screen time and chore stats).
   - **FR-1.3.2 (Fail-Closed Offline Enforcement):** The router shall persist the active enforcement state locally in secure storage; during network drops, airplane mode, or device restarts, navigation shall fail-closed by maintaining screen overlay lock until verified online.
   - **FR-1.3.3 (Server-Side Authorization Parity):** PostgreSQL Row Level Security (RLS) policies shall mirror client routing states, guaranteeing that Child tokens cannot execute Parent mutations even if client-side navigation is manipulated.
+- **FR-1.4 (Credential Validation & Policy Enforcement):** The system shall enforce strict client-side and server-side validation rules on authentication credentials prior to account creation and authentication:
+  - **FR-1.4.1 (Email Format Standardization):** The system shall validate email address inputs against standard RFC 5322 syntax (requiring a valid recipient name, an `@` symbol, and a top-level domain e.g., `user@domain.com`), rejecting malformed submissions with immediate inline error feedback.
+  - **FR-1.4.2 (Password Complexity & Entropy Rules):** The system shall require passwords to be at least eight (8) characters in length and enforce a composition policy containing at least one uppercase letter (`A-Z`), one lowercase letter (`a-z`), and one numeric digit (`0-9`), accompanied by visual real-time requirement feedback as the user types.
 
 ### 5.2. Family Circle Management & Pairing
 *These requirements govern the establishment and grouping of household accounts.*
