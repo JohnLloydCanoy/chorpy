@@ -74,7 +74,41 @@ Type `@` in the chat input box to attach specific context directly into your mes
 
 ---
 
-## 4. Recommended 4-Step Feature Workflow
+## 4. Project Structure & Architecture Map
+
+Refer to this layout when directing the agent to specific files:
+
+```text
+chorpy/
+├── .agents/                    # Agent rules, instructions, and modular skills
+│   ├── instructions.md         # Master rules, architecture, and screen registry
+│   └── agentProtocol.md        # Agent activation and command cheat sheet
+├── database/                   # SQL schemas, RLS policies, and database migrations
+│   └── schema.sql              # Supabase table definitions, triggers, and realtime publications
+├── mobile/                     # React Native / Expo application
+│   ├── assets/                 # Images, icons, and static fonts
+│   ├── src/
+│   │   ├── components/         # Reusable UI components (Button.tsx, Card.tsx)
+│   │   ├── context/            # React Context providers (AuthContext.tsx)
+│   │   ├── hooks/              # Custom hooks (useAuth.ts, useChores.ts, useDeviceLock.ts)
+│   │   ├── lib/                # Supabase client (supabase.ts)
+│   │   ├── screens/            # Core Screen Registry
+│   │   │   ├── AuthScreen.tsx       # Registration & login form
+│   │   │   ├── ChildLockScreen.tsx  # Non-dismissible lock & photo proof trigger
+│   │   │   ├── ParentDashboard.tsx  # Guardian dashboard, approvals & device status
+│   │   │   └── RoleScreen.tsx       # Role selector & 6-digit PIN circle pairing
+│   │   ├── services/           # Supabase API services (choreService, authService, etc.)
+│   │   ├── theme/              # Central design tokens (Colors, Typography, Spacing)
+│   │   └── types/              # TypeScript types (index.ts)
+│   ├── App.tsx                 # Root application entry & preview navigator
+│   ├── app.json                # Expo configuration and native plugins
+│   └── package.json
+└── server/                     # Backend microservices (if applicable)
+```
+
+---
+
+## 5. Recommended 4-Step Feature Workflow
 
 Follow this loop for building features smoothly:
 
@@ -87,7 +121,7 @@ Follow this loop for building features smoothly:
 
 ---
 
-## 5. Emergency / Sanity Check Commands
+## 6. Emergency / Sanity Check Commands
 If anything feels out of sync or broken, run these prompts:
 
 1. *"Run typecheck to see if any TypeScript types are broken."*  
