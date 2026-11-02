@@ -22,7 +22,8 @@
     "start": "expo start",
     "android": "expo start --android",
     "ios": "expo start --ios",
-    "web": "expo start --web"
+    "web": "expo start --web",
+    "lint:standards": "node ../.agents/skills/chief-of-staff/scripts/audit-rn-standards.js"
   },
   "private": true
 }

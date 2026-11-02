@@ -18,7 +18,7 @@
 
 ## 2. Technology Stack
 - **Frontend / Mobile:** React Native with Expo SDK 51+ (TypeScript)
-- **Backend & Database:** Supabase (PostgreSQL, Supabase Auth, Realtime WebSockets, Storage)
+- **Backend & Database:** Supabase Cloud (PostgreSQL, Supabase Auth [Email+Password, Confirmation OFF], Realtime WebSockets, Storage [Bucket Pending])
 - **Native Android Layer:** Expo Config Plugins, `SYSTEM_ALERT_WINDOW` permission, Foreground Services
 - **Navigation:** React Native Navigation / Expo Router
 - **State Management:** React Context (`AuthContext`) and custom React hooks
