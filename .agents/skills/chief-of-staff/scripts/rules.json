@@ -1,0 +1,121 @@
+{
+  "version": "1.0.0",
+  "name": "Expo & React Native Performance and Architecture Rules",
+  "description": "Rules for thread performance, Continuous Native Generation (CNG), code cleanliness, and UI/UX standards.",
+  "categories": {
+    "THREAD_PERFORMANCE": {
+      "title": "Thread Performance & Lag Reduction",
+      "description": "Rules to preserve 60/120 FPS on the UI thread and prevent JavaScript thread blockage.",
+      "reference": "https://expo.dev/blog/best-practices-for-reducing-lag-in-expo-apps"
+    },
+    "EXPO_CNG": {
+      "title": "Expo Continuous Native Generation (CNG)",
+      "description": "Rules enforcing config plugins, clean prebuild workflows, and dependency hygiene.",
+      "reference": "https://docs.expo.dev/guides/overview/"
+    },
+    "CODE_CLEANLINESS": {
+      "title": "React Native Code Cleanliness & Architecture",
+      "description": "Rules enforcing modularity, small files, typing, and zero production log noise.",
+      "reference": "https://dev.to/hellonehha/react-native-code-practices-6dl"
+    },
+    "UI_UX_STANDARDS": {
+      "title": "UI & Design Token Standards",
+      "description": "Rules ensuring design token consistency, accessibility touch targets, and visual polish.",
+      "reference": "https://dev.to/hellonehha/react-native-code-practices-6dl"
+    }
+  },
+  "rules": [
+    {
+      "id": "TP001",
+      "category": "THREAD_PERFORMANCE",
+      "name": "NO_PAN_RESPONDER",
+      "severity": "error",
+      "description": "PanResponder processes touch gestures on the JavaScript thread, creating frame drops and input lag when the JS thread is busy.",
+      "recommendation": "Use 'react-native-gesture-handler' paired with 'react-native-reanimated' to execute gesture handling on the native UI thread.",
+      "patterns": [
+        "import\\s+[^;]*\\bPanResponder\\b[^;]*from\\s+['\"]react-native['\"]",
+        "\\bPanResponder\\.create\\s*\\("
+      ]
+    },
+    {
+      "id": "TP002",
+      "category": "THREAD_PERFORMANCE",
+      "name": "AVOID_INLINE_STYLES_IN_MAP",
+      "severity": "warning",
+      "description": "Inline style objects (style={{ ... }}) allocated inside .map() callbacks create fresh object references on every render, triggering avoidable GC pressure and subcomponent re-renders.",
+      "recommendation": "Extract styles into StyleSheet.create outside the component or memoize dynamically calculated style values.",
+      "patterns": [
+        "\\.map\\s*\\([\\s\\S]*?style\\s*=\\s*\\{\\{"
+      ]
+    },
+    {
+      "id": "TP003",
+      "category": "THREAD_PERFORMANCE",
+      "name": "UNBOUNDED_MAP_RENDERING",
+      "severity": "warning",
+      "description": "Rendering dynamic lists using array.map() renders all items at once into the layout tree without virtualization, leading to memory bloat and scroll stutter.",
+      "recommendation": "Use virtualized list components such as FlatList or @shopify/flash-list with keyExtractor and getItemLayout for large or dynamic collections.",
+      "patterns": [
+        "\\.map\\s*\\(\\s*(?:\\([^)]*\\)|[a-zA-Z0-9_]+)\\s*=>\\s*(?:\\(\\s*)?<[A-Z][a-zA-Z0-9]*(?:View|Card|TouchableOpacity|Pressable|ScrollView)"
+      ]
+    },
+    {
+      "id": "CNG001",
+      "category": "EXPO_CNG",
+      "name": "NO_MANUAL_NATIVE_DIRECTORIES",
+      "severity": "error",
+      "description": "Directly committing or manually modifying 'android/' or 'ios/' directories bypasses Expo Continuous Native Generation (CNG), causing drift and upgrade friction.",
+      "recommendation": "Configure native permissions, bundle identifiers, and build settings via app.json config plugins. Native directories should be generated dynamically or gitignored.",
+      "patterns": []
+    },
+    {
+      "id": "CNG002",
+      "category": "EXPO_CNG",
+      "name": "EXPO_INSTALL_DEPENDENCIES",
+      "severity": "warning",
+      "description": "Directly installing native packages via standard npm or yarn can install binary versions incompatible with the active Expo SDK release.",
+      "recommendation": "Always install native modules using 'npx expo install <package>' to maintain version compatibility with the active Expo SDK.",
+      "patterns": []
+    },
+    {
+      "id": "CC001",
+      "category": "CODE_CLEANLINESS",
+      "name": "NO_CONSOLE_LOG",
+      "severity": "warning",
+      "description": "console.log and console.debug statements serialize objects synchronously across the bridge and leak sensitive diagnostics in production builds.",
+      "recommendation": "Remove console.log/console.debug before merging or guard them behind a __DEV__ condition or a dedicated logger utility.",
+      "patterns": [
+        "\\bconsole\\.(log|debug)\\s*\\("
+      ]
+    },
+    {
+      "id": "CC002",
+      "category": "CODE_CLEANLINESS",
+      "name": "MAX_FILE_LINE_COUNT",
+      "severity": "warning",
+      "description": "Files exceeding 250 lines of code increase cognitive load, complicate code reviews, and violate the single responsibility principle.",
+      "recommendation": "Decompose large components into subcomponents, extract business logic into custom hooks (src/hooks/), and isolate data queries into services (src/services/).",
+      "maxLines": 250
+    },
+    {
+      "id": "UI001",
+      "category": "UI_UX_STANDARDS",
+      "name": "NO_HARDCODED_HEX_COLORS",
+      "severity": "warning",
+      "description": "Hardcoded hex color strings (#hex) in components bypass centralized design tokens and break theming consistency.",
+      "recommendation": "Import palette colors from 'src/theme' (e.g., colors.primary, colors.background) instead of hardcoding raw hex values in components.",
+      "patterns": [
+        "#[0-9a-fA-F]{3,8}\\b"
+      ]
+    },
+    {
+      "id": "UI002",
+      "category": "UI_UX_STANDARDS",
+      "name": "MIN_TOUCH_TARGET_SIZE",
+      "severity": "warning",
+      "description": "Interactive elements with touch targets smaller than 48x48 dp harm accessibility and usability on touch screens.",
+      "recommendation": "Provide hitSlop or ensure interactive elements have a minimum height and width of 48dp.",
+      "patterns": []
+    }
+  ]
+}
