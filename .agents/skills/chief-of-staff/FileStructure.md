@@ -125,7 +125,18 @@ Supabase Realtime WebSocket synchronization is activated on:
   - `Allow authenticated users to update devices`: `to authenticated using (true)`
   - `Allow authenticated users to register devices`: `to authenticated with check (true)`
 
-### 2.3 Migration & Seeding Conventions
+### 2.3 Supabase Cloud Operational Context & Environment
+
+> [!NOTE]
+> **Active Environment Configuration:**
+> - **Provider:** Supabase Cloud (Hosted Postgres + Auth + Realtime).
+> - **Authentication Strategy:** Email + Password only.
+> - **Email Confirmation:** **DISABLED** (Users are auto-confirmed upon `supabase.auth.signUp`; no email verification step required during onboarding).
+> - **Phone / Social Auth:** Inactive for current milestone.
+> - **Storage Buckets:** No storage buckets provisioned yet. When implementing photo proof submissions (FR-3), provision bucket `chore-proofs` with appropriate RLS policies.
+> - **Client Environment Variables:** Requires `EXPO_PUBLIC_SUPABASE_URL` and `EXPO_PUBLIC_SUPABASE_ANON_KEY` in `mobile/.env.local`.
+
+### 2.4 Migration & Seeding Conventions
 - **Future Migrations:** When altering schemas, create sequential migration scripts under `database/migrations/` using timestamped naming (e.g., `YYYYMMDDHHMMSS_add_device_token.sql`) or Supabase CLI conventions (`supabase/migrations/`).
 - **Seed Scripts:** Development and testing seed datasets should reside in `database/seeds/seed.sql` containing mock households, sample parent and child profiles, test chore queues, and sample devices.
 - **Fail-Closed Invariant:** Never disable RLS on any table. Any new table must define explicit `SELECT`, `INSERT`, `UPDATE`, and `DELETE` policies.
