@@ -27,6 +27,7 @@ export function useChores(householdId?: string | null) {
   useEffect(() => {
     if (!householdId) return;
 
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchChores();
 
     // Subscribe to real-time changes on the chores table

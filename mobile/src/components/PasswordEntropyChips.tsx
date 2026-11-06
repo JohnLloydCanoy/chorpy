@@ -1,7 +1,7 @@
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { PasswordCriteria } from '../utils/validation';
-import { colors, spacing, borderRadius } from '../theme';
+import { colors, spacing, borderRadius, typography } from '../theme';
 
 interface PasswordEntropyChipsProps {
   criteria: PasswordCriteria;
@@ -72,8 +72,8 @@ const styles = StyleSheet.create({
     borderColor: colors.successBorder,
   },
   icon: {
-    fontSize: 11,
-    fontWeight: '700',
+    fontSize: typography.fontSizes.xs,
+    fontFamily: typography.fontFamily.secondaryBold,
     marginRight: spacing.xs,
   },
   iconPending: {
@@ -83,8 +83,8 @@ const styles = StyleSheet.create({
     color: colors.success,
   },
   label: {
-    fontSize: 11,
-    fontWeight: '600',
+    fontSize: typography.fontSizes.xs,
+    fontFamily: typography.fontFamily.secondaryMedium,
   },
   labelPending: {
     color: colors.textSecondary,

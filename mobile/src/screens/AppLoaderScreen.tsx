@@ -1,6 +1,8 @@
 import React from 'react';
-import { StyleSheet, Text, View, ActivityIndicator, TouchableOpacity } from 'react-native';
-import { colors, spacing, borderRadius } from '../theme';
+import { StyleSheet, Text, View, ActivityIndicator, TouchableOpacity, Image } from 'react-native';
+import { colors, spacing, borderRadius, typography } from '../theme';
+
+const primaryBgImage = require('../../assets/Background-of-Primary-Color.png');
 
 interface AppLoaderScreenProps {
   message?: string;
@@ -35,6 +37,11 @@ export default function AppLoaderScreen({
                 accessibilityRole="button"
                 accessibilityLabel="Retry connection to Supabase"
               >
+                <Image
+                  source={primaryBgImage}
+                  style={StyleSheet.absoluteFill}
+                  resizeMode="cover"
+                />
                 <Text style={styles.retryButtonText}>Retry</Text>
               </TouchableOpacity>
             )}
@@ -69,15 +76,15 @@ const styles = StyleSheet.create({
     marginBottom: spacing.xs,
   },
   title: {
-    fontSize: 34,
-    fontWeight: '800',
+    fontFamily: typography.fontFamily.mainBold,
+    fontSize: typography.fontSizes.display,
     color: colors.primary,
     marginBottom: spacing.xs,
     letterSpacing: -0.5,
   },
   subtitle: {
-    fontSize: 14,
-    fontWeight: '500',
+    fontFamily: typography.fontFamily.secondaryMedium,
+    fontSize: typography.fontSizes.sm,
     color: colors.textSecondary,
     marginBottom: spacing.xl,
     textAlign: 'center',
@@ -96,15 +103,15 @@ const styles = StyleSheet.create({
     marginBottom: spacing.md,
   },
   loadingMessage: {
-    fontSize: 17,
-    fontWeight: '700',
+    fontFamily: typography.fontFamily.secondarySemiBold,
+    fontSize: typography.fontSizes.lg,
     color: colors.text,
     marginBottom: spacing.xs,
     textAlign: 'center',
   },
   subMessage: {
-    fontSize: 12,
-    fontWeight: '400',
+    fontFamily: typography.fontFamily.secondary,
+    fontSize: typography.fontSizes.xs,
     color: colors.textSecondary,
     textAlign: 'center',
   },
@@ -123,13 +130,14 @@ const styles = StyleSheet.create({
     marginBottom: spacing.xs,
   },
   errorTitle: {
-    fontSize: 15,
-    fontWeight: '700',
+    fontFamily: typography.fontFamily.secondaryBold,
+    fontSize: typography.fontSizes.base,
     color: colors.danger,
     marginBottom: spacing.xs,
   },
   errorMessage: {
-    fontSize: 12,
+    fontFamily: typography.fontFamily.secondary,
+    fontSize: typography.fontSizes.xs,
     color: colors.textSecondary,
     textAlign: 'center',
     marginBottom: spacing.md,
@@ -143,10 +151,12 @@ const styles = StyleSheet.create({
     minWidth: 120,
     alignItems: 'center',
     justifyContent: 'center',
+    overflow: 'hidden',
   },
   retryButtonText: {
+    fontFamily: typography.fontFamily.secondaryBold,
     color: colors.textLight,
-    fontWeight: '700',
-    fontSize: 14,
+    fontSize: typography.fontSizes.sm,
+    zIndex: 1,
   },
 });

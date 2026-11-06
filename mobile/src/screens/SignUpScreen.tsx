@@ -1,12 +1,14 @@
-import React, { useState, useEffect } from 'react';
-import { StyleSheet, Text, View, TextInput, TouchableOpacity, ScrollView, ActivityIndicator } from 'react-native';
+import React, { useState } from 'react';
+import { StyleSheet, Text, View, TextInput, TouchableOpacity, ScrollView, ActivityIndicator, Image } from 'react-native';
 import { authService } from '../services/authService';
 import { validateEmail, evaluatePasswordEntropy, formatTitleCase, formatE164Phone, calculateAgeFromDOB } from '../utils/validation';
 import { PasswordEntropyChips } from '../components/PasswordEntropyChips';
 import { DeveloperQuickPreview } from '../components/DeveloperQuickPreview';
 import { RoleSelector } from '../components/RoleSelector';
-import { colors, spacing, borderRadius } from '../theme';
+import { colors, spacing, borderRadius, typography } from '../theme';
 import { UserRole } from '../types';
+
+const primaryBgImage = require('../../assets/Background-of-Primary-Color.png');
 
 interface SignUpScreenProps {
   onNavigateToLogin: () => void;
@@ -28,12 +30,8 @@ export default function SignUpScreen({ onNavigateToLogin, onDemoLogin }: SignUpS
   const phoneResult = formatE164Phone(phone);
   const ageResult = calculateAgeFromDOB(dob);
   const entropy = evaluatePasswordEntropy(password);
-
-  useEffect(() => {
-    if (ageResult.isValidDate && ageResult.isUnder18 && role !== 'child') {
-      setRole('child');
-    }
-  }, [ageResult.isValidDate, ageResult.isUnder18, role]);
+  const isParentDisabled = Boolean(ageResult.isValidDate && ageResult.isUnder18);
+  const effectiveRole: UserRole = isParentDisabled ? 'child' : role;
 
   function handleEmailBlur() {
     if (!email.trim()) return setEmailError(null);
@@ -70,8 +68,6 @@ export default function SignUpScreen({ onNavigateToLogin, onDemoLogin }: SignUpS
       setLoading(false);
     }
   }
-
-  const isParentDisabled = ageResult.isValidDate && ageResult.isUnder18;
 
   return (
     <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
@@ -146,7 +142,7 @@ export default function SignUpScreen({ onNavigateToLogin, onDemoLogin }: SignUpS
         ) : null}
 
         <RoleSelector
-          role={role}
+          role={effectiveRole}
           onSelectRole={setRole}
           isParentDisabled={isParentDisabled}
         />
@@ -181,9 +177,15 @@ export default function SignUpScreen({ onNavigateToLogin, onDemoLogin }: SignUpS
           onPress={handleSignUp}
           disabled={!agreeTerms || !entropy.isValid || loading}
           activeOpacity={0.8}
+          accessibilityRole="button"
         >
+          <Image
+            source={primaryBgImage}
+            style={StyleSheet.absoluteFill}
+            resizeMode="cover"
+          />
           {loading ? (
-            <ActivityIndicator color={colors.textLight} />
+            <ActivityIndicator style={styles.foregroundLoader} color={colors.textLight} />
           ) : (
             <Text style={styles.primaryBtnText}>Create Account</Text>
           )}
@@ -205,25 +207,26 @@ export default function SignUpScreen({ onNavigateToLogin, onDemoLogin }: SignUpS
 const styles = StyleSheet.create({
   container: { padding: spacing.lg, backgroundColor: colors.background, flexGrow: 1, justifyContent: 'center' },
   mascot: { fontSize: 44, textAlign: 'center', marginBottom: spacing.xs },
-  title: { fontSize: 24, fontWeight: '800', color: colors.text, textAlign: 'center', marginBottom: spacing.xs },
-  subtitle: { fontSize: 13, color: colors.textSecondary, textAlign: 'center', marginBottom: spacing.md },
+  title: { fontSize: typography.fontSizes.xl, fontFamily: typography.fontFamily.mainBold, color: colors.primary, textAlign: 'center', marginBottom: spacing.xs },
+  subtitle: { fontSize: typography.fontSizes.sm, fontFamily: typography.fontFamily.secondary, color: colors.textSecondary, textAlign: 'center', marginBottom: spacing.md },
   form: { backgroundColor: colors.surface, padding: spacing.lg, borderRadius: borderRadius.lg, borderWidth: 1, borderColor: colors.border },
   errorBox: { backgroundColor: colors.dangerSoft, borderColor: colors.dangerBorder, borderWidth: 1, borderRadius: borderRadius.sm, padding: spacing.sm, marginBottom: spacing.md },
-  errorText: { color: colors.danger, fontSize: 13, fontWeight: '600', textAlign: 'center' },
-  label: { fontSize: 13, fontWeight: '600', color: colors.text, marginBottom: spacing.xs },
-  input: { backgroundColor: colors.background, borderRadius: borderRadius.md, paddingHorizontal: spacing.md, paddingVertical: spacing.sm, fontSize: 14, color: colors.text, marginBottom: spacing.sm, borderWidth: 1, borderColor: colors.border, minHeight: 44 },
+  errorText: { color: colors.danger, fontSize: typography.fontSizes.sm, fontFamily: typography.fontFamily.secondaryMedium, textAlign: 'center' },
+  label: { fontSize: typography.fontSizes.sm, fontFamily: typography.fontFamily.secondarySemiBold, color: colors.text, marginBottom: spacing.xs },
+  input: { backgroundColor: colors.background, borderRadius: borderRadius.md, paddingHorizontal: spacing.md, paddingVertical: spacing.sm, fontSize: typography.fontSizes.base, fontFamily: typography.fontFamily.secondary, color: colors.text, marginBottom: spacing.sm, borderWidth: 1, borderColor: colors.border, minHeight: 48 },
   inputError: { borderColor: colors.danger },
-  fieldError: { color: colors.danger, fontSize: 11, fontWeight: '600', marginBottom: spacing.sm },
-  hintSuccess: { color: colors.success, fontSize: 11, fontWeight: '600', marginBottom: spacing.sm },
+  fieldError: { color: colors.danger, fontSize: typography.fontSizes.xs, fontFamily: typography.fontFamily.secondaryMedium, marginBottom: spacing.sm },
+  hintSuccess: { color: colors.success, fontSize: typography.fontSizes.xs, fontFamily: typography.fontFamily.secondaryMedium, marginBottom: spacing.sm },
   termsRow: { flexDirection: 'row', alignItems: 'center', marginVertical: spacing.md },
   checkbox: { width: 20, height: 20, borderRadius: borderRadius.sm, borderWidth: 1, borderColor: colors.border, marginRight: spacing.sm, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.background },
   checkboxActive: { backgroundColor: colors.primary, borderColor: colors.primaryDark },
   checkmark: { color: colors.textLight, fontSize: 12, fontWeight: '700' },
-  termsText: { fontSize: 13, color: colors.text, flex: 1 },
-  primaryBtn: { backgroundColor: colors.primary, paddingVertical: spacing.md, borderRadius: borderRadius.md, alignItems: 'center', justifyContent: 'center', marginTop: spacing.xs, minHeight: 48 },
+  termsText: { fontSize: typography.fontSizes.sm, fontFamily: typography.fontFamily.secondary, color: colors.text, flex: 1 },
+  primaryBtn: { backgroundColor: colors.primary, paddingVertical: spacing.md, borderRadius: borderRadius.md, alignItems: 'center', justifyContent: 'center', marginTop: spacing.xs, minHeight: 48, overflow: 'hidden' },
   btnDisabled: { opacity: 0.5 },
-  primaryBtnText: { color: colors.textLight, fontWeight: '700', fontSize: 15 },
+  primaryBtnText: { color: colors.textLight, fontFamily: typography.fontFamily.secondaryBold, fontSize: typography.fontSizes.base, zIndex: 1 },
+  foregroundLoader: { zIndex: 1 },
   footerRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', marginTop: spacing.lg, minHeight: 32 },
-  footerText: { color: colors.textSecondary, fontSize: 13 },
-  loginLink: { color: colors.primary, fontSize: 13, fontWeight: '700' },
+  footerText: { color: colors.textSecondary, fontSize: typography.fontSizes.sm, fontFamily: typography.fontFamily.secondary },
+  loginLink: { color: colors.primary, fontSize: typography.fontSizes.sm, fontFamily: typography.fontFamily.secondaryBold },
 });

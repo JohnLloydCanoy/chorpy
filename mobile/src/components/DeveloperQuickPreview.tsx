@@ -1,6 +1,6 @@
 import React from 'react';
 import { StyleSheet, Text, View, TouchableOpacity } from 'react-native';
-import { colors, spacing, borderRadius } from '../theme';
+import { colors, spacing, borderRadius, typography } from '../theme';
 
 interface DeveloperQuickPreviewProps {
   onDemoLogin?: (role?: 'parent' | 'child') => void;
@@ -19,6 +19,7 @@ export function DeveloperQuickPreview({ onDemoLogin, disabled }: DeveloperQuickP
           style={styles.btn}
           onPress={() => onDemoLogin('parent')}
           disabled={disabled}
+          accessibilityRole="button"
         >
           <Text style={styles.btnText}>Preview as Parent</Text>
         </TouchableOpacity>
@@ -26,6 +27,7 @@ export function DeveloperQuickPreview({ onDemoLogin, disabled }: DeveloperQuickP
           style={styles.btn}
           onPress={() => onDemoLogin('child')}
           disabled={disabled}
+          accessibilityRole="button"
         >
           <Text style={styles.btnText}>Preview as Child</Text>
         </TouchableOpacity>
@@ -44,8 +46,8 @@ const styles = StyleSheet.create({
     marginBottom: spacing.md,
   },
   label: {
-    fontSize: 11,
-    fontWeight: '700',
+    fontSize: typography.fontSizes.xs,
+    fontFamily: typography.fontFamily.secondaryBold,
     color: colors.textSecondary,
     textAlign: 'center',
     marginBottom: spacing.sm,
@@ -65,11 +67,11 @@ const styles = StyleSheet.create({
     borderRadius: borderRadius.md,
     alignItems: 'center',
     justifyContent: 'center',
-    minHeight: 44,
+    minHeight: 48,
   },
   btnText: {
-    fontSize: 12,
-    fontWeight: '700',
+    fontSize: typography.fontSizes.sm,
+    fontFamily: typography.fontFamily.secondaryBold,
     color: colors.primary,
   },
 });

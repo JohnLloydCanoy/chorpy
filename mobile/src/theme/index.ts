@@ -4,15 +4,20 @@
  */
 
 export const colors = {
-  // Brand Identity (Sky Blue + Coral Orange)
-  primary: '#0284C7',        // Sky Blue (Headers, active buttons, focus)
-  primaryLight: '#38BDF8',   // Lighter Sky Blue (Hover, active badges)
-  primarySoft: '#F0F9FF',    // Background tint
-  primaryDark: '#0369A1',
+  // Brand Identity (Navy Blue + Light Sky/Cyan Blue)
+  primary: '#1B365D',        // Navy Blue (Headers, active buttons, focus)
+  primaryLight: '#2C4D7D',   // Lighter Navy Blue (Hover, active badges)
+  primarySoft: '#E8EEF5',    // Soft Navy tint
+  primaryDark: '#12243F',
 
-  accent: '#FF6B4A',         // Bright Coral Orange (Call-to-actions, locks, highlights)
-  accentHover: '#EA580C',
-  accentSoft: '#FFF7ED',
+  secondary: '#60C1E5',      // Light Sky/Cyan Blue
+  secondaryLight: '#8CE0FC', // Lighter Cyan Blue
+  secondarySoft: '#F0F9FD',  // Soft Cyan tint
+  secondaryDark: '#3A9ABF',
+
+  accent: '#60C1E5',         // Secondary accent (Call-to-actions, highlights)
+  accentHover: '#3A9ABF',
+  accentSoft: '#F0F9FD',
 
   // Status & Feedback Colors
   success: '#16A34A',        // Green (Approved, unlocked, complete)
@@ -61,6 +66,15 @@ export const borderRadius = {
 };
 
 export const typography = {
+  fontFamily: {
+    main: 'Fredoka_400Regular',
+    mainSemiBold: 'Fredoka_600SemiBold',
+    mainBold: 'Fredoka_700Bold',
+    secondary: 'Poppins_400Regular',
+    secondaryMedium: 'Poppins_500Medium',
+    secondarySemiBold: 'Poppins_600SemiBold',
+    secondaryBold: 'Poppins_700Bold',
+  },
   fontSizes: {
     xs: 11,
     sm: 13,

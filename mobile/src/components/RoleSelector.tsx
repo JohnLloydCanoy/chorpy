@@ -1,7 +1,9 @@
 import React from 'react';
-import { StyleSheet, Text, View, TouchableOpacity } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity, Image } from 'react-native';
 import { UserRole } from '../types';
-import { colors, spacing, borderRadius } from '../theme';
+import { colors, spacing, borderRadius, typography } from '../theme';
+
+const primaryBgImage = require('../../assets/Background-of-Primary-Color.png');
 
 interface RoleSelectorProps {
   role: UserRole;
@@ -10,6 +12,9 @@ interface RoleSelectorProps {
 }
 
 export function RoleSelector({ role, onSelectRole, isParentDisabled }: RoleSelectorProps) {
+  const isParentActive = role === 'parent' && !isParentDisabled;
+  const isChildActive = role === 'child';
+
   return (
     <View style={styles.container}>
       <Text style={styles.label}>Account Role</Text>
@@ -17,7 +22,7 @@ export function RoleSelector({ role, onSelectRole, isParentDisabled }: RoleSelec
         <TouchableOpacity
           style={[
             styles.btn,
-            role === 'parent' && !isParentDisabled && styles.btnActive,
+            isParentActive && styles.btnActive,
             isParentDisabled && styles.btnDisabled,
           ]}
           onPress={() => !isParentDisabled && onSelectRole('parent')}
@@ -25,10 +30,17 @@ export function RoleSelector({ role, onSelectRole, isParentDisabled }: RoleSelec
           accessibilityRole="button"
           accessibilityState={{ disabled: isParentDisabled, selected: role === 'parent' }}
         >
+          {isParentActive && (
+            <Image
+              source={primaryBgImage}
+              style={StyleSheet.absoluteFill}
+              resizeMode="cover"
+            />
+          )}
           <Text
             style={[
               styles.btnText,
-              role === 'parent' && !isParentDisabled && styles.btnTextActive,
+              isParentActive && styles.btnTextActive,
             ]}
           >
             Parent
@@ -37,12 +49,19 @@ export function RoleSelector({ role, onSelectRole, isParentDisabled }: RoleSelec
         </TouchableOpacity>
 
         <TouchableOpacity
-          style={[styles.btn, role === 'child' && styles.btnActive]}
+          style={[styles.btn, isChildActive && styles.btnActive]}
           onPress={() => onSelectRole('child')}
           accessibilityRole="button"
           accessibilityState={{ selected: role === 'child' }}
         >
-          <Text style={[styles.btnText, role === 'child' && styles.btnTextActive]}>Child</Text>
+          {isChildActive && (
+            <Image
+              source={primaryBgImage}
+              style={StyleSheet.absoluteFill}
+              resizeMode="cover"
+            />
+          )}
+          <Text style={[styles.btnText, isChildActive && styles.btnTextActive]}>Child</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -54,8 +73,8 @@ const styles = StyleSheet.create({
     marginBottom: spacing.xs,
   },
   label: {
-    fontSize: 13,
-    fontWeight: '600',
+    fontFamily: typography.fontFamily.secondarySemiBold,
+    fontSize: typography.fontSizes.sm,
     color: colors.text,
     marginBottom: spacing.xs,
   },
@@ -72,8 +91,9 @@ const styles = StyleSheet.create({
     borderColor: colors.border,
     alignItems: 'center',
     backgroundColor: colors.background,
-    minHeight: 44,
+    minHeight: 48,
     justifyContent: 'center',
+    overflow: 'hidden',
   },
   btnActive: {
     backgroundColor: colors.primary,
@@ -84,17 +104,20 @@ const styles = StyleSheet.create({
     backgroundColor: colors.border,
   },
   btnText: {
-    fontSize: 13,
-    fontWeight: '600',
+    fontFamily: typography.fontFamily.secondarySemiBold,
+    fontSize: typography.fontSizes.sm,
     color: colors.textSecondary,
   },
   btnTextActive: {
+    fontFamily: typography.fontFamily.secondaryBold,
     color: colors.textLight,
+    zIndex: 1,
   },
   badge: {
-    fontSize: 10,
+    fontFamily: typography.fontFamily.secondarySemiBold,
+    fontSize: typography.fontSizes.xs,
     color: colors.danger,
-    fontWeight: '700',
     marginTop: 2,
+    zIndex: 1,
   },
 });

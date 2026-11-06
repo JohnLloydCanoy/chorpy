@@ -6,11 +6,10 @@ import { LockStatus } from '../types';
 export function useDeviceLock(childId?: string | null) {
   const [lockStatus, setLockStatus] = useState<LockStatus>('unlocked');
   const [deviceId, setDeviceId] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(Boolean(childId));
 
   useEffect(() => {
     if (!childId) {
-      setLoading(false);
       return;
     }
 

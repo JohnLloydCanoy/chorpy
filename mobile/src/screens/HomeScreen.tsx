@@ -1,6 +1,6 @@
 import React from 'react';
 import { StyleSheet, Text, View, ActivityIndicator } from 'react-native';
-import { colors, spacing, borderRadius } from '../theme';
+import { colors, spacing, borderRadius, typography } from '../theme';
 
 interface HomeScreenProps {
   role: 'parent' | 'child';
@@ -64,14 +64,15 @@ const styles = StyleSheet.create({
     marginBottom: spacing.xs,
   },
   title: {
-    fontSize: 28,
-    fontWeight: '800',
+    fontSize: typography.fontSizes.xxl,
+    fontFamily: typography.fontFamily.mainBold,
     color: colors.primary,
     marginBottom: spacing.xs,
     textAlign: 'center',
   },
   subtitle: {
-    fontSize: 14,
+    fontSize: typography.fontSizes.sm,
+    fontFamily: typography.fontFamily.secondary,
     color: colors.textSecondary,
     marginBottom: spacing.lg,
     textAlign: 'center',
@@ -88,20 +89,21 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   roleLabel: {
-    fontSize: 11,
-    fontWeight: '700',
+    fontSize: typography.fontSizes.xs,
+    fontFamily: typography.fontFamily.secondaryBold,
     color: colors.textSecondary,
     letterSpacing: 0.5,
     marginBottom: spacing.xs,
   },
   roleValue: {
-    fontSize: 20,
-    fontWeight: '800',
+    fontSize: typography.fontSizes.xl,
+    fontFamily: typography.fontFamily.mainBold,
     color: colors.primary,
     marginBottom: spacing.xs,
   },
   roleHint: {
-    fontSize: 12,
+    fontSize: typography.fontSizes.xs,
+    fontFamily: typography.fontFamily.secondary,
     color: colors.textSecondary,
     textAlign: 'center',
     lineHeight: 16,
@@ -131,13 +133,14 @@ const styles = StyleSheet.create({
     borderColor: colors.dangerBorder,
   },
   statusText: {
-    fontSize: 14,
-    fontWeight: '700',
+    fontSize: typography.fontSizes.sm,
+    fontFamily: typography.fontFamily.secondaryBold,
     color: colors.text,
     marginBottom: 2,
   },
   statusDetail: {
-    fontSize: 12,
+    fontSize: typography.fontSizes.xs,
+    fontFamily: typography.fontFamily.secondary,
     color: colors.textSecondary,
     textAlign: 'center',
   },

@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
-import { StyleSheet, Text, View, TextInput, TouchableOpacity, ScrollView, ActivityIndicator } from 'react-native';
+import { StyleSheet, Text, View, TextInput, TouchableOpacity, ScrollView, ActivityIndicator, Image } from 'react-native';
 import { authService } from '../services/authService';
 import { validateEmail } from '../utils/validation';
 import { DeveloperQuickPreview } from '../components/DeveloperQuickPreview';
-import { colors, spacing, borderRadius } from '../theme';
+import { colors, spacing, borderRadius, typography } from '../theme';
+
+const primaryBgImage = require('../../assets/Background-of-Primary-Color.png');
 
 interface LoginScreenProps {
   onNavigateToSignUp: () => void;
@@ -97,16 +99,22 @@ export default function LoginScreen({ onNavigateToSignUp, onDemoLogin }: LoginSc
           onPress={handleSignIn}
           disabled={loading}
           activeOpacity={0.8}
+          accessibilityRole="button"
         >
+          <Image
+            source={primaryBgImage}
+            style={StyleSheet.absoluteFill}
+            resizeMode="cover"
+          />
           {loading ? (
-            <ActivityIndicator color={colors.textLight} />
+            <ActivityIndicator style={styles.foregroundLoader} color={colors.textLight} />
           ) : (
             <Text style={styles.primaryBtnText}>Sign In</Text>
           )}
         </TouchableOpacity>
 
         <View style={styles.footerRow}>
-          <Text style={styles.footerText}>Don't have an account? </Text>
+          <Text style={styles.footerText}>{"Don't have an account? "}</Text>
           <TouchableOpacity onPress={onNavigateToSignUp} disabled={loading} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
             <Text style={styles.signUpLink}>Sign up Here</Text>
           </TouchableOpacity>
@@ -121,19 +129,20 @@ export default function LoginScreen({ onNavigateToSignUp, onDemoLogin }: LoginSc
 const styles = StyleSheet.create({
   container: { padding: spacing.lg, backgroundColor: colors.background, flexGrow: 1, justifyContent: 'center' },
   mascot: { fontSize: 48, textAlign: 'center', marginBottom: spacing.xs },
-  title: { fontSize: 26, fontWeight: '800', color: colors.text, textAlign: 'center', marginBottom: spacing.xs },
-  subtitle: { fontSize: 13, color: colors.textSecondary, textAlign: 'center', marginBottom: spacing.lg },
+  title: { fontSize: typography.fontSizes.xxl, fontFamily: typography.fontFamily.mainBold, color: colors.primary, textAlign: 'center', marginBottom: spacing.xs },
+  subtitle: { fontSize: typography.fontSizes.sm, fontFamily: typography.fontFamily.secondary, color: colors.textSecondary, textAlign: 'center', marginBottom: spacing.lg },
   form: { backgroundColor: colors.surface, padding: spacing.lg, borderRadius: borderRadius.lg, borderWidth: 1, borderColor: colors.border },
   errorBox: { backgroundColor: colors.dangerSoft, borderColor: colors.dangerBorder, borderWidth: 1, borderRadius: borderRadius.sm, padding: spacing.sm, marginBottom: spacing.md },
-  errorText: { color: colors.danger, fontSize: 13, fontWeight: '600', textAlign: 'center' },
-  label: { fontSize: 13, fontWeight: '600', color: colors.text, marginBottom: spacing.xs },
-  input: { backgroundColor: colors.background, borderRadius: borderRadius.md, paddingHorizontal: spacing.md, paddingVertical: spacing.sm, fontSize: 14, color: colors.text, marginBottom: spacing.md, borderWidth: 1, borderColor: colors.border, minHeight: 48 },
+  errorText: { color: colors.danger, fontSize: typography.fontSizes.sm, fontFamily: typography.fontFamily.secondaryMedium, textAlign: 'center' },
+  label: { fontSize: typography.fontSizes.sm, fontFamily: typography.fontFamily.secondarySemiBold, color: colors.text, marginBottom: spacing.xs },
+  input: { backgroundColor: colors.background, borderRadius: borderRadius.md, paddingHorizontal: spacing.md, paddingVertical: spacing.sm, fontSize: typography.fontSizes.base, fontFamily: typography.fontFamily.secondary, color: colors.text, marginBottom: spacing.md, borderWidth: 1, borderColor: colors.border, minHeight: 48 },
   inputError: { borderColor: colors.danger, marginBottom: spacing.xs },
-  fieldError: { color: colors.danger, fontSize: 11, fontWeight: '600', marginBottom: spacing.md },
-  primaryBtn: { backgroundColor: colors.primary, paddingVertical: spacing.md, borderRadius: borderRadius.md, alignItems: 'center', justifyContent: 'center', marginTop: spacing.xs, minHeight: 48 },
+  fieldError: { color: colors.danger, fontSize: typography.fontSizes.xs, fontFamily: typography.fontFamily.secondaryMedium, marginBottom: spacing.md },
+  primaryBtn: { backgroundColor: colors.primary, paddingVertical: spacing.md, borderRadius: borderRadius.md, alignItems: 'center', justifyContent: 'center', marginTop: spacing.xs, minHeight: 48, overflow: 'hidden' },
   btnDisabled: { opacity: 0.6 },
-  primaryBtnText: { color: colors.textLight, fontWeight: '700', fontSize: 15 },
+  primaryBtnText: { color: colors.textLight, fontFamily: typography.fontFamily.secondaryBold, fontSize: typography.fontSizes.base, zIndex: 1 },
+  foregroundLoader: { zIndex: 1 },
   footerRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', marginTop: spacing.lg, minHeight: 32 },
-  footerText: { color: colors.textSecondary, fontSize: 13 },
-  signUpLink: { color: colors.accent, fontSize: 13, fontWeight: '700' },
+  footerText: { color: colors.textSecondary, fontSize: typography.fontSizes.sm, fontFamily: typography.fontFamily.secondary },
+  signUpLink: { color: colors.primary, fontSize: typography.fontSizes.sm, fontFamily: typography.fontFamily.secondaryBold },
 });
