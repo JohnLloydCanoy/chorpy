@@ -1,5 +1,8 @@
 import React from 'react';
-import { StyleSheet, Text, View, TouchableOpacity } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity, Image } from 'react-native';
+import { colors, spacing, borderRadius, typography } from '../theme';
+
+const primaryBgImage = require('../../assets/Background-of-Primary-Color.png');
 
 export default function ChildLockScreen() {
   return (
@@ -14,7 +17,16 @@ export default function ChildLockScreen() {
         <Text style={styles.choreDesc}>Wipe the desk surface and arrange keyboard and cords.</Text>
       </View>
 
-      <TouchableOpacity style={styles.cameraButton}>
+      <TouchableOpacity
+        style={styles.cameraButton}
+        accessibilityRole="button"
+        accessibilityLabel="Take photo proof of completed chore"
+      >
+        <Image
+          source={primaryBgImage}
+          style={styles.cameraButtonBgImage}
+          resizeMode="cover"
+        />
         <Text style={styles.cameraButtonText}>📸 Take Photo Proof</Text>
       </TouchableOpacity>
 
@@ -26,71 +38,89 @@ export default function ChildLockScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0F172A',
-    padding: 24,
+    backgroundColor: colors.surfaceDark,
+    padding: spacing.lg,
     justifyContent: 'center',
     alignItems: 'center',
   },
   lockIcon: {
     fontSize: 54,
-    marginBottom: 12,
+    marginBottom: spacing.sm,
   },
   title: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: '#F8FAFC',
-    marginBottom: 6,
+    fontSize: typography.fontSizes.xxl,
+    fontFamily: typography.fontFamily.mainBold,
+    color: colors.background,
+    marginBottom: spacing.xs,
   },
   subtitle: {
-    fontSize: 14,
-    color: '#94A3B8',
+    fontSize: typography.fontSizes.sm,
+    fontFamily: typography.fontFamily.secondary,
+    color: colors.textMuted,
     textAlign: 'center',
-    marginBottom: 28,
+    marginBottom: spacing.xl,
   },
   choreCard: {
-    backgroundColor: '#1E293B',
-    borderRadius: 16,
-    padding: 20,
+    backgroundColor: colors.surfaceCardDark,
+    borderRadius: borderRadius.lg,
+    padding: spacing.md,
     width: '100%',
-    marginBottom: 24,
+    marginBottom: spacing.lg,
     borderWidth: 1,
-    borderColor: '#334155',
+    borderColor: colors.borderDark,
   },
   badge: {
-    color: '#F59E0B',
-    fontSize: 11,
-    fontWeight: 'bold',
-    marginBottom: 6,
+    color: colors.warning,
+    fontSize: typography.fontSizes.xs,
+    fontFamily: typography.fontFamily.secondaryBold,
+    marginBottom: spacing.xs,
     letterSpacing: 0.5,
   },
   choreTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#FFFFFF',
-    marginBottom: 6,
+    fontSize: typography.fontSizes.lg,
+    fontFamily: typography.fontFamily.mainBold,
+    color: colors.textLight,
+    marginBottom: spacing.xs,
   },
   choreDesc: {
-    fontSize: 13,
-    color: '#CBD5E1',
+    fontSize: typography.fontSizes.sm,
+    fontFamily: typography.fontFamily.secondary,
+    color: colors.border,
     lineHeight: 18,
   },
   cameraButton: {
-    backgroundColor: '#FF6B4A',
-    paddingVertical: 16,
-    paddingHorizontal: 28,
-    borderRadius: 14,
+    backgroundColor: colors.primary,
+    paddingVertical: spacing.md,
+    paddingHorizontal: spacing.xl,
+    borderRadius: borderRadius.lg,
     width: '100%',
     alignItems: 'center',
-    marginBottom: 16,
+    justifyContent: 'center',
+    marginBottom: spacing.md,
+    minHeight: 48,
+    overflow: 'hidden',
+  },
+  cameraButtonBgImage: {
+    position: 'absolute',
+    top: 0,
+    left: '-6%',
+    right: '-6%',
+    bottom: 0,
+    width: '112%',
+    height: '100%',
+    zIndex: 1,
   },
   cameraButtonText: {
-    color: '#FFFFFF',
-    fontWeight: 'bold',
-    fontSize: 16,
+    color: colors.textLight,
+    fontFamily: typography.fontFamily.secondaryBold,
+    fontSize: typography.fontSizes.base,
+    zIndex: 2,
+    position: 'relative',
   },
   hint: {
-    fontSize: 12,
-    color: '#64748B',
+    fontSize: typography.fontSizes.xs,
+    fontFamily: typography.fontFamily.secondary,
+    color: colors.textSecondary,
     textAlign: 'center',
   },
 });

@@ -1,5 +1,6 @@
 import React from 'react';
 import { StyleSheet, Text, View, ScrollView, TouchableOpacity } from 'react-native';
+import { colors, spacing, borderRadius, typography } from '../theme';
 
 export default function ParentDashboard() {
   return (
@@ -21,10 +22,18 @@ export default function ParentDashboard() {
             <Text style={styles.photoText}>📸 Photo Proof Preview</Text>
           </View>
           <View style={styles.buttonRow}>
-            <TouchableOpacity style={styles.approveButton}>
+            <TouchableOpacity
+              style={styles.approveButton}
+              accessibilityRole="button"
+              accessibilityLabel="Approve chore and unlock device"
+            >
               <Text style={styles.buttonText}>Approve & Unlock</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.rejectButton}>
+            <TouchableOpacity
+              style={styles.rejectButton}
+              accessibilityRole="button"
+              accessibilityLabel="Reject chore photo proof"
+            >
               <Text style={styles.rejectText}>Reject</Text>
             </TouchableOpacity>
           </View>
@@ -34,7 +43,7 @@ export default function ParentDashboard() {
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Connected Devices</Text>
         <View style={styles.deviceRow}>
-          <Text style={styles.deviceName}>📱 Lloyd's Phone (Galaxy A12)</Text>
+          <Text style={styles.deviceName}>{"📱 Lloyd's Phone (Galaxy A12)"}</Text>
           <Text style={styles.statusLocked}>LOCKED</Text>
         </View>
       </View>
@@ -44,124 +53,131 @@ export default function ParentDashboard() {
 
 const styles = StyleSheet.create({
   container: {
-    padding: 20,
-    backgroundColor: '#F8FAFC',
+    padding: spacing.md,
+    backgroundColor: colors.background,
     flexGrow: 1,
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 24,
-    marginTop: 20,
+    marginBottom: spacing.lg,
+    marginTop: spacing.md,
   },
   greeting: {
-    fontSize: 22,
-    fontWeight: 'bold',
-    color: '#0F172A',
+    fontSize: typography.fontSizes.xl,
+    fontFamily: typography.fontFamily.mainBold,
+    color: colors.primary,
   },
   subgreeting: {
-    fontSize: 14,
-    color: '#64748B',
+    fontSize: typography.fontSizes.sm,
+    fontFamily: typography.fontFamily.secondary,
+    color: colors.textSecondary,
   },
   pinBadge: {
-    backgroundColor: '#E0F2FE',
-    color: '#0284C7',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 8,
-    fontWeight: 'bold',
-    fontSize: 13,
+    backgroundColor: colors.secondarySoft,
+    color: colors.primary,
+    fontFamily: typography.fontFamily.secondaryBold,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: spacing.xs,
+    borderRadius: borderRadius.sm,
+    fontSize: typography.fontSizes.sm,
   },
   section: {
-    marginBottom: 24,
+    marginBottom: spacing.lg,
   },
   sectionTitle: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#334155',
-    marginBottom: 10,
+    fontSize: typography.fontSizes.base,
+    fontFamily: typography.fontFamily.mainSemiBold,
+    color: colors.text,
+    marginBottom: spacing.sm,
   },
   card: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 16,
-    padding: 16,
+    backgroundColor: colors.surface,
+    borderRadius: borderRadius.lg,
+    padding: spacing.md,
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: colors.border,
   },
   choreTitle: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#0F172A',
+    fontSize: typography.fontSizes.base,
+    fontFamily: typography.fontFamily.mainSemiBold,
+    color: colors.text,
   },
   childName: {
-    fontSize: 13,
-    color: '#64748B',
-    marginBottom: 12,
+    fontSize: typography.fontSizes.sm,
+    fontFamily: typography.fontFamily.secondary,
+    color: colors.textSecondary,
+    marginBottom: spacing.sm,
   },
   photoPlaceholder: {
     height: 140,
-    backgroundColor: '#F1F5F9',
-    borderRadius: 10,
+    backgroundColor: colors.background,
+    borderRadius: borderRadius.md,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 14,
+    marginBottom: spacing.md,
   },
   photoText: {
-    color: '#64748B',
-    fontSize: 13,
+    color: colors.textSecondary,
+    fontSize: typography.fontSizes.sm,
+    fontFamily: typography.fontFamily.secondary,
   },
   buttonRow: {
     flexDirection: 'row',
-    gap: 10,
+    gap: spacing.sm,
   },
   approveButton: {
     flex: 1,
-    backgroundColor: '#16A34A',
-    paddingVertical: 12,
-    borderRadius: 10,
+    backgroundColor: colors.success,
+    paddingVertical: spacing.sm,
+    borderRadius: borderRadius.md,
     alignItems: 'center',
+    justifyContent: 'center',
+    minHeight: 48,
   },
   buttonText: {
-    color: '#FFFFFF',
-    fontWeight: 'bold',
-    fontSize: 13,
+    color: colors.textLight,
+    fontFamily: typography.fontFamily.secondaryBold,
+    fontSize: typography.fontSizes.sm,
   },
   rejectButton: {
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderRadius: 10,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    borderRadius: borderRadius.md,
     borderWidth: 1,
-    borderColor: '#DC2626',
+    borderColor: colors.danger,
     alignItems: 'center',
+    justifyContent: 'center',
+    minHeight: 48,
   },
   rejectText: {
-    color: '#DC2626',
-    fontWeight: 'bold',
-    fontSize: 13,
+    color: colors.danger,
+    fontFamily: typography.fontFamily.secondaryBold,
+    fontSize: typography.fontSizes.sm,
   },
   deviceRow: {
-    backgroundColor: '#FFFFFF',
-    padding: 14,
-    borderRadius: 12,
+    backgroundColor: colors.surface,
+    padding: spacing.md,
+    borderRadius: borderRadius.md,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: colors.border,
   },
   deviceName: {
-    fontSize: 14,
-    color: '#0F172A',
-    fontWeight: '500',
+    fontSize: typography.fontSizes.sm,
+    color: colors.text,
+    fontFamily: typography.fontFamily.secondaryMedium,
   },
   statusLocked: {
-    color: '#DC2626',
-    fontWeight: 'bold',
-    fontSize: 12,
-    backgroundColor: '#FEE2E2',
-    paddingHorizontal: 8,
+    color: colors.danger,
+    fontFamily: typography.fontFamily.secondaryBold,
+    fontSize: typography.fontSizes.xs,
+    backgroundColor: colors.dangerSoft,
+    paddingHorizontal: spacing.sm,
     paddingVertical: 3,
-    borderRadius: 6,
+    borderRadius: borderRadius.sm,
   },
 });

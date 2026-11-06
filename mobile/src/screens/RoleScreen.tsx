@@ -1,5 +1,6 @@
 import React from 'react';
 import { StyleSheet, Text, View, TouchableOpacity } from 'react-native';
+import { colors, spacing, borderRadius, typography } from '../theme';
 
 export default function RoleScreen() {
   return (
@@ -8,7 +9,11 @@ export default function RoleScreen() {
       <Text style={styles.title}>Who is using this phone?</Text>
       <Text style={styles.subtitle}>Select your role to set up this device</Text>
 
-      <TouchableOpacity style={styles.roleCard}>
+      <TouchableOpacity
+        style={styles.roleCard}
+        accessibilityRole="button"
+        accessibilityLabel="Select Parent role"
+      >
         <Text style={styles.roleIcon}>👨‍👩‍👧</Text>
         <View style={styles.roleInfo}>
           <Text style={styles.roleTitle}>I am a Parent</Text>
@@ -18,7 +23,11 @@ export default function RoleScreen() {
         </View>
       </TouchableOpacity>
 
-      <TouchableOpacity style={styles.roleCard}>
+      <TouchableOpacity
+        style={styles.roleCard}
+        accessibilityRole="button"
+        accessibilityLabel="Select Child role"
+      >
         <Text style={styles.roleIcon}>🧒</Text>
         <View style={styles.roleInfo}>
           <Text style={styles.roleTitle}>I am a Child</Text>
@@ -34,54 +43,57 @@ export default function RoleScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F8FAFC',
-    padding: 24,
+    backgroundColor: colors.background,
+    padding: spacing.lg,
     justifyContent: 'center',
   },
   mascot: {
     fontSize: 48,
     textAlign: 'center',
-    marginBottom: 8,
+    marginBottom: spacing.sm,
   },
   title: {
-    fontSize: 26,
-    fontWeight: 'bold',
-    color: '#0F172A',
+    fontSize: typography.fontSizes.xxl,
+    fontFamily: typography.fontFamily.mainBold,
+    color: colors.primary,
     textAlign: 'center',
-    marginBottom: 6,
+    marginBottom: spacing.xs,
   },
   subtitle: {
-    fontSize: 14,
-    color: '#64748B',
+    fontSize: typography.fontSizes.sm,
+    fontFamily: typography.fontFamily.secondary,
+    color: colors.textSecondary,
     textAlign: 'center',
-    marginBottom: 28,
+    marginBottom: spacing.xl,
   },
   roleCard: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 16,
-    padding: 20,
-    marginBottom: 16,
+    backgroundColor: colors.surface,
+    borderRadius: borderRadius.xl,
+    padding: spacing.md,
+    marginBottom: spacing.md,
     flexDirection: 'row',
     alignItems: 'center',
     borderWidth: 1.5,
-    borderColor: '#E2E8F0',
+    borderColor: colors.border,
+    minHeight: 48,
   },
   roleIcon: {
     fontSize: 36,
-    marginRight: 16,
+    marginRight: spacing.md,
   },
   roleInfo: {
     flex: 1,
   },
   roleTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#0F172A',
-    marginBottom: 4,
+    fontSize: typography.fontSizes.lg,
+    fontFamily: typography.fontFamily.mainBold,
+    color: colors.primary,
+    marginBottom: spacing.xs,
   },
   roleDescription: {
-    fontSize: 13,
-    color: '#64748B',
+    fontSize: typography.fontSizes.sm,
+    fontFamily: typography.fontFamily.secondary,
+    color: colors.textSecondary,
     lineHeight: 18,
   },
 });
