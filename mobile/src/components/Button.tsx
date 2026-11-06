@@ -45,6 +45,7 @@ export function Button({ title, variant = 'primary', loading, style, disabled, .
 
 const styles = StyleSheet.create({
   base: {
+    width: '100%',
     paddingVertical: 14,
     paddingHorizontal: spacing.lg,
     borderRadius: borderRadius.md,
@@ -73,10 +74,10 @@ const styles = StyleSheet.create({
   primaryBgImage: {
     position: 'absolute',
     top: 0,
-    left: 0,
-    right: 0,
+    left: '-6%',
+    right: '-6%',
     bottom: 0,
-    width: '100%',
+    width: '112%',
     height: '100%',
     zIndex: 1,
   },
