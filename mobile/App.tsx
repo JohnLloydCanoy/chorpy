@@ -206,7 +206,7 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   navButtonActive: { backgroundColor: colors.primary },
-  navButtonBgImage: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, width: '100%', height: '100%', zIndex: 1 },
+  navButtonBgImage: { position: 'absolute', top: 0, left: '-6%', right: '-6%', bottom: 0, width: '112%', height: '100%', zIndex: 1 },
   navButtonText: { fontFamily: typography.fontFamily.secondarySemiBold, fontSize: 12, color: colors.textSecondary },
   navButtonTextActive: { fontFamily: typography.fontFamily.secondaryBold, color: colors.textLight, zIndex: 2, position: 'relative' },
   content: { flex: 1 },
