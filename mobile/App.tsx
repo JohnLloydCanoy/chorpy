@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View, TouchableOpacity, SafeAreaView } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity, SafeAreaView, Image } from 'react-native';
+import { useFonts, Fredoka_400Regular, Fredoka_600SemiBold, Fredoka_700Bold } from '@expo-google-fonts/fredoka';
+import { Poppins_400Regular, Poppins_500Medium, Poppins_600SemiBold, Poppins_700Bold } from '@expo-google-fonts/poppins';
 import { supabase } from './src/lib/supabase';
 import { AuthProvider, useAuthContext } from './src/context/AuthContext';
 import AppLoaderScreen from './src/screens/AppLoaderScreen';
@@ -9,7 +11,9 @@ import HomeScreen from './src/screens/HomeScreen';
 import RoleScreen from './src/screens/RoleScreen';
 import ParentDashboard from './src/screens/ParentDashboard';
 import ChildLockScreen from './src/screens/ChildLockScreen';
-import { colors, spacing, borderRadius } from './src/theme';
+import { colors, spacing, borderRadius, typography } from './src/theme';
+
+const primaryBgImage = require('./assets/Background-of-Primary-Color.png');
 
 // Navigation Screen Registry (Auth removed from navigation per requirement)
 type ScreenName = 'home' | 'role' | 'parent' | 'child';
@@ -102,6 +106,13 @@ function AppContent() {
               accessibilityRole="tab"
               accessibilityState={{ selected: isActive }}
             >
+              {isActive && (
+                <Image
+                  source={primaryBgImage}
+                  style={StyleSheet.absoluteFill}
+                  resizeMode="cover"
+                />
+              )}
               <Text style={[styles.navButtonText, isActive && styles.navButtonTextActive]}>
                 {tab.toUpperCase()}
               </Text>
@@ -130,6 +141,20 @@ function AppContent() {
 }
 
 export default function App() {
+  const [fontsLoaded] = useFonts({
+    Fredoka_400Regular,
+    Fredoka_600SemiBold,
+    Fredoka_700Bold,
+    Poppins_400Regular,
+    Poppins_500Medium,
+    Poppins_600SemiBold,
+    Poppins_700Bold,
+  });
+
+  if (!fontsLoaded) {
+    return <AppLoaderScreen message="Loading Chorpy..." subMessage="Setting up theme and typography..." />;
+  }
+
   return (
     <AuthProvider>
       <AppContent />
@@ -161,14 +186,14 @@ const styles = StyleSheet.create({
     fontSize: 24,
   },
   headerTitle: {
-    fontSize: 16,
-    fontWeight: '800',
+    fontFamily: typography.fontFamily.mainBold,
+    fontSize: 18,
     color: colors.primary,
   },
   headerUser: {
+    fontFamily: typography.fontFamily.secondaryMedium,
     fontSize: 11,
     color: colors.textSecondary,
-    fontWeight: '500',
   },
   signOutButton: {
     paddingVertical: spacing.xs,
@@ -181,8 +206,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   signOutText: {
+    fontFamily: typography.fontFamily.secondarySemiBold,
     fontSize: 12,
-    fontWeight: '700',
     color: colors.danger,
   },
   navBar: {
@@ -201,17 +226,20 @@ const styles = StyleSheet.create({
     borderRadius: borderRadius.md,
     minHeight: 36,
     justifyContent: 'center',
+    overflow: 'hidden',
   },
   navButtonActive: {
     backgroundColor: colors.primary,
   },
   navButtonText: {
+    fontFamily: typography.fontFamily.secondarySemiBold,
     fontSize: 12,
-    fontWeight: '700',
     color: colors.textSecondary,
   },
   navButtonTextActive: {
+    fontFamily: typography.fontFamily.secondaryBold,
     color: colors.textLight,
+    zIndex: 1,
   },
   content: {
     flex: 1,
