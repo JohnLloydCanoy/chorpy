@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
-import { StyleSheet, Text, View, TextInput, TouchableOpacity, ScrollView } from 'react-native';
+import { StyleSheet, Text, View, TextInput, TouchableOpacity, ScrollView, Image } from 'react-native';
 import { authService } from '../services/authService';
 import { validateEmail } from '../utils/validation';
 import { DeveloperQuickPreview } from '../components/DeveloperQuickPreview';
 import { Button } from '../components/Button';
 import { colors, spacing, borderRadius, typography } from '../theme';
+
+const whiteBgAsset = require('../../assets/White-Background-Assets.png');
 
 interface LoginScreenProps {
   onNavigateToSignUp: () => void;
@@ -50,72 +52,81 @@ export default function LoginScreen({ onNavigateToSignUp, onDemoLogin }: LoginSc
   }
 
   return (
-    <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
-      <Text style={styles.mascot}>🐦</Text>
-      <Text style={styles.title}>Welcome to Chorpy</Text>
-      <Text style={styles.subtitle}>Sign in to access your household dashboard</Text>
+    <View style={styles.screenWrapper}>
+      <Image
+        source={whiteBgAsset}
+        style={styles.screenBgImage}
+        resizeMode="cover"
+      />
+      <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
+        <Text style={styles.mascot}>🐦</Text>
+        <Text style={styles.title}>Welcome to Chorpy</Text>
+        <Text style={styles.subtitle}>Sign in to access your household dashboard</Text>
 
-      <View style={styles.form}>
-        {authError ? (
-          <View style={styles.errorBox}>
-            <Text style={styles.errorText}>{authError}</Text>
+        <View style={styles.form}>
+          {authError ? (
+            <View style={styles.errorBox}>
+              <Text style={styles.errorText}>{authError}</Text>
+            </View>
+          ) : null}
+
+          <Text style={styles.label}>Email Address</Text>
+          <TextInput
+            style={[styles.input, emailError ? styles.inputError : null]}
+            placeholder="parent@example.com"
+            placeholderTextColor={colors.textMuted}
+            value={email}
+            onChangeText={(val) => {
+              setEmail(val);
+              if (emailError) setEmailError(null);
+            }}
+            onBlur={handleEmailBlur}
+            autoCapitalize="none"
+            keyboardType="email-address"
+            autoCorrect={false}
+          />
+          {emailError ? <Text style={styles.fieldError}>{emailError}</Text> : null}
+
+          <Text style={styles.label}>Password</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="••••••••"
+            secureTextEntry
+            placeholderTextColor={colors.textMuted}
+            value={password}
+            onChangeText={(val) => {
+              setPassword(val);
+              if (authError) setAuthError(null);
+            }}
+            autoCapitalize="none"
+          />
+
+          <Button
+            title="Sign In"
+            variant="primary"
+            loading={loading}
+            onPress={handleSignIn}
+            style={styles.primaryBtn}
+          />
+
+          <View style={styles.footerRow}>
+            <Text style={styles.footerText}>{"Don't have an account? "}</Text>
+            <TouchableOpacity onPress={onNavigateToSignUp} disabled={loading} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+              <Text style={styles.signUpLink}>Sign up Here</Text>
+            </TouchableOpacity>
           </View>
-        ) : null}
 
-        <Text style={styles.label}>Email Address</Text>
-        <TextInput
-          style={[styles.input, emailError ? styles.inputError : null]}
-          placeholder="parent@example.com"
-          placeholderTextColor={colors.textMuted}
-          value={email}
-          onChangeText={(val) => {
-            setEmail(val);
-            if (emailError) setEmailError(null);
-          }}
-          onBlur={handleEmailBlur}
-          autoCapitalize="none"
-          keyboardType="email-address"
-          autoCorrect={false}
-        />
-        {emailError ? <Text style={styles.fieldError}>{emailError}</Text> : null}
-
-        <Text style={styles.label}>Password</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="••••••••"
-          secureTextEntry
-          placeholderTextColor={colors.textMuted}
-          value={password}
-          onChangeText={(val) => {
-            setPassword(val);
-            if (authError) setAuthError(null);
-          }}
-          autoCapitalize="none"
-        />
-
-        <Button
-          title="Sign In"
-          variant="primary"
-          loading={loading}
-          onPress={handleSignIn}
-          style={styles.primaryBtn}
-        />
-
-        <View style={styles.footerRow}>
-          <Text style={styles.footerText}>{"Don't have an account? "}</Text>
-          <TouchableOpacity onPress={onNavigateToSignUp} disabled={loading} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
-            <Text style={styles.signUpLink}>Sign up Here</Text>
-          </TouchableOpacity>
+          <DeveloperQuickPreview onDemoLogin={onDemoLogin} disabled={loading} />
         </View>
-
-        <DeveloperQuickPreview onDemoLogin={onDemoLogin} disabled={loading} />
-      </View>
-    </ScrollView>
+      </ScrollView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { padding: spacing.lg, backgroundColor: colors.background, flexGrow: 1, justifyContent: 'center' },
+  screenWrapper: { flex: 1, backgroundColor: colors.background },
+  screenBgImage: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, width: '100%', height: '100%' },
+  container: { padding: spacing.lg, backgroundColor: 'transparent', flexGrow: 1, justifyContent: 'center' },
   mascot: { fontSize: 48, textAlign: 'center', marginBottom: spacing.xs },
   title: { fontSize: typography.fontSizes.xxl, fontFamily: typography.fontFamily.mainBold, color: colors.primary, textAlign: 'center', marginBottom: spacing.xs },
   subtitle: { fontSize: typography.fontSizes.sm, fontFamily: typography.fontFamily.secondary, color: colors.textSecondary, textAlign: 'center', marginBottom: spacing.lg },

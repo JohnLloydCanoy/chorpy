@@ -103,10 +103,10 @@ const styles = StyleSheet.create({
   cameraButtonBgImage: {
     position: 'absolute',
     top: 0,
-    left: 0,
-    right: 0,
+    left: '-6%',
+    right: '-6%',
     bottom: 0,
-    width: '100%',
+    width: '112%',
     height: '100%',
     zIndex: 1,
   },

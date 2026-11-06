@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { StyleSheet, Text, View, TextInput, TouchableOpacity, ScrollView } from 'react-native';
+import { StyleSheet, Text, View, TextInput, TouchableOpacity, ScrollView, Image } from 'react-native';
 import { authService } from '../services/authService';
 import { validateEmail, evaluatePasswordEntropy, formatTitleCase, formatE164Phone, calculateAgeFromDOB } from '../utils/validation';
 import { PasswordEntropyChips } from '../components/PasswordEntropyChips';
@@ -8,6 +8,8 @@ import { RoleSelector } from '../components/RoleSelector';
 import { Button } from '../components/Button';
 import { colors, spacing, borderRadius, typography } from '../theme';
 import { UserRole } from '../types';
+
+const whiteBgAsset = require('../../assets/White-Background-Assets.png');
 
 interface SignUpScreenProps {
   onNavigateToLogin: () => void;
@@ -69,12 +71,18 @@ export default function SignUpScreen({ onNavigateToLogin, onDemoLogin }: SignUpS
   }
 
   return (
-    <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
-      <Text style={styles.mascot}>🐦</Text>
-      <Text style={styles.title}>Join Chorpy</Text>
-      <Text style={styles.subtitle}>Create your digital wellbeing household account</Text>
+    <View style={styles.screenWrapper}>
+      <Image
+        source={whiteBgAsset}
+        style={styles.screenBgImage}
+        resizeMode="cover"
+      />
+      <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
+        <Text style={styles.mascot}>🐦</Text>
+        <Text style={styles.title}>Join Chorpy</Text>
+        <Text style={styles.subtitle}>Create your digital wellbeing household account</Text>
 
-      <View style={styles.form}>
+        <View style={styles.form}>
         {authError ? (
           <View style={styles.errorBox}>
             <Text style={styles.errorText}>{authError}</Text>
@@ -190,11 +198,14 @@ export default function SignUpScreen({ onNavigateToLogin, onDemoLogin }: SignUpS
         <DeveloperQuickPreview onDemoLogin={onDemoLogin} disabled={loading} />
       </View>
     </ScrollView>
+  </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { padding: spacing.lg, backgroundColor: colors.background, flexGrow: 1, justifyContent: 'center' },
+  screenWrapper: { flex: 1, backgroundColor: colors.background },
+  screenBgImage: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, width: '100%', height: '100%' },
+  container: { padding: spacing.lg, backgroundColor: 'transparent', flexGrow: 1, justifyContent: 'center' },
   mascot: { fontSize: 44, textAlign: 'center', marginBottom: spacing.xs },
   title: { fontSize: typography.fontSizes.xl, fontFamily: typography.fontFamily.mainBold, color: colors.primary, textAlign: 'center', marginBottom: spacing.xs },
   subtitle: { fontSize: typography.fontSizes.sm, fontFamily: typography.fontFamily.secondary, color: colors.textSecondary, textAlign: 'center', marginBottom: spacing.md },
