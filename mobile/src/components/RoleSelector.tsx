@@ -33,7 +33,7 @@ export function RoleSelector({ role, onSelectRole, isParentDisabled }: RoleSelec
           {isParentActive && (
             <Image
               source={primaryBgImage}
-              style={StyleSheet.absoluteFill}
+              style={styles.btnBgImage}
               resizeMode="cover"
             />
           )}
@@ -57,7 +57,7 @@ export function RoleSelector({ role, onSelectRole, isParentDisabled }: RoleSelec
           {isChildActive && (
             <Image
               source={primaryBgImage}
-              style={StyleSheet.absoluteFill}
+              style={styles.btnBgImage}
               resizeMode="cover"
             />
           )}
@@ -99,6 +99,16 @@ const styles = StyleSheet.create({
     backgroundColor: colors.primary,
     borderColor: colors.primaryDark,
   },
+  btnBgImage: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    width: '100%',
+    height: '100%',
+    zIndex: 1,
+  },
   btnDisabled: {
     opacity: 0.5,
     backgroundColor: colors.border,
@@ -111,13 +121,15 @@ const styles = StyleSheet.create({
   btnTextActive: {
     fontFamily: typography.fontFamily.secondaryBold,
     color: colors.textLight,
-    zIndex: 1,
+    zIndex: 2,
+    position: 'relative',
   },
   badge: {
     fontFamily: typography.fontFamily.secondarySemiBold,
     fontSize: typography.fontSizes.xs,
     color: colors.danger,
     marginTop: 2,
-    zIndex: 1,
+    zIndex: 2,
+    position: 'relative',
   },
 });

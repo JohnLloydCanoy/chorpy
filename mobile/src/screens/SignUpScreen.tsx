@@ -1,14 +1,13 @@
 import React, { useState } from 'react';
-import { StyleSheet, Text, View, TextInput, TouchableOpacity, ScrollView, ActivityIndicator, Image } from 'react-native';
+import { StyleSheet, Text, View, TextInput, TouchableOpacity, ScrollView } from 'react-native';
 import { authService } from '../services/authService';
 import { validateEmail, evaluatePasswordEntropy, formatTitleCase, formatE164Phone, calculateAgeFromDOB } from '../utils/validation';
 import { PasswordEntropyChips } from '../components/PasswordEntropyChips';
 import { DeveloperQuickPreview } from '../components/DeveloperQuickPreview';
 import { RoleSelector } from '../components/RoleSelector';
+import { Button } from '../components/Button';
 import { colors, spacing, borderRadius, typography } from '../theme';
 import { UserRole } from '../types';
-
-const primaryBgImage = require('../../assets/Background-of-Primary-Color.png');
 
 interface SignUpScreenProps {
   onNavigateToLogin: () => void;
@@ -172,24 +171,14 @@ export default function SignUpScreen({ onNavigateToLogin, onDemoLogin }: SignUpS
           <Text style={styles.termsText}>I agree to the Chorpy rules and regulations</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity
-          style={[styles.primaryBtn, (!agreeTerms || !entropy.isValid || loading) && styles.btnDisabled]}
-          onPress={handleSignUp}
+        <Button
+          title="Create Account"
+          variant="primary"
+          loading={loading}
           disabled={!agreeTerms || !entropy.isValid || loading}
-          activeOpacity={0.8}
-          accessibilityRole="button"
-        >
-          <Image
-            source={primaryBgImage}
-            style={StyleSheet.absoluteFill}
-            resizeMode="cover"
-          />
-          {loading ? (
-            <ActivityIndicator style={styles.foregroundLoader} color={colors.textLight} />
-          ) : (
-            <Text style={styles.primaryBtnText}>Create Account</Text>
-          )}
-        </TouchableOpacity>
+          onPress={handleSignUp}
+          style={styles.primaryBtn}
+        />
 
         <View style={styles.footerRow}>
           <Text style={styles.footerText}>Already have an account? </Text>
@@ -222,10 +211,7 @@ const styles = StyleSheet.create({
   checkboxActive: { backgroundColor: colors.primary, borderColor: colors.primaryDark },
   checkmark: { color: colors.textLight, fontSize: 12, fontWeight: '700' },
   termsText: { fontSize: typography.fontSizes.sm, fontFamily: typography.fontFamily.secondary, color: colors.text, flex: 1 },
-  primaryBtn: { backgroundColor: colors.primary, paddingVertical: spacing.md, borderRadius: borderRadius.md, alignItems: 'center', justifyContent: 'center', marginTop: spacing.xs, minHeight: 48, overflow: 'hidden' },
-  btnDisabled: { opacity: 0.5 },
-  primaryBtnText: { color: colors.textLight, fontFamily: typography.fontFamily.secondaryBold, fontSize: typography.fontSizes.base, zIndex: 1 },
-  foregroundLoader: { zIndex: 1 },
+  primaryBtn: { marginTop: spacing.xs },
   footerRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', marginTop: spacing.lg, minHeight: 32 },
   footerText: { color: colors.textSecondary, fontSize: typography.fontSizes.sm, fontFamily: typography.fontFamily.secondary },
   loginLink: { color: colors.primary, fontSize: typography.fontSizes.sm, fontFamily: typography.fontFamily.secondaryBold },

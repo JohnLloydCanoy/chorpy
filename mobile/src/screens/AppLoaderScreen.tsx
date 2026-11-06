@@ -39,7 +39,7 @@ export default function AppLoaderScreen({
               >
                 <Image
                   source={primaryBgImage}
-                  style={StyleSheet.absoluteFill}
+                  style={styles.retryButtonBgImage}
                   resizeMode="cover"
                 />
                 <Text style={styles.retryButtonText}>Retry</Text>
@@ -153,10 +153,21 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     overflow: 'hidden',
   },
+  retryButtonBgImage: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    width: '100%',
+    height: '100%',
+    zIndex: 1,
+  },
   retryButtonText: {
     fontFamily: typography.fontFamily.secondaryBold,
     color: colors.textLight,
     fontSize: typography.fontSizes.sm,
-    zIndex: 1,
+    zIndex: 2,
+    position: 'relative',
   },
 });

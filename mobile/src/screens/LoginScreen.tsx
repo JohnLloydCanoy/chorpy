@@ -1,11 +1,10 @@
 import React, { useState } from 'react';
-import { StyleSheet, Text, View, TextInput, TouchableOpacity, ScrollView, ActivityIndicator, Image } from 'react-native';
+import { StyleSheet, Text, View, TextInput, TouchableOpacity, ScrollView } from 'react-native';
 import { authService } from '../services/authService';
 import { validateEmail } from '../utils/validation';
 import { DeveloperQuickPreview } from '../components/DeveloperQuickPreview';
+import { Button } from '../components/Button';
 import { colors, spacing, borderRadius, typography } from '../theme';
-
-const primaryBgImage = require('../../assets/Background-of-Primary-Color.png');
 
 interface LoginScreenProps {
   onNavigateToSignUp: () => void;
@@ -94,24 +93,13 @@ export default function LoginScreen({ onNavigateToSignUp, onDemoLogin }: LoginSc
           autoCapitalize="none"
         />
 
-        <TouchableOpacity
-          style={[styles.primaryBtn, loading && styles.btnDisabled]}
+        <Button
+          title="Sign In"
+          variant="primary"
+          loading={loading}
           onPress={handleSignIn}
-          disabled={loading}
-          activeOpacity={0.8}
-          accessibilityRole="button"
-        >
-          <Image
-            source={primaryBgImage}
-            style={StyleSheet.absoluteFill}
-            resizeMode="cover"
-          />
-          {loading ? (
-            <ActivityIndicator style={styles.foregroundLoader} color={colors.textLight} />
-          ) : (
-            <Text style={styles.primaryBtnText}>Sign In</Text>
-          )}
-        </TouchableOpacity>
+          style={styles.primaryBtn}
+        />
 
         <View style={styles.footerRow}>
           <Text style={styles.footerText}>{"Don't have an account? "}</Text>
@@ -138,10 +126,7 @@ const styles = StyleSheet.create({
   input: { backgroundColor: colors.background, borderRadius: borderRadius.md, paddingHorizontal: spacing.md, paddingVertical: spacing.sm, fontSize: typography.fontSizes.base, fontFamily: typography.fontFamily.secondary, color: colors.text, marginBottom: spacing.md, borderWidth: 1, borderColor: colors.border, minHeight: 48 },
   inputError: { borderColor: colors.danger, marginBottom: spacing.xs },
   fieldError: { color: colors.danger, fontSize: typography.fontSizes.xs, fontFamily: typography.fontFamily.secondaryMedium, marginBottom: spacing.md },
-  primaryBtn: { backgroundColor: colors.primary, paddingVertical: spacing.md, borderRadius: borderRadius.md, alignItems: 'center', justifyContent: 'center', marginTop: spacing.xs, minHeight: 48, overflow: 'hidden' },
-  btnDisabled: { opacity: 0.6 },
-  primaryBtnText: { color: colors.textLight, fontFamily: typography.fontFamily.secondaryBold, fontSize: typography.fontSizes.base, zIndex: 1 },
-  foregroundLoader: { zIndex: 1 },
+  primaryBtn: { marginTop: spacing.xs },
   footerRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', marginTop: spacing.lg, minHeight: 32 },
   footerText: { color: colors.textSecondary, fontSize: typography.fontSizes.sm, fontFamily: typography.fontFamily.secondary },
   signUpLink: { color: colors.primary, fontSize: typography.fontSizes.sm, fontFamily: typography.fontFamily.secondaryBold },

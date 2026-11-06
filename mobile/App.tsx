@@ -109,7 +109,7 @@ function AppContent() {
               {isActive && (
                 <Image
                   source={primaryBgImage}
-                  style={StyleSheet.absoluteFill}
+                  style={styles.navButtonBgImage}
                   resizeMode="cover"
                 />
               )}
@@ -142,13 +142,8 @@ function AppContent() {
 
 export default function App() {
   const [fontsLoaded] = useFonts({
-    Fredoka_400Regular,
-    Fredoka_600SemiBold,
-    Fredoka_700Bold,
-    Poppins_400Regular,
-    Poppins_500Medium,
-    Poppins_600SemiBold,
-    Poppins_700Bold,
+    Fredoka_400Regular, Fredoka_600SemiBold, Fredoka_700Bold,
+    Poppins_400Regular, Poppins_500Medium, Poppins_600SemiBold, Poppins_700Bold,
   });
 
   if (!fontsLoaded) {
@@ -177,24 +172,10 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: colors.border,
   },
-  headerLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm,
-  },
-  headerMascot: {
-    fontSize: 24,
-  },
-  headerTitle: {
-    fontFamily: typography.fontFamily.mainBold,
-    fontSize: 18,
-    color: colors.primary,
-  },
-  headerUser: {
-    fontFamily: typography.fontFamily.secondaryMedium,
-    fontSize: 11,
-    color: colors.textSecondary,
-  },
+  headerLeft: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
+  headerMascot: { fontSize: 24 },
+  headerTitle: { fontFamily: typography.fontFamily.mainBold, fontSize: 18, color: colors.primary },
+  headerUser: { fontFamily: typography.fontFamily.secondaryMedium, fontSize: 11, color: colors.textSecondary },
   signOutButton: {
     paddingVertical: spacing.xs,
     paddingHorizontal: spacing.md,
@@ -205,11 +186,7 @@ const styles = StyleSheet.create({
     minHeight: 36,
     justifyContent: 'center',
   },
-  signOutText: {
-    fontFamily: typography.fontFamily.secondarySemiBold,
-    fontSize: 12,
-    color: colors.danger,
-  },
+  signOutText: { fontFamily: typography.fontFamily.secondarySemiBold, fontSize: 12, color: colors.danger },
   navBar: {
     flexDirection: 'row',
     backgroundColor: colors.surface,
@@ -228,20 +205,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     overflow: 'hidden',
   },
-  navButtonActive: {
-    backgroundColor: colors.primary,
-  },
-  navButtonText: {
-    fontFamily: typography.fontFamily.secondarySemiBold,
-    fontSize: 12,
-    color: colors.textSecondary,
-  },
-  navButtonTextActive: {
-    fontFamily: typography.fontFamily.secondaryBold,
-    color: colors.textLight,
-    zIndex: 1,
-  },
-  content: {
-    flex: 1,
-  },
+  navButtonActive: { backgroundColor: colors.primary },
+  navButtonBgImage: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, width: '100%', height: '100%', zIndex: 1 },
+  navButtonText: { fontFamily: typography.fontFamily.secondarySemiBold, fontSize: 12, color: colors.textSecondary },
+  navButtonTextActive: { fontFamily: typography.fontFamily.secondaryBold, color: colors.textLight, zIndex: 2, position: 'relative' },
+  content: { flex: 1 },
 });

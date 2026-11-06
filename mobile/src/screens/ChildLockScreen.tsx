@@ -24,7 +24,7 @@ export default function ChildLockScreen() {
       >
         <Image
           source={primaryBgImage}
-          style={StyleSheet.absoluteFill}
+          style={styles.cameraButtonBgImage}
           resizeMode="cover"
         />
         <Text style={styles.cameraButtonText}>📸 Take Photo Proof</Text>
@@ -100,11 +100,22 @@ const styles = StyleSheet.create({
     minHeight: 48,
     overflow: 'hidden',
   },
+  cameraButtonBgImage: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    width: '100%',
+    height: '100%',
+    zIndex: 1,
+  },
   cameraButtonText: {
     color: colors.textLight,
     fontFamily: typography.fontFamily.secondaryBold,
     fontSize: typography.fontSizes.base,
-    zIndex: 1,
+    zIndex: 2,
+    position: 'relative',
   },
   hint: {
     fontSize: typography.fontSizes.xs,
