@@ -38,23 +38,50 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   useEffect(() => {
-    // 1. Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      if (session?.user) {
-        loadProfile().finally(() => setLoading(false));
-      } else {
+    let isMounted = true;
+
+    // Safety timeout to ensure loader resolves even on high latency or network timeouts
+    const timeoutId = setTimeout(() => {
+      if (isMounted) {
         setLoading(false);
       }
-    });
+    }, 6000);
+
+    // 1. Get initial session
+    supabase.auth
+      .getSession()
+      .then(({ data: { session } }) => {
+        if (!isMounted) return;
+        setSession(session);
+        setUser(session?.user ?? null);
+        if (session?.user) {
+          loadProfile().finally(() => {
+            if (isMounted) {
+              clearTimeout(timeoutId);
+              setLoading(false);
+            }
+          });
+        } else {
+          clearTimeout(timeoutId);
+          setLoading(false);
+        }
+      })
+      .catch(() => {
+        if (isMounted) {
+          clearTimeout(timeoutId);
+          setLoading(false);
+        }
+      });
 
     // 2. Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (!isMounted) return;
       setSession(session);
       setUser(session?.user ?? null);
       if (session?.user) {
-        loadProfile().finally(() => setLoading(false));
+        loadProfile().finally(() => {
+          if (isMounted) setLoading(false);
+        });
       } else {
         setProfile(null);
         setLoading(false);
@@ -62,6 +89,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     });
 
     return () => {
+      isMounted = false;
+      clearTimeout(timeoutId);
       subscription.unsubscribe();
     };
   }, []);
