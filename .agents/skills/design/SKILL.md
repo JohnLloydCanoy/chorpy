@@ -22,13 +22,17 @@ All color references in components **MUST** be imported from `src/theme` (`color
 
 | Token | Hex | Role & Usage Context |
 | :--- | :--- | :--- |
-| `colors.primary` | `#0284C7` | **Sky Blue (Primary):** Main headers, primary buttons, active tabs, keyboard focus rings. |
-| `colors.primaryLight` | `#38BDF8` | **Light Sky Blue:** Hover states, active badge highlights, brand accent accents. |
-| `colors.primarySoft` | `#F0F9FF` | **Soft Tint:** Background highlights for primary cards and selected list items. |
-| `colors.primaryDark` | `#0369A1` | **Dark Sky Blue:** Pressed states for primary buttons, high-contrast borders. |
-| `colors.accent` | `#FF6B4A` | **Coral Orange (Accent):** Critical call-to-actions, urgent alerts, unlock CTAs. |
-| `colors.accentHover` | `#EA580C` | **Dark Coral:** Pressed state for accent buttons. |
-| `colors.accentSoft` | `#FFF7ED` | **Soft Coral:** Background container for urgent warnings or chore badges. |
+| `colors.primary` | `#1B365D` | **Navy Blue (Primary):** Main headers, primary buttons, active tabs, keyboard focus rings. Rendered on top of `Background-of-Primary-Color.png` for primary buttons. |
+| `colors.primaryLight` | `#2C4D7D` | **Lighter Navy Blue:** Hover states, active badge highlights. |
+| `colors.primarySoft` | `#E8EEF5` | **Soft Navy Tint:** Background highlights for primary cards and selected list items. |
+| `colors.primaryDark` | `#12243F` | **Dark Navy Blue:** Pressed states for primary buttons, high-contrast borders. |
+| `colors.secondary` | `#60C1E5` | **Light Sky/Cyan Blue (Secondary):** Secondary brand elements, highlights, links. |
+| `colors.secondaryLight`| `#8CE0FC` | **Lighter Cyan Blue:** Subtle highlights and secondary badges. |
+| `colors.secondarySoft` | `#F0F9FD` | **Soft Cyan Tint:** Background container for alerts and info cards. |
+| `colors.secondaryDark` | `#3A9ABF` | **Dark Cyan Blue:** Active/hover states for secondary controls. |
+| `colors.accent` | `#60C1E5` | **Vibrant Accent:** Secondary call-to-actions, urgent alerts, unlock CTAs. |
+| `colors.accentHover` | `#3A9ABF` | **Dark Cyan Accent:** Pressed state for accent buttons. |
+| `colors.accentSoft` | `#F0F9FD` | **Soft Cyan Accent:** Background container for badges. |
 | `colors.background` | `#F8FAFC` | **Cloud White:** App-wide screen background (clean, non-glare canvas). |
 | `colors.surface` | `#FFFFFF` | **Pure White:** Card surfaces, bottom sheets, form input backgrounds. |
 | `colors.surfaceDark` | `#0F172A` | **Slate Navy:** Child Lock Screen background, primary high-contrast headings. |
@@ -79,6 +83,15 @@ Chorpy enforces a strict mathematical type scale derived from modern mobile acce
 
 ```typescript
 export const typography = {
+  fontFamily: {
+    main: 'Fredoka_400Regular',
+    mainSemiBold: 'Fredoka_600SemiBold',
+    mainBold: 'Fredoka_700Bold',
+    secondary: 'Poppins_400Regular',
+    secondaryMedium: 'Poppins_500Medium',
+    secondarySemiBold: 'Poppins_600SemiBold',
+    secondaryBold: 'Poppins_700Bold',
+  },
   fontSizes: {
     xs: 11,      // Badges, caption indicators, legal notices
     sm: 13,      // Secondary descriptions, timestamps, helper text
