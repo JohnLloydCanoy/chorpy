@@ -203,8 +203,20 @@ export default function SignUpScreen({ onNavigateToLogin, onDemoLogin }: SignUpS
 }
 
 const styles = StyleSheet.create({
-  screenWrapper: { flex: 1, backgroundColor: colors.background },
-  screenBgImage: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, width: '100%', height: '100%' },
+  screenWrapper: {
+    flex: 1,
+    backgroundColor: colors.background,
+    overflow: 'hidden',
+  },
+  screenBgImage: {
+    position: 'absolute',
+    top: '-8%',
+    bottom: '-8%',
+    left: '-6%',
+    right: '-6%',
+    width: '112%',
+    height: '116%',
+  },
   container: { padding: spacing.lg, backgroundColor: 'transparent', flexGrow: 1, justifyContent: 'center' },
   mascot: { fontSize: 44, textAlign: 'center', marginBottom: spacing.xs },
   title: { fontSize: typography.fontSizes.xl, fontFamily: typography.fontFamily.mainBold, color: colors.primary, textAlign: 'center', marginBottom: spacing.xs },
