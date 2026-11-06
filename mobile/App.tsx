@@ -55,7 +55,7 @@ function AppContent() {
   const isAuthenticated = Boolean(user || demoRole);
   if (!isAuthenticated) {
     return (
-      <SafeAreaView style={styles.safeArea}>
+      <SafeAreaView style={styles.authSafeArea}>
         <AuthScreen onDemoLogin={(role) => setDemoRole(role || 'parent')} />
         <StatusBar style="dark" />
       </SafeAreaView>
@@ -158,6 +158,10 @@ export default function App() {
 }
 
 const styles = StyleSheet.create({
+  authSafeArea: {
+    flex: 1,
+    backgroundColor: 'transparent',
+  },
   safeArea: {
     flex: 1,
     backgroundColor: colors.background,
