@@ -158,6 +158,7 @@ function AppContent() {
             role={effectiveRole}
             dbStatus={dbStatus}
             statusMessage={statusMessage}
+            onNavigateToFamily={() => setCurrentScreen('my_family')}
           />
         )}
         {currentScreen === 'my_family' && <MyFamilyScreen />}
@@ -195,7 +196,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     backgroundColor: colors.surface,
-    paddingHorizontal: spacing.md,
+    paddingHorizontal: '2.5%',
     paddingVertical: spacing.sm,
     borderBottomWidth: 1,
     borderBottomColor: colors.border,
@@ -221,7 +222,7 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: colors.border,
     paddingVertical: spacing.sm,
-    paddingHorizontal: spacing.xs,
+    paddingHorizontal: '2.5%',
     justifyContent: 'space-around',
     zIndex: 10,
   },
