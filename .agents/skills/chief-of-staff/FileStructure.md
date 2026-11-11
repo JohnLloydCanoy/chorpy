@@ -174,8 +174,8 @@ mobile/
 │   ├── screens/                             # Screen views and application route containers
 │   │   ├── AuthScreen.tsx                   # User login and registration screen
 │   │   ├── ChildLockScreen.tsx              # Child kiosk / locked state enforcement and task proof screen
-│   │   ├── ParentDashboard.tsx              # Parent chore management, child approval, and device control
-│   │   └── RoleScreen.tsx                   # Role selection (Parent vs. Child) and Household pairing flow
+│   │   ├── MyFamilyScreen.tsx               # Guardian chore management, child approval, and device control
+│   │   └── SettingsScreen.tsx               # Profile overview, household circle status, wellbeing & sign-out
 │   ├── services/                            # Pure API and database communication layer (Supabase SDK)
 │   │   ├── authService.ts                   # Auth signup, signin, signout, and profile retrieval
 │   │   ├── choreService.ts                  # Chore creation, listing, proof submission, approval, rejection
@@ -226,9 +226,9 @@ Configuration for external libraries and platforms:
 #### `mobile/src/screens/`
 Screen-level views coordinating business hooks and presentational components:
 - **`AuthScreen.tsx`**: Handles login and sign-up with email and password, full name, phone number, and role selection.
-- **`RoleScreen.tsx`**: Guides new users through creating a family circle or joining via a 6-digit household PIN.
-- **`ParentDashboard.tsx`**: Displays household chores categorized by status (`pending`, `awaiting_approval`, `approved`), provides quick-action approval/rejection triggers, and remote device lock controls.
 - **`ChildLockScreen.tsx`**: Visual child lock enforcement mode. Displays lock status, assigned chores, and proof submission actions.
+- **`MyFamilyScreen.tsx`**: Guardian chore management, child approvals queue, household pairing PIN, and remote device lock controls.
+- **`SettingsScreen.tsx`**: User profile and account overview, household pairing and circle status, device wellbeing (hardware overlay status, emergency contact info), and account sign-out.
 
 #### `mobile/src/services/`
 The pure database and network communication layer:
@@ -327,7 +327,7 @@ server/
 │                                                                                 │
 │   ┌───────────────────────────┐         ┌───────────────────────────────────┐   │
 │   │   Screens & UI Views      │ ──────► │       Context & Custom Hooks      │   │
-│   │ (ParentDashboard,         │         │ (AuthContext, useChores,          │   │
+│   │ (MyFamilyScreen,          │         │ (AuthContext, useChores,          │   │
 │   │  ChildLockScreen, etc.)   │ ◄────── │  useDeviceLock, useAuth)          │   │
 │   └───────────────────────────┘         └─────────────────┬─────────────────┘   │
 │                                                           │                     │
@@ -417,7 +417,7 @@ This tracking register is audited by the **Chief of Staff** and **QA** subagents
 | **`mobile/`** | Design Tokens & Theme | Complete / Active | `src/theme/index.ts` | Global colors, typography, spacing, and shadows established. |
 | **`mobile/`** | Service Layer | Complete / Active | `src/services/*.ts` | All Supabase queries isolated across 4 dedicated service files. |
 | **`mobile/`** | State & Hooks | Complete / Active | `src/context/`, `src/hooks/` | Realtime sync hooks for chores and device lock active. |
-| **`mobile/`** | UI Screens | Complete / Active | `src/screens/*.ts` | Auth, Role, ParentDashboard, and ChildLock screens active. |
+| **`mobile/`** | UI Screens | Complete / Active | `src/screens/*.tsx` | Auth, ChildLock, and MyFamily screens active with RBAC route guards. |
 | **`mobile/`** | UI Components | Complete / Active | `src/components/*.tsx` | Shared `Button` and `Card` components adhering to design tokens. |
 | **`server/`** | Root & Scaffolding | Initialized | `server/` | Directory initialized; awaiting worker, cron, and Docker scaffolding. |
 | **`server/`** | Scheduled Reset Worker| Planned | `server/src/workers/` | Planned for automated chore resets and streak calculation. |

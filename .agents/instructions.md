@@ -53,8 +53,8 @@ chorpy/
 │   │   ├── screens/            # Core Screen Registry
 │   │   │   ├── AuthScreen.tsx       # Registration & login form
 │   │   │   ├── ChildLockScreen.tsx  # Non-dismissible lock & photo proof trigger
-│   │   │   ├── ParentDashboard.tsx  # Guardian dashboard, approvals & device status
-│   │   │   └── RoleScreen.tsx       # Role selector & 6-digit PIN circle pairing
+│   │   │   ├── MyFamilyScreen.tsx   # Guardian dashboard, approvals & device status
+│   │   │   └── SettingsScreen.tsx   # Account overview, circle status, wellbeing & sign out
 │   │   ├── services/           # Pure Supabase API service layer
 │   │   │   ├── authService.ts       # Auth sign-up, sign-in, and profile operations
 │   │   │   ├── choreService.ts      # Chore CRUD and status updates
@@ -83,18 +83,10 @@ chorpy/
   * Date of Birth (`date_of_birth`) & dynamic Age (`age`)
   * Email (`email`) & Password (`password`)
 * **Backend Connection:** Triggers `supabase.auth.signUp` / `signInWithPassword`. The database trigger in `schema.sql` automatically populates the `public.profiles` table upon successful user creation.
-* **Navigation Trigger:** Redirects to `RoleScreen.tsx` upon initial profile creation.
+* **Navigation Trigger:** Redirects to role-gated navigation once authenticated.
 
-### 2. `mobile/src/screens/RoleScreen.tsx`
-* **File:** `mobile/src/screens/RoleScreen.tsx`
-* **Purpose:** Initial onboarding role selector to define the device node's role within the family.
-* **Options:**
-  * **Parent / Guardian Mode:** Provisions a new household Circle with a unique 6-digit pairing PIN, or lets secondary guardians join an existing Circle.
-  * **Child Mode:** Prompts the child to enter the household's 6-digit PIN to pair the physical device with the family circle.
-* **Backend Connection:** Interacts with `public.households` and updates the user's role (`'parent' | 'child'`) and `household_id` in `public.profiles`.
-
-### 3. `mobile/src/screens/ParentDashboard.tsx`
-* **File:** `mobile/src/screens/ParentDashboard.tsx`
+### 2. `mobile/src/screens/MyFamilyScreen.tsx` ("My Family Dashboard")
+* **File:** `mobile/src/screens/MyFamilyScreen.tsx`
 * **Purpose:** Guardian command center for monitoring household devices and approving chores.
 * **Key Features:**
   * **Circle Header:** Shows the household name and the unique 6-digit pairing PIN (`PIN: 482910`).
@@ -102,7 +94,7 @@ chorpy/
   * **Connected Devices:** Lists all paired child devices with their live lock status (`LOCKED` vs `UNLOCKED`).
 * **Realtime Sync:** Subscribes to `public.chores` and `public.devices` via Supabase Realtime to update status instantly when proof is submitted.
 
-### 4. `mobile/src/screens/ChildLockScreen.tsx`
+### 3. `mobile/src/screens/ChildLockScreen.tsx`
 * **File:** `mobile/src/screens/ChildLockScreen.tsx`
 * **Purpose:** The enforcement view presented to the child when mandatory chores are pending.
 * **Key Features:**
@@ -111,6 +103,26 @@ chorpy/
   * **Photo Proof Action:** Prompts child to launch the camera and capture proof of completion.
   * **Emergency SOS Override:** Unrestricted safety button allowing instant emergency phone calls or parent alerts.
 * **Native Android Target:** Designed to run inside a full-screen, non-dismissible hardware overlay window (`SYSTEM_ALERT_WINDOW`).
+
+### 4. `mobile/src/screens/SettingsScreen.tsx` ("Settings & Preferences")
+* **File:** `mobile/src/screens/SettingsScreen.tsx`
+* **Purpose:** User profile overview, household circle status, app/device wellbeing settings, and sign-out controls.
+* **Key Features:**
+  * **Profile & Account Overview:** Displays authenticated full name, email, role badge (`PARENT` / `CHILD`), phone, and age.
+  * **Household Circle Preferences:** Shows circle sync status, pairing PIN, and household identifier.
+  * **Device & Wellbeing Status:** Details hardware overlay (`SYSTEM_ALERT_WINDOW`), emergency SOS availability, and Supabase Realtime WebSocket health.
+  * **About Chorpy:** App version, ethos, and Chorpy the Maya mascot overview.
+  * **Sign Out Action:** Clean, accessible session revocation invoking `signOut()` from `AuthContext`.
+
+### 5. Role-Based Navigation Governance (RBAC)
+Navigation tabs and active routes are strictly governed by the authenticated user's role (`effectiveRole`):
+- **Parent (`role === 'parent'`):**
+  - Allowed Navigation Tabs: `HOME` (`'home'`), `MY FAMILY` (`'my_family'`), `SETTING` (`'settings'`).
+  - Permitted Screen Views: `HomeScreen.tsx`, `MyFamilyScreen.tsx`, `SettingsScreen.tsx`.
+- **Child (`role === 'child'`):**
+  - Allowed Navigation Tabs: `HOME` (`'home'`), `CHILD` (`'child'`), `SETTING` (`'settings'`).
+  - Permitted Screen Views: `HomeScreen.tsx`, `ChildLockScreen.tsx`, `SettingsScreen.tsx`.
+- **Active Route Guard:** An automated `useEffect` route guard verifies whether `currentScreen` is permitted under `effectiveRole`; if unauthorized, navigation safely resets to `'home'`.
 
 ---
 

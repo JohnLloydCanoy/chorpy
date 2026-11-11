@@ -2,7 +2,7 @@ import React from 'react';
 import { StyleSheet, Text, View, ScrollView, TouchableOpacity } from 'react-native';
 import { colors, spacing, borderRadius, typography } from '../theme';
 
-export default function ParentDashboard() {
+export default function MyFamilyScreen() {
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <View style={styles.header}>
