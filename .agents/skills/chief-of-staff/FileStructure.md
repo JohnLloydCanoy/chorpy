@@ -160,8 +160,17 @@ mobile/
 │   └── splash-icon.png                      # Native splash screen logo
 ├── src/
 │   ├── components/                          # Presentational, reusable atomic UI components
+│   │   ├── onboarding/                      # Multi-step Onboarding & Household Setup Components
+│   │   │   ├── OnboardingStep1Form.tsx      # Step 1: Account credentials, DOB, and entropy chips
+│   │   │   ├── OnboardingFamilyFork.tsx     # Step 2: Join existing family vs create circle decision
+│   │   │   ├── OnboardingJoinPin.tsx        # Step 2a: 6-digit numeric family PIN pairing input
+│   │   │   ├── OnboardingCreateHousehold.tsx# Step 2b: Household circle naming and family composition
+│   │   │   └── index.ts                     # Onboarding component export barrel
 │   │   ├── Button.tsx                       # Themed interactive button (variants: primary, secondary, danger)
 │   │   ├── Card.tsx                         # Elevated container component with theme border/shadow
+│   │   ├── DeveloperQuickPreview.tsx        # Quick role preview toolbar for development
+│   │   ├── PasswordEntropyChips.tsx         # Live visual security chips for password strength
+│   │   ├── RoleSelector.tsx                 # Parent/child role selection toggle
 │   │   └── index.ts                         # Component re-export barrel
 │   ├── context/                             # Scoped application state providers
 │   │   └── AuthContext.tsx                  # Global Supabase authentication and profile provider
@@ -172,7 +181,9 @@ mobile/
 │   ├── lib/                                 # External SDK initialization & platform shims
 │   │   └── supabase.ts                      # Supabase client singleton with AsyncStorage persistence
 │   ├── screens/                             # Screen views and application route containers
-│   │   ├── AuthScreen.tsx                   # User login and registration screen
+│   │   ├── AuthScreen.tsx                   # Auth coordinator screen (Login vs Onboarding)
+│   │   ├── LoginScreen.tsx                  # User authentication / sign in view
+│   │   ├── OnboardingScreen.tsx             # Multi-step registration and family setup gateway
 │   │   ├── ChildLockScreen.tsx              # Child kiosk / locked state enforcement and task proof screen
 │   │   ├── MyFamilyScreen.tsx               # Guardian chore management, child approval, and device control
 │   │   └── SettingsScreen.tsx               # Profile overview, household circle status, wellbeing & sign-out
@@ -205,8 +216,12 @@ Contains high-resolution visual branding assets:
 
 #### `mobile/src/components/`
 Atomic, reusable UI building blocks:
+- **`onboarding/`**: Multi-step onboarding components including `OnboardingStep1Form.tsx` (account credentials & validation), `OnboardingFamilyFork.tsx` (join vs create selection), `OnboardingJoinPin.tsx` (6-digit numeric family PIN input), and `OnboardingCreateHousehold.tsx` (household naming and family composition).
 - **`Button.tsx`**: Encapsulates accessibility guidelines (minimum 48dp touch target), loading spinners, and visual variants (`primary`, `secondary`, `accent`, `danger`, `outline`).
 - **`Card.tsx`**: Uniform container providing standard border radius, surface color, and shadows.
+- **`DeveloperQuickPreview.tsx`**: Development toolbar for rapid role testing.
+- **`PasswordEntropyChips.tsx`**: Live security chips for 8+ characters, uppercase, lowercase, and numbers.
+- **`RoleSelector.tsx`**: Account role selector (parent/child) with under-18 enforcement.
 - **`index.ts`**: Re-exports all shared components for clean modular imports.
 
 #### `mobile/src/context/`
@@ -225,7 +240,9 @@ Configuration for external libraries and platforms:
 
 #### `mobile/src/screens/`
 Screen-level views coordinating business hooks and presentational components:
-- **`AuthScreen.tsx`**: Handles login and sign-up with email and password, full name, phone number, and role selection.
+- **`AuthScreen.tsx`**: Auth coordinator switching between Login and Onboarding flows.
+- **`LoginScreen.tsx`**: Sign in view handling email/password authentication.
+- **`OnboardingScreen.tsx`**: Multi-step registration, credentials validation, and family setup gateway (Join with PIN or Create Household).
 - **`ChildLockScreen.tsx`**: Visual child lock enforcement mode. Displays lock status, assigned chores, and proof submission actions.
 - **`MyFamilyScreen.tsx`**: Guardian chore management, child approvals queue, household pairing PIN, and remote device lock controls.
 - **`SettingsScreen.tsx`**: User profile and account overview, household pairing and circle status, device wellbeing (hardware overlay status, emergency contact info), and account sign-out.
