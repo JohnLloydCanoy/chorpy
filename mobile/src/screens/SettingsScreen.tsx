@@ -139,7 +139,12 @@ export default function SettingsScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
-  contentContainer: { padding: spacing.md, paddingBottom: spacing.xxl },
+  contentContainer: {
+    width: '95%',
+    alignSelf: 'center',
+    paddingVertical: spacing.md,
+    paddingBottom: spacing.xxl,
+  },
   header: { marginBottom: spacing.md, marginTop: spacing.xs },
   headerTitle: { fontFamily: typography.fontFamily.mainBold, fontSize: typography.fontSizes.xl, color: colors.primary },
   headerSubtitle: { fontFamily: typography.fontFamily.secondary, fontSize: typography.fontSizes.sm, color: colors.textSecondary, marginTop: 2 },
