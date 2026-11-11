@@ -50,8 +50,29 @@ chorpy/
 │   │   │   └── useDeviceLock.ts# Device lock state watcher
 │   │   ├── lib/
 │   │   │   └── supabase.ts     # Supabase client initialization
+│   │   ├── components/         # Reusable UI & Onboarding Blocks
+│   │   │   ├── onboarding/     # Multi-step Onboarding & Setup Components
+│   │   │   │   ├── OnboardingStep1Form.tsx
+│   │   │   │   ├── OnboardingFamilyFork.tsx
+│   │   │   │   ├── OnboardingJoinPin.tsx
+│   │   │   │   ├── OnboardingCreateHousehold.tsx
+│   │   │   │   └── index.ts
+│   │   │   ├── Button.tsx
+│   │   │   ├── Card.tsx
+│   │   │   ├── DeveloperQuickPreview.tsx
+│   │   │   ├── PasswordEntropyChips.tsx
+│   │   │   └── RoleSelector.tsx
+│   │   ├── context/            # React Context providers (AuthContext)
+│   │   ├── hooks/              # Custom reactive hooks
+│   │   │   ├── useAuth.ts      # Authentication session & profile
+│   │   │   ├── useChores.ts    # Realtime chore synchronization
+│   │   │   └── useDeviceLock.ts# Device lock state watcher
+│   │   ├── lib/
+│   │   │   └── supabase.ts     # Supabase client initialization
 │   │   ├── screens/            # Core Screen Registry
-│   │   │   ├── AuthScreen.tsx       # Registration & login form
+│   │   │   ├── AuthScreen.tsx       # Auth coordinator (Login vs Onboarding)
+│   │   │   ├── LoginScreen.tsx      # Sign in credentials screen
+│   │   │   ├── OnboardingScreen.tsx # Multi-step account & family gateway
 │   │   │   ├── ChildLockScreen.tsx  # Non-dismissible lock & photo proof trigger
 │   │   │   ├── MyFamilyScreen.tsx   # Guardian dashboard, approvals & device status
 │   │   │   └── SettingsScreen.tsx   # Account overview, circle status, wellbeing & sign out
@@ -74,15 +95,19 @@ chorpy/
 
 ## 4. Core Screen Registry & Context
 
-### 1. `mobile/src/screens/AuthScreen.tsx`
-* **File:** `mobile/src/screens/AuthScreen.tsx`
-* **Purpose:** Handles user authentication (Sign Up / Sign In) via Supabase Auth.
-* **Form Inputs:**
-  * Full Name (`full_name`)
-  * Phone Number (`phone_number`)
-  * Date of Birth (`date_of_birth`) & dynamic Age (`age`)
-  * Email (`email`) & Password (`password`)
-* **Backend Connection:** Triggers `supabase.auth.signUp` / `signInWithPassword`. The database trigger in `schema.sql` automatically populates the `public.profiles` table upon successful user creation.
+### 1. `mobile/src/screens/AuthScreen.tsx` & `mobile/src/screens/OnboardingScreen.tsx`
+* **Files:** `mobile/src/screens/AuthScreen.tsx`, `mobile/src/screens/LoginScreen.tsx`, `mobile/src/screens/OnboardingScreen.tsx`
+* **Purpose:** Coordinates authentication and the multi-step onboarding & family setup flow.
+* **Onboarding Steps:**
+  * **Step 1: Account Details (`OnboardingStep1Form.tsx`):**
+    * Full Name, Email, Phone Number, Date of Birth (with dynamic age calculation), Role Selector (parent/child), Password with entropy chips, and Terms & Regulations agreement.
+  * **Step 2: Family Setup Gateway (`OnboardingFamilyFork.tsx`):**
+    * Fork asking "Do you already have a family?", routing to either joining an existing circle or creating a new household.
+  * **Step 2a: Join Family PIN (`OnboardingJoinPin.tsx`):**
+    * Validates and links user to an existing household using a 6-digit numeric pairing PIN.
+  * **Step 2b: Create Household Circle (`OnboardingCreateHousehold.tsx`):**
+    * Creates a new household circle with custom circle name, number of children, and number of co-parents.
+* **Backend Connection:** Triggers `supabase.auth.signUp` / `signInWithPassword` and `householdService` (`createHousehold` or `joinHouseholdWithPin`). The database trigger in `schema.sql` automatically populates the `public.profiles` table upon successful user creation.
 * **Navigation Trigger:** Redirects to role-gated navigation once authenticated.
 
 ### 2. `mobile/src/screens/MyFamilyScreen.tsx` ("My Family Dashboard")
