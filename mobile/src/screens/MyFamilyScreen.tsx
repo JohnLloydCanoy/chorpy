@@ -4,7 +4,7 @@ import { colors, spacing, borderRadius, typography } from '../theme';
 
 export default function MyFamilyScreen() {
   return (
-    <ScrollView contentContainerStyle={styles.container}>
+    <ScrollView style={styles.screenWrapper} contentContainerStyle={styles.container}>
       <View style={styles.header}>
         <View>
           <Text style={styles.greeting}>Hello, Parent! 👋</Text>
@@ -52,9 +52,14 @@ export default function MyFamilyScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    padding: spacing.md,
+  screenWrapper: {
+    flex: 1,
     backgroundColor: colors.background,
+  },
+  container: {
+    width: '95%',
+    alignSelf: 'center',
+    paddingVertical: spacing.md,
     flexGrow: 1,
   },
   header: {
