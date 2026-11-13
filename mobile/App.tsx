@@ -161,7 +161,7 @@ function AppContent() {
             onNavigateToFamily={() => setCurrentScreen('my_family')}
           />
         )}
-        {currentScreen === 'my_family' && <MyFamilyScreen />}
+        {currentScreen === 'my_family' && <MyFamilyScreen role={effectiveRole} />}
         {currentScreen === 'child' && effectiveRole === 'child' && <ChildLockScreen />}
         {currentScreen === 'settings' && <SettingsScreen />}
       </View>
