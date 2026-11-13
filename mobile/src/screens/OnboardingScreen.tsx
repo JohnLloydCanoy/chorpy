@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { StyleSheet, Text, View, ScrollView, Image } from 'react-native';
 import { authService } from '../services/authService';
 import { householdService } from '../services/householdService';
+import { useAuthContext } from '../context/AuthContext';
 import {
   OnboardingStep1Form,
   Step1FormData,
@@ -21,9 +22,10 @@ interface OnboardingScreenProps {
 type OnboardingStep = 1 | 2 | 'join' | 'create';
 
 export default function OnboardingScreen({ onNavigateToLogin, onDemoLogin }: OnboardingScreenProps) {
+  const { refreshProfile } = useAuthContext();
   const [step, setStep] = useState<OnboardingStep>(1);
   const [step1Data, setStep1Data] = useState<Step1FormData>({
-    fullName: '', email: '', phone: '', dob: '', role: 'parent', password: '',
+    fullName: '', email: '', phone: '', dob: '', age: null, role: 'parent', password: '',
   });
   const [pin, setPin] = useState('');
   const [householdName, setHouseholdName] = useState('');
@@ -53,13 +55,15 @@ export default function OnboardingScreen({ onNavigateToLogin, onDemoLogin }: Onb
         fullName: step1Data.fullName,
         phoneNumber: step1Data.phone || undefined,
         dateOfBirth: step1Data.dob || undefined,
+        age: step1Data.age ?? undefined,
         role: step1Data.role,
       });
       const userId = authRes.user?.id;
-      if (!userId) {
+      if (!userId || !authRes.session) {
         throw new Error('Registration completed. Please verify your email before logging in.');
       }
       await action(userId);
+      await refreshProfile();
     } catch (err: any) {
       setError(err?.message || fallbackMsg);
     } finally {
@@ -69,10 +73,15 @@ export default function OnboardingScreen({ onNavigateToLogin, onDemoLogin }: Onb
 
   async function handleJoinSubmit() {
     if (pin.trim().length !== 6) return setError('Please enter a valid 6-digit Family PIN.');
-    await householdService.verifyPin(pin).catch((err) => {
+    setError(null);
+    setLoading(true);
+    try {
+      await householdService.verifyPin(pin);
+    } catch (err: any) {
       setError(err?.message || 'Invalid or expired Family PIN.');
-      throw err;
-    });
+      setLoading(false);
+      return;
+    }
     await registerAndLink(
       (userId) => householdService.joinHouseholdWithPin(pin, userId),
       'Failed to join family. Please check the PIN and try again.'
