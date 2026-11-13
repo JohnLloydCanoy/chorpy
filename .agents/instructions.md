@@ -10,48 +10,45 @@
 - **Key Workflow:**
   1. **Parent/Guardian:** Creates chores, sets requirements, and reviews photo proof submissions.
   2. **Child:** Completes chores to earn screen access.
-  3. **Hardware Enforcement:** If a chore is pending, the child's Android device screen is locked via `SYSTEM_ALERT_WINDOW`.
-  4. **Verification & Unlock:** Child submits photo proof; once approved by an adult, the lock dissolves via Supabase Realtime WebSockets.
-  5. **Safety Anchor:** Emergency SOS override is always available on the locked screen.
+  3. **Hardware Enforcement:** When a chore is pending, the child's Android device screen is designed to lock via `SYSTEM_ALERT_WINDOW` *(native module planned)*.
+  4. **Verification & Unlock:** Child submits photo proof; once approved by an adult, the lock dissolves via Supabase Realtime WebSockets *(camera capture & proof review UI in development)*.
+  5. **Safety Anchor:** Emergency SOS override remains accessible on the locked screen *(planned)*.
 
 ---
 
 ## 2. Technology Stack
-- **Frontend / Mobile:** React Native with Expo SDK 51+ (TypeScript)
-- **Backend & Database:** Supabase Cloud (PostgreSQL, Supabase Auth [Email+Password, Confirmation OFF], Realtime WebSockets, Storage [Bucket Pending])
-- **Native Android Layer:** Expo Config Plugins, `SYSTEM_ALERT_WINDOW` permission, Foreground Services
-- **Navigation:** React Native Navigation / Expo Router
-- **State Management:** React Context (`AuthContext`) and custom React hooks
+- **Frontend / Mobile:** React Native `0.88.0` with Expo SDK 58 (`~58.0.17`), React `19.3.0`, and strict TypeScript (`~6.0.3`)
+- **Backend & Database:** Supabase Cloud (`@supabase/supabase-js` `^2.118.0` — PostgreSQL, Supabase Auth [Email+Password, Confirmation OFF], Realtime WebSockets, Storage [Bucket Pending])
+- **Native Android Layer:** Continuous Native Generation (CNG) via `mobile/app.json` (`expo-font`, `@react-native-community/datetimepicker` active; `SYSTEM_ALERT_WINDOW` & Foreground Services planned)
+- **Navigation:** State-driven RBAC tab navigator and active route guard in `mobile/App.tsx`
+- **State Management:** React Context (`AuthContext`) and custom reactive hooks (`useAuth`, `useChores`, `useDeviceLock`, `useHouseholdMembers`)
 
 ---
 
 ## 3. Project Structure & Architecture
-Follow this directory convention:
+Follow this directory convention (verified against repository ground truth):
 
 ```text
 chorpy/
 ├── .agents/                    # Agent rules, instructions, and modular skills
+│   ├── rules/                  # Governance rules (global-rule, ui, ux, security, testing-quality)
+│   ├── skills/                 # Chief of Staff & Design skills + audit scripts
 │   ├── instructions.md         # Master rules, architecture, and screen registry
 │   └── agentProtocol.md        # Agent activation and command cheat sheet
 ├── database/                   # SQL schemas, RLS policies, and database migrations
 │   └── schema.sql              # Supabase table definitions, triggers, and realtime publications
-├── mobile/                     # React Native / Expo application
-│   ├── assets/                 # Images, icons, and static fonts
+├── mobile/                     # React Native / Expo application (SDK 58)
+│   ├── assets/                 # Images, icons, and adaptive Android assets
 │   ├── src/
-│   │   ├── components/         # Reusable UI components
-│   │   │   ├── Button.tsx      # Branded action buttons
-│   │   │   ├── Card.tsx        # Styled card containers
-│   │   │   └── index.ts
-│   │   ├── context/            # React Context providers
-│   │   │   └── AuthContext.tsx # User session and authentication state
-│   │   ├── hooks/              # Custom React hooks
-│   │   │   ├── useAuth.ts      # Authentication hook
-│   │   │   ├── useChores.ts    # Real-time chore subscriptions
-│   │   │   └── useDeviceLock.ts# Device lock state watcher
-│   │   ├── lib/
-│   │   │   └── supabase.ts     # Supabase client initialization
-│   │   ├── components/         # Reusable UI & Onboarding Blocks
+│   │   ├── components/         # Reusable UI, Family & Onboarding Blocks
+│   │   │   ├── family/         # Chore creation & virtualized table components
+│   │   │   │   ├── AddChoreForm.tsx
+│   │   │   │   ├── ChildMemberPicker.tsx
+│   │   │   │   ├── ChoreRow.tsx
+│   │   │   │   └── ChoreTable.tsx
 │   │   │   ├── onboarding/     # Multi-step Onboarding & Setup Components
+│   │   │   │   ├── DobWheelPicker.tsx
+│   │   │   │   ├── WheelColumn.tsx
 │   │   │   │   ├── OnboardingStep1Form.tsx
 │   │   │   │   ├── OnboardingFamilyFork.tsx
 │   │   │   │   ├── OnboardingJoinPin.tsx
@@ -61,113 +58,114 @@ chorpy/
 │   │   │   ├── Card.tsx
 │   │   │   ├── DeveloperQuickPreview.tsx
 │   │   │   ├── PasswordEntropyChips.tsx
-│   │   │   └── RoleSelector.tsx
-│   │   ├── context/            # React Context providers (AuthContext)
+│   │   │   ├── RoleSelector.tsx
+│   │   │   └── index.ts
+│   │   ├── context/            # React Context providers
+│   │   │   └── AuthContext.tsx # User session, profile hydration, and sign-out
 │   │   ├── hooks/              # Custom reactive hooks
-│   │   │   ├── useAuth.ts      # Authentication session & profile
-│   │   │   ├── useChores.ts    # Realtime chore synchronization
-│   │   │   └── useDeviceLock.ts# Device lock state watcher
+│   │   │   ├── useAuth.ts              # Authentication session, role flags & profile
+│   │   │   ├── useChores.ts            # Realtime chore sync, optimistic creation & rollback
+│   │   │   ├── useDeviceLock.ts        # Realtime device lock state watcher
+│   │   │   └── useHouseholdMembers.ts  # Household member fetching & retry state
 │   │   ├── lib/
-│   │   │   └── supabase.ts     # Supabase client initialization
+│   │   │   └── supabase.ts     # Supabase client singleton with AsyncStorage persistence
 │   │   ├── screens/            # Core Screen Registry
+│   │   │   ├── AppLoaderScreen.tsx  # Session bootstrap & retry loader
 │   │   │   ├── AuthScreen.tsx       # Auth coordinator (Login vs Onboarding)
-│   │   │   ├── LoginScreen.tsx      # Sign in credentials screen
-│   │   │   ├── OnboardingScreen.tsx # Multi-step account & family gateway
-│   │   │   ├── ChildLockScreen.tsx  # Non-dismissible lock & photo proof trigger
-│   │   │   ├── MyFamilyScreen.tsx   # Guardian dashboard, approvals & device status
+│   │   │   ├── LoginScreen.tsx      # Sign in credentials screen + quick demo preview
+│   │   │   ├── OnboardingScreen.tsx # 2-step account & family circle setup
+│   │   │   ├── HomeScreen.tsx       # Hero card with Chorpy mascot & Manage My Family CTA
+│   │   │   ├── MyFamilyScreen.tsx   # Chore creation, child assignment & virtualized chore table
+│   │   │   ├── ChildLockScreen.tsx  # Child lock UI scaffold (camera & overlay wiring planned)
 │   │   │   └── SettingsScreen.tsx   # Account overview, circle status, wellbeing & sign out
 │   │   ├── services/           # Pure Supabase API service layer
-│   │   │   ├── authService.ts       # Auth sign-up, sign-in, and profile operations
-│   │   │   ├── choreService.ts      # Chore CRUD and status updates
+│   │   │   ├── authService.ts       # Auth sign-up, sign-in, sign-out & profile lookup
+│   │   │   ├── choreService.ts      # Chore CRUD and status transitions
 │   │   │   ├── deviceService.ts     # Device registration and lock updates
 │   │   │   └── householdService.ts  # Household circle provisioning and PIN verification
 │   │   ├── theme/              # Central design tokens
-│   │   │   └── index.ts        # Colors (#38BDF8, #FF6B4A, #0F172A), spacing, typography
-│   │   └── types/              # TypeScript types and interfaces
-│   │       └── index.ts        # Chore, Profile, Device, Household types
-│   ├── App.tsx                 # Root application entry & preview navigator
-│   ├── app.json                # Expo configuration and native plugins
+│   │   │   └── index.ts        # Colors (#1B365D, #60C1E5, #0F172A), spacing, Fredoka + Poppins
+│   │   ├── types/              # TypeScript types and interfaces
+│   │   │   └── index.ts        # Chore, Profile, Device, Household types
+│   │   └── utils/              # Validation & input formatting helpers
+│   │       ├── validation.ts           # Email regex, entropy scoring, E.164 phone, DOB age calculation
+│   │       └── onboardingValidation.ts # Editable age validation & Step 1 submission checks
+│   ├── App.tsx                 # Root application entry, font loader & RBAC navigator
+│   ├── app.json                # Expo configuration and CNG plugins
+│   ├── eslint.config.js        # Expo ESLint configuration
 │   └── package.json
-└── server/                     # Backend microservices (if applicable)
+└── server/                     # Reserved backend microservices directory
 ```
 
 ---
 
 ## 4. Core Screen Registry & Context
 
-### 1. `mobile/src/screens/AuthScreen.tsx` & `mobile/src/screens/OnboardingScreen.tsx`
-* **Files:** `mobile/src/screens/AuthScreen.tsx`, `mobile/src/screens/LoginScreen.tsx`, `mobile/src/screens/OnboardingScreen.tsx`
-* **Purpose:** Coordinates authentication and the multi-step onboarding & family setup flow.
+### 1. `mobile/src/screens/AppLoaderScreen.tsx`, `AuthScreen.tsx`, `LoginScreen.tsx` & `OnboardingScreen.tsx`
+* **Purpose:** Coordinates session bootstrap, sign-in, and the 2-step onboarding & family setup flow.
 * **Onboarding Steps:**
-  * **Step 1: Account Details (`OnboardingStep1Form.tsx`):**
-    * Full Name, Email, Phone Number, Date of Birth (with dynamic age calculation), Role Selector (parent/child), Password with entropy chips, and Terms & Regulations agreement.
-  * **Step 2: Family Setup Gateway (`OnboardingFamilyFork.tsx`):**
+  * **Step 1 (`OnboardingStep1Form.tsx`):**
+    * Full Name (title-cased on blur), Email (RFC 5322 validation), Phone Number (E.164 formatting preview), Date of Birth via **`DobWheelPicker.tsx`** (`@react-native-community/datetimepicker` spinner on Android/iOS + virtualized 3-column **`WheelColumn.tsx`** on Web), editable **Age** input autofilled from DOB (`onboardingValidation.ts`), **`RoleSelector.tsx`** with `< 18` Parent disablement, **`PasswordEntropyChips.tsx`**, and Terms & Regulations checkbox.
+  * **Step 2 (`OnboardingFamilyFork.tsx`):**
     * Fork asking "Do you already have a family?", routing to either joining an existing circle or creating a new household.
-  * **Step 2a: Join Family PIN (`OnboardingJoinPin.tsx`):**
-    * Validates and links user to an existing household using a 6-digit numeric pairing PIN.
-  * **Step 2b: Create Household Circle (`OnboardingCreateHousehold.tsx`):**
-    * Creates a new household circle with custom circle name, number of children, and number of co-parents.
-* **Backend Connection:** Triggers `supabase.auth.signUp` / `signInWithPassword` and `householdService` (`createHousehold` or `joinHouseholdWithPin`). The database trigger in `schema.sql` automatically populates the `public.profiles` table upon successful user creation.
-* **Navigation Trigger:** Redirects to role-gated navigation once authenticated.
+  * **Step 2a (`OnboardingJoinPin.tsx`):**
+    * Validates and links user to an existing household using a 6-digit numeric pairing PIN (`householdService.verifyPin` + `joinHouseholdWithPin`).
+  * **Step 2b (`OnboardingCreateHousehold.tsx`):**
+    * Creates a new household circle with custom circle name, number of children, and number of co-parents (`householdService.createHousehold`).
+* **Backend Connection:** Calls `authService.signUp()` passing `fullName`, `phoneNumber`, `dateOfBirth`, `age`, and `role`, followed by `householdService`. The `handle_new_user()` trigger in `database/schema.sql` populates `public.profiles`.
 
-### 2. `mobile/src/screens/MyFamilyScreen.tsx` ("My Family Dashboard")
-* **File:** `mobile/src/screens/MyFamilyScreen.tsx`
-* **Purpose:** Guardian command center for monitoring household devices and approving chores.
+### 2. `mobile/src/screens/HomeScreen.tsx`
+* **Purpose:** Primary landing dashboard after authentication.
+* **Key Features:** Displays the branded Chorpy Hero Card (`Background-of-Primary-Color.png` + Chorpy mascot) and the full-width `Manage My Family` CTA routing to `my_family`.
+
+### 3. `mobile/src/screens/MyFamilyScreen.tsx` ("My Family Dashboard")
+* **Purpose:** Household chore assignment and real-time chore tracking center.
 * **Key Features:**
-  * **Circle Header:** Shows the household name and the unique 6-digit pairing PIN (`PIN: 482910`).
-  * **Pending Approvals Queue:** Displays photo proof submissions from children with "Approve & Unlock" and "Reject" actions.
-  * **Connected Devices:** Lists all paired child devices with their live lock status (`LOCKED` vs `UNLOCKED`).
-* **Realtime Sync:** Subscribes to `public.chores` and `public.devices` via Supabase Realtime to update status instantly when proof is submitted.
+  * **Dynamic Greeting:** Greets the authenticated user via `AuthContext` (`full_name` or email prefix fallback).
+  * **RBAC-Gated Chore Creation:** Parents (`effectiveRole === 'parent'`) see the `"Add Chore"` toggle opening **`AddChoreForm.tsx`** with **`ChildMemberPicker.tsx`** (populated by `useHouseholdMembers`).
+  * **Virtualized Chore List:** Renders **`ChoreTable.tsx`** and **`ChoreRow.tsx`** (`FlatList` with `getItemLayout` and `React.memo`) backed by **`useChores`** with optimistic creation, rollback on failure, all 5 UI states (Empty, Loading, Error, Partial, Populated), Supabase Realtime synchronization, and role-based filtering (parents see all household chores; children see chores where `assigned_child_id === user.id`).
+  * **Planned:** Live household name/PIN lookup, guardian proof approval/rejection controls, and connected child device telemetry cards.
 
-### 3. `mobile/src/screens/ChildLockScreen.tsx`
-* **File:** `mobile/src/screens/ChildLockScreen.tsx`
-* **Purpose:** The enforcement view presented to the child when mandatory chores are pending.
-* **Key Features:**
-  * **Lock Header:** High-contrast dark container (`#0F172A`) signaling a locked device state.
-  * **Active Chore Card:** Displays the current pending task (e.g., *"🧹 Clean Computer Desk"*), instructions, and status badge.
-  * **Photo Proof Action:** Prompts child to launch the camera and capture proof of completion.
-  * **Emergency SOS Override:** Unrestricted safety button allowing instant emergency phone calls or parent alerts.
-* **Native Android Target:** Designed to run inside a full-screen, non-dismissible hardware overlay window (`SYSTEM_ALERT_WINDOW`).
+### 4. `mobile/src/screens/ChildLockScreen.tsx`
+* **Purpose:** The enforcement view scaffold presented to the child when mandatory chores are pending.
+* **Current State:** High-contrast dark UI scaffold (`colors.surfaceDark` `#0F172A`) showing a placeholder pending chore card and unhooked `"Take Photo Proof"` button.
+* **Planned:** Wiring to `useDeviceLock` and `useChores`, `expo-camera` proof capture & upload, Emergency SOS trigger (`tel:` + panic broadcast), and native Android `SYSTEM_ALERT_WINDOW` overlay inflation.
 
-### 4. `mobile/src/screens/SettingsScreen.tsx` ("Settings & Preferences")
-* **File:** `mobile/src/screens/SettingsScreen.tsx`
-* **Purpose:** User profile overview, household circle status, app/device wellbeing settings, and sign-out controls.
-* **Key Features:**
-  * **Profile & Account Overview:** Displays authenticated full name, email, role badge (`PARENT` / `CHILD`), phone, and age.
-  * **Household Circle Preferences:** Shows circle sync status, pairing PIN, and household identifier.
-  * **Device & Wellbeing Status:** Details hardware overlay (`SYSTEM_ALERT_WINDOW`), emergency SOS availability, and Supabase Realtime WebSocket health.
-  * **About Chorpy:** App version, ethos, and Chorpy the Maya mascot overview.
-  * **Sign Out Action:** Clean, accessible session revocation invoking `signOut()` from `AuthContext`.
+### 5. `mobile/src/screens/SettingsScreen.tsx` ("Settings & Preferences")
+* **Purpose:** User profile overview, household circle info, app/device wellbeing overview, and sign-out controls.
+* **Key Features:** Displays authenticated name, email, role badge (`PARENT` / `CHILD`), phone, age, household info, wellbeing overview, and `Sign Out of Chorpy` invoking `signOut()` from `AuthContext`.
 
-### 5. Role-Based Navigation Governance (RBAC)
-Navigation tabs and active routes are strictly governed by the authenticated user's role (`effectiveRole`):
+### 6. Role-Based Navigation Governance (RBAC)
+Navigation tabs and active routes in `mobile/App.tsx` are governed by `effectiveRole` (`profile?.role || demoRole || 'parent'`):
 - **Parent (`role === 'parent'`):**
   - Allowed Navigation Tabs: `HOME` (`'home'`), `MY FAMILY` (`'my_family'`), `SETTING` (`'settings'`).
   - Permitted Screen Views: `HomeScreen.tsx`, `MyFamilyScreen.tsx`, `SettingsScreen.tsx`.
 - **Child (`role === 'child'`):**
-  - Allowed Navigation Tabs: `HOME` (`'home'`), `CHILD` (`'child'`), `SETTING` (`'settings'`).
-  - Permitted Screen Views: `HomeScreen.tsx`, `ChildLockScreen.tsx`, `SettingsScreen.tsx`.
-- **Active Route Guard:** An automated `useEffect` route guard verifies whether `currentScreen` is permitted under `effectiveRole`; if unauthorized, navigation safely resets to `'home'`.
+  - Allowed Navigation Tabs: `HOME` (`'home'`), `MY FAMILY` (`'my_family'`), `CHILD` (`'child'`), `SETTING` (`'settings'`).
+  - Permitted Screen Views: `HomeScreen.tsx`, `MyFamilyScreen.tsx`, `ChildLockScreen.tsx`, `SettingsScreen.tsx`.
+- **Active Route Guard:** A `useEffect` guard in `mobile/App.tsx` checks whether `currentScreen` is permitted under `effectiveRole`; if unauthorized, navigation resets to `'home'`.
 
 ---
 
 ## 5. Design & Branding Guidelines
-- **Palette:**
-  - `Primary / Sky Blue`: `#38BDF8` (Headers, active tabs, buttons)
-  - `Accent / Coral Orange`: `#FF6B4A` (Action badges, alerts, unlock CTAs)
-  - `Dark Neutral / Slate Navy`: `#0F172A` (Headings, primary text, lock screen background)
-  - `Surface / Cloud White`: `#F8FAFC` (Card surfaces, screen backgrounds)
+- **Canonical Tokens (`mobile/src/theme/index.ts`):**
+  - `primary` (**Navy Blue**): `#1B365D` (Headers, active buttons, focus, titles)
+  - `secondary` / `accent` (**Light Sky / Cyan**): `#60C1E5` (Call-to-actions, highlights, secondary accent)
+  - `success`: `#16A34A` | `warning`: `#F59E0B` | `danger`: `#DC2626`
+  - `background` (**Cloud White**): `#F8FAFC` | `surface` (**Pure White**): `#FFFFFF`
+  - `surfaceDark` / `text` (**Slate Navy**): `#0F172A` (Child Lock Screen dark surface & primary headings)
+  - **Typography:** `Fredoka` (`Fredoka_400Regular`, `Fredoka_600SemiBold`, `Fredoka_700Bold`) and `Poppins` (`Poppins_400Regular`, `Poppins_500Medium`, `Poppins_600SemiBold`, `Poppins_700Bold`)
 - **Mascot Persona:** *Chorpy the Maya* (Eurasian Tree Sparrow)
   - Use playful, encouraging messages during unlocks and chore completions.
-  - Maintain a clean, high-contrast, child-friendly yet modern interface.
+  - Maintain a clean, high-contrast, child-friendly yet modern interface without raw emojis in production UI chrome (`ui.md` #19).
 
 ---
 
 ## 6. Coding Standards & Conventions
 - **Language:** TypeScript with strict type checking enabled.
-- **Components:** Functional components using React hooks (`useState`, `useEffect`, `useCallback`, `useMemo`).
+- **Components:** Functional components using React hooks (`useState`, `useEffect`, `useCallback`, `useMemo`) and `React.memo` for list rows/cards.
 - **Styling:** React Native `StyleSheet.create()`; reference tokens from `src/theme/index.ts` instead of hardcoded hex values.
-- **Service Layer:** Keep UI screens clean by delegating all Supabase queries, mutations, and realtime listeners to `src/services/`.
+- **Service Layer:** Keep UI screens clean by delegating all Supabase queries, mutations, and realtime listeners to `src/services/` and `src/hooks/`.
 - **Status Types:** Chore statuses must adhere strictly to:
   ```typescript
   type ChoreStatus = 'pending' | 'awaiting_approval' | 'approved' | 'rejected';
@@ -189,8 +187,12 @@ Before marking any feature or bugfix as complete:
    ```bash
    cd mobile && npx tsc --noEmit
    ```
-2. Run linter:
+2. Run Expo & React Native standards audit:
+   ```bash
+   cd mobile && npm run lint:standards
+   ```
+3. Run linter:
    ```bash
    cd mobile && npx expo lint
    ```
-3. Ensure no regressions or broken imports exist.
+4. Ensure no regressions or broken imports exist.
