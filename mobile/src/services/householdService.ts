@@ -1,59 +1,81 @@
 import { supabase } from '../lib/supabase';
 import { Household, Profile } from '../types';
 
+export interface CreateHouseholdMetadata {
+  numChildren?: number;
+  numCoParents?: number;
+}
+
+const PIN_PATTERN = /^\d{6}$/;
+
 export const householdService = {
-  // Generate random 6-digit alphanumeric PIN
-  generatePin(): string {
-    return Math.floor(100000 + Math.random() * 900000).toString();
-  },
-
-  // Parent creates a new household Circle
-  async createHousehold(name: string, parentUserId: string): Promise<Household> {
-    const pin = this.generatePin();
-
-    const { data: household, error: householdError } = await supabase
-      .from('households')
-      .insert({
-        name,
-        pairing_pin: pin,
-      })
-      .select()
-      .single();
-
-    if (householdError) throw householdError;
-
-    // Link parent profile to newly created household
-    const { error: profileError } = await supabase
-      .from('profiles')
-      .update({ household_id: household.id })
-      .eq('id', parentUserId);
-
-    if (profileError) throw profileError;
-
-    return household as Household;
-  },
-
-  // Child joins a household using the 6-digit pairing PIN
-  async joinHouseholdWithPin(pin: string, childUserId: string): Promise<Household> {
-    const { data: household, error: findError } = await supabase
-      .from('households')
-      .select('*')
-      .eq('pairing_pin', pin.trim())
-      .single();
-
-    if (findError || !household) {
+  // Verify whether a 6-digit PIN is active (not expired) prior to account signup
+  async verifyPin(pin: string): Promise<boolean> {
+    const trimmed = pin.trim();
+    if (!PIN_PATTERN.test(trimmed)) {
       throw new Error('Invalid or expired Family PIN.');
     }
 
-    // Link child profile to the found household
-    const { error: updateError } = await supabase
-      .from('profiles')
-      .update({ household_id: household.id })
-      .eq('id', childUserId);
+    const { data, error } = await supabase.rpc('verify_household_pin', {
+      p_pin: trimmed,
+    });
 
-    if (updateError) throw updateError;
+    if (error || !data) {
+      throw new Error('Invalid or expired Family PIN.');
+    }
 
-    return household as Household;
+    return true;
+  },
+
+  // Parent creates a new household Circle with a 30-minute TTL PIN via server RPC
+  async createHousehold(
+    name: string,
+    _parentUserId: string,
+    _metadata?: CreateHouseholdMetadata
+  ): Promise<Household> {
+    const { data, error } = await supabase.rpc('create_household_with_pin', {
+      p_name: name.trim(),
+    });
+
+    if (error || !data) {
+      throw new Error(error?.message || 'Failed to create family circle.');
+    }
+
+    return data as Household;
+  },
+
+  // Member joins an active household using a non-expired 6-digit pairing PIN
+  async joinHouseholdWithPin(pin: string, _childUserId: string): Promise<Household> {
+    const trimmed = pin.trim();
+    if (!PIN_PATTERN.test(trimmed)) {
+      throw new Error('Invalid or expired Family PIN.');
+    }
+
+    const { data, error } = await supabase.rpc('join_household_with_pin', {
+      p_pin: trimmed,
+    });
+
+    if (error || !data) {
+      throw new Error(error?.message || 'Invalid or expired Family PIN.');
+    }
+
+    return data as Household;
+  },
+
+  // Fetch the authenticated member's linked household + server clock timestamp
+  async getMyHousehold(): Promise<Household | null> {
+    const { data, error } = await supabase.rpc('get_my_household');
+    if (error) throw error;
+    return (data as Household | null) ?? null;
+  },
+
+  // Parent regenerates the household pairing PIN with a fresh 30-minute TTL
+  async regeneratePin(): Promise<Household> {
+    const { data, error } = await supabase.rpc('regenerate_household_pin');
+    if (error || !data) {
+      throw new Error(error?.message || 'Failed to regenerate Family PIN.');
+    }
+    return data as Household;
   },
 
   // List all members of a household

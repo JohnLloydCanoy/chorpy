@@ -8,16 +8,33 @@ import { AuthProvider, useAuthContext } from './src/context/AuthContext';
 import AppLoaderScreen from './src/screens/AppLoaderScreen';
 import AuthScreen from './src/screens/AuthScreen';
 import HomeScreen from './src/screens/HomeScreen';
-import RoleScreen from './src/screens/RoleScreen';
-import ParentDashboard from './src/screens/ParentDashboard';
+import MyFamilyScreen from './src/screens/MyFamilyScreen';
 import ChildLockScreen from './src/screens/ChildLockScreen';
+import SettingsScreen from './src/screens/SettingsScreen';
 import { colors, spacing, borderRadius, typography } from './src/theme';
 
 const primaryBgImage = require('./assets/Background-of-Primary-Color.png');
 
-// Navigation Screen Registry (Auth removed from navigation per requirement)
-type ScreenName = 'home' | 'role' | 'parent' | 'child';
-const NAV_TABS: readonly ScreenName[] = ['home', 'role', 'parent', 'child'];
+// Navigation Screen Registry with Role-Based Access Control (RBAC)
+type ScreenName = 'home' | 'my_family' | 'child' | 'settings';
+
+interface NavTabItem {
+  id: ScreenName;
+  label: string;
+}
+
+const PARENT_NAV_TABS: readonly NavTabItem[] = [
+  { id: 'home', label: 'HOME' },
+  { id: 'my_family', label: 'MY FAMILY' },
+  { id: 'settings', label: 'SETTING' },
+];
+
+const CHILD_NAV_TABS: readonly NavTabItem[] = [
+  { id: 'home', label: 'HOME' },
+  { id: 'my_family', label: 'MY FAMILY' },
+  { id: 'child', label: 'CHILD' },
+  { id: 'settings', label: 'SETTING' },
+];
 
 function AppContent() {
   const { user, profile, loading, signOut } = useAuthContext();
@@ -25,6 +42,8 @@ function AppContent() {
   const [dbStatus, setDbStatus] = useState<'checking' | 'connected' | 'error'>('checking');
   const [statusMessage, setStatusMessage] = useState('Connecting to Supabase...');
   const [demoRole, setDemoRole] = useState<'parent' | 'child' | null>(null);
+
+  const effectiveRole = profile?.role || demoRole || 'parent';
 
   useEffect(() => {
     async function testConnection() {
@@ -46,6 +65,17 @@ function AppContent() {
     testConnection();
   }, []);
 
+  // Active route guard: reset to 'home' if currentScreen is not permitted for effectiveRole
+  useEffect(() => {
+    const allowedScreens: ScreenName[] =
+      effectiveRole === 'parent'
+        ? ['home', 'my_family', 'settings']
+        : ['home', 'my_family', 'child', 'settings'];
+    if (!allowedScreens.includes(currentScreen)) {
+      setCurrentScreen('home');
+    }
+  }, [effectiveRole, currentScreen]);
+
   // 1. Initial App Loader Screen with "Getting Data..." placeholder
   if (loading) {
     return <AppLoaderScreen message="Getting Data..." subMessage="Verifying session with Supabase Cloud..." />;
@@ -62,8 +92,8 @@ function AppContent() {
     );
   }
 
-  // 3. Authenticated: Render Home / Feature views with clean navigation
-  const effectiveRole = profile?.role || demoRole || 'parent';
+  // 3. Authenticated: Render Home / Feature views with clean RBAC navigation
+  const visibleTabs = effectiveRole === 'parent' ? PARENT_NAV_TABS : CHILD_NAV_TABS;
 
   async function handleSignOut() {
     setDemoRole(null);
@@ -94,14 +124,14 @@ function AppContent() {
         </TouchableOpacity>
       </View>
 
-      {/* Screen Preview Navigation Bar (Auth removed) */}
+      {/* Dynamic RBAC Navigation Bar */}
       <View style={styles.navBar}>
-        {NAV_TABS.map((tab) => {
-          const isActive = currentScreen === tab;
+        {visibleTabs.map((tab) => {
+          const isActive = currentScreen === tab.id;
           return (
             <TouchableOpacity
-              key={tab}
-              onPress={() => setCurrentScreen(tab)}
+              key={tab.id}
+              onPress={() => setCurrentScreen(tab.id)}
               style={[styles.navButton, isActive && styles.navButtonActive]}
               accessibilityRole="tab"
               accessibilityState={{ selected: isActive }}
@@ -114,25 +144,26 @@ function AppContent() {
                 />
               )}
               <Text style={[styles.navButtonText, isActive && styles.navButtonTextActive]}>
-                {tab.toUpperCase()}
+                {tab.label}
               </Text>
             </TouchableOpacity>
           );
         })}
       </View>
 
-      {/* Main Screen Content */}
+      {/* Main Screen Content with Strict RBAC Guards */}
       <View style={styles.content}>
         {currentScreen === 'home' && (
           <HomeScreen
             role={effectiveRole}
             dbStatus={dbStatus}
             statusMessage={statusMessage}
+            onNavigateToFamily={() => setCurrentScreen('my_family')}
           />
         )}
-        {currentScreen === 'role' && <RoleScreen />}
-        {currentScreen === 'parent' && <ParentDashboard />}
-        {currentScreen === 'child' && <ChildLockScreen />}
+        {currentScreen === 'my_family' && <MyFamilyScreen role={effectiveRole} />}
+        {currentScreen === 'child' && effectiveRole === 'child' && <ChildLockScreen />}
+        {currentScreen === 'settings' && <SettingsScreen />}
       </View>
 
       <StatusBar style="dark" />
@@ -158,20 +189,14 @@ export default function App() {
 }
 
 const styles = StyleSheet.create({
-  authSafeArea: {
-    flex: 1,
-    backgroundColor: 'transparent',
-  },
-  safeArea: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
+  authSafeArea: { flex: 1, backgroundColor: 'transparent' },
+  safeArea: { flex: 1, backgroundColor: colors.background },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     backgroundColor: colors.surface,
-    paddingHorizontal: spacing.md,
+    paddingHorizontal: '2.5%',
     paddingVertical: spacing.sm,
     borderBottomWidth: 1,
     borderBottomColor: colors.border,
@@ -197,7 +222,7 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: colors.border,
     paddingVertical: spacing.sm,
-    paddingHorizontal: spacing.xs,
+    paddingHorizontal: '2.5%',
     justifyContent: 'space-around',
     zIndex: 10,
   },

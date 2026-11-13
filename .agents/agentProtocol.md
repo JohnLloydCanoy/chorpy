@@ -29,7 +29,7 @@ When you want to run multiple specialized agents at once or assign distinct role
    * **Researcher Agent:**  
      > *"Launch a research subagent to check Expo SDK 51 documentation for hardware overlay APIs."*
    * **Implementer Agent:**  
-     > *"Have an implementer agent build the UI in `src/screens/ParentDashboard.tsx`."*
+     > *"Have an implementer agent build the UI in `src/screens/MyFamilyScreen.tsx`."*
    * **QA / Checker Agent:**  
      > *"Spawn a checker subagent to run `npx tsc --noEmit` and verify our TypeScript types."*
 
@@ -95,8 +95,7 @@ chorpy/
 │   │   ├── screens/            # Core Screen Registry
 │   │   │   ├── AuthScreen.tsx       # Registration & login form
 │   │   │   ├── ChildLockScreen.tsx  # Non-dismissible lock & photo proof trigger
-│   │   │   ├── ParentDashboard.tsx  # Guardian dashboard, approvals & device status
-│   │   │   └── RoleScreen.tsx       # Role selector & 6-digit PIN circle pairing
+│   │   │   └── MyFamilyScreen.tsx   # Guardian dashboard, approvals & device status
 │   │   ├── services/           # Supabase API services (choreService, authService, etc.)
 │   │   ├── theme/              # Central design tokens (Colors, Typography, Spacing)
 │   │   └── types/              # TypeScript types (index.ts)

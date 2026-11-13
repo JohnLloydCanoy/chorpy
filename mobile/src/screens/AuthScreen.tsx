@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import LoginScreen from './LoginScreen';
-import SignUpScreen from './SignUpScreen';
+import OnboardingScreen from './OnboardingScreen';
 
 interface AuthScreenProps {
   onDemoLogin?: (role?: 'parent' | 'child') => void;
@@ -8,14 +8,14 @@ interface AuthScreenProps {
 
 /**
  * Auth Coordinator Screen
- * Manages view switching between LoginScreen (default) and SignUpScreen.
+ * Manages view switching between LoginScreen (default) and OnboardingScreen.
  */
 export default function AuthScreen({ onDemoLogin }: AuthScreenProps) {
-  const [authView, setAuthView] = useState<'login' | 'signup'>('login');
+  const [authView, setAuthView] = useState<'login' | 'onboarding'>('login');
 
-  if (authView === 'signup') {
+  if (authView === 'onboarding') {
     return (
-      <SignUpScreen
+      <OnboardingScreen
         onNavigateToLogin={() => setAuthView('login')}
         onDemoLogin={onDemoLogin}
       />
@@ -24,7 +24,7 @@ export default function AuthScreen({ onDemoLogin }: AuthScreenProps) {
 
   return (
     <LoginScreen
-      onNavigateToSignUp={() => setAuthView('signup')}
+      onNavigateToSignUp={() => setAuthView('onboarding')}
       onDemoLogin={onDemoLogin}
     />
   );

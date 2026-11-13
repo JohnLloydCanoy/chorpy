@@ -19,8 +19,10 @@ export interface Profile {
 export interface Household {
   id: string;
   name: string;
-  pairing_pin: string;
+  pairing_pin: string | null;
+  pin_expires_at: string | null;
   created_at: string;
+  server_now?: string;
 }
 
 export interface Device {
