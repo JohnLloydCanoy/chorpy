@@ -37,7 +37,7 @@
    - An adversarial client can easily alter or remove filter parameters.
    - Access boundaries must be rigidly enforced by database RLS policies (`auth.uid() = id`, or checking membership in `public.households`).
 3. **Policy Design Patterns:**
-   - **Profiles:** Users may read and update only their own profile record (`auth.uid() = id`).
+   - **Profiles:** Users may read their own profile (`auth.uid() = id`) and co-member profiles sharing their `household_id` (via `public.get_my_household_id()`), and may update only their own profile (`auth.uid() = id`).
    - **Households:** Only members belonging to the household (joined via valid PIN or creator ID) may select or update the circle.
    - **Chores:** Chores are only readable and actionable by confirmed members of the matching `household_id`.
    - **Devices:** Devices can only be updated by the registered child or the household guardian.
