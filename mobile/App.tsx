@@ -1,10 +1,11 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { StatusBar } from 'expo-status-bar';
+import * as SplashScreen from 'expo-splash-screen';
 import { StyleSheet, Text, View, TouchableOpacity, SafeAreaView, Image } from 'react-native';
 import { useFonts, Fredoka_400Regular, Fredoka_600SemiBold, Fredoka_700Bold } from '@expo-google-fonts/fredoka';
 import { Poppins_400Regular, Poppins_500Medium, Poppins_600SemiBold, Poppins_700Bold } from '@expo-google-fonts/poppins';
-import { supabase } from './src/lib/supabase';
 import { AuthProvider, useAuthContext } from './src/context/AuthContext';
+import { useAppSplash } from './src/hooks/useAppSplash';
 import AppLoaderScreen from './src/screens/AppLoaderScreen';
 import AuthScreen from './src/screens/AuthScreen';
 import HomeScreen from './src/screens/HomeScreen';
@@ -12,6 +13,8 @@ import MyFamilyScreen from './src/screens/MyFamilyScreen';
 import ChildLockScreen from './src/screens/ChildLockScreen';
 import SettingsScreen from './src/screens/SettingsScreen';
 import { colors, spacing, borderRadius, typography } from './src/theme';
+
+SplashScreen.preventAutoHideAsync().catch(() => {});
 
 const primaryBgImage = require('./assets/Background-of-Primary-Color.png');
 
@@ -28,7 +31,6 @@ const PARENT_NAV_TABS: readonly NavTabItem[] = [
   { id: 'my_family', label: 'MY FAMILY' },
   { id: 'settings', label: 'SETTING' },
 ];
-
 const CHILD_NAV_TABS: readonly NavTabItem[] = [
   { id: 'home', label: 'HOME' },
   { id: 'my_family', label: 'MY FAMILY' },
@@ -39,31 +41,13 @@ const CHILD_NAV_TABS: readonly NavTabItem[] = [
 function AppContent() {
   const { user, profile, loading, signOut } = useAuthContext();
   const [currentScreen, setCurrentScreen] = useState<ScreenName>('home');
-  const [dbStatus, setDbStatus] = useState<'checking' | 'connected' | 'error'>('checking');
-  const [statusMessage, setStatusMessage] = useState('Connecting to Supabase...');
   const [demoRole, setDemoRole] = useState<'parent' | 'child' | null>(null);
+  const {
+    dbStatus, statusMessage, isStartupLoading,
+    demoSplashVisible, demoStatusText, triggerDemoSplash, dismissDemoSplash,
+  } = useAppSplash(loading);
 
   const effectiveRole = profile?.role || demoRole || 'parent';
-
-  useEffect(() => {
-    async function testConnection() {
-      try {
-        const { error } = await supabase.from('households').select('count', { count: 'exact', head: true });
-        if (error) {
-          setDbStatus('error');
-          setStatusMessage(`Supabase: ${error.message}`);
-        } else {
-          setDbStatus('connected');
-          setStatusMessage('Backend Connected Successfully');
-        }
-      } catch (err: any) {
-        setDbStatus('error');
-        setStatusMessage(err?.message || 'Connection failed');
-      }
-    }
-
-    testConnection();
-  }, []);
 
   // Active route guard: reset to 'home' if currentScreen is not permitted for effectiveRole
   useEffect(() => {
@@ -76,9 +60,19 @@ function AppContent() {
     }
   }, [effectiveRole, currentScreen]);
 
-  // 1. Initial App Loader Screen with "Getting Data..." placeholder
-  if (loading) {
-    return <AppLoaderScreen message="Getting Data..." subMessage="Verifying session with Supabase Cloud..." />;
+  // 1. Initial App Loader / Demo Splash Screen
+  if (isStartupLoading || demoSplashVisible) {
+    const subMessage = demoSplashVisible
+      ? 'Chorpy is flying while testing live Supabase response time.'
+      : loading ? 'Verifying session with Supabase Cloud...' : statusMessage;
+    return (
+      <AppLoaderScreen
+        message={demoSplashVisible ? 'Demo Splash Preview' : 'Getting Data...'}
+        subMessage={subMessage}
+        demoStatusText={demoSplashVisible ? demoStatusText : undefined}
+        onExitDemo={demoSplashVisible ? dismissDemoSplash : undefined}
+      />
+    );
   }
 
   // 2. Unauthenticated: route directly to AuthScreen (no top navigation bar)
@@ -87,6 +81,17 @@ function AppContent() {
     return (
       <SafeAreaView style={styles.authSafeArea}>
         <AuthScreen onDemoLogin={(role) => setDemoRole(role || 'parent')} />
+        {/* TODO(remove-after-testing): Temporary Demo Splash trigger */}
+        <View style={styles.demoBar}>
+          <TouchableOpacity
+            style={styles.demoSplashButton}
+            onPress={triggerDemoSplash}
+            accessibilityRole="button"
+            accessibilityLabel="Preview flying Chorpy splash screen"
+          >
+            <Text style={styles.demoSplashText}>Demo Splash</Text>
+          </TouchableOpacity>
+        </View>
         <StatusBar style="dark" />
       </SafeAreaView>
     );
@@ -105,7 +110,9 @@ function AppContent() {
       {/* Authenticated Header with Sign Out action */}
       <View style={styles.header}>
         <View style={styles.headerLeft}>
-          <Text style={styles.headerMascot}>🐦</Text>
+          <View style={styles.headerBadge}>
+            <Text style={styles.headerBadgeText}>C</Text>
+          </View>
           <View>
             <Text style={styles.headerTitle}>Chorpy</Text>
             <Text style={styles.headerUser}>
@@ -114,14 +121,28 @@ function AppContent() {
           </View>
         </View>
 
-        <TouchableOpacity
-          style={styles.signOutButton}
-          onPress={handleSignOut}
-          accessibilityRole="button"
-          accessibilityLabel="Sign out of Chorpy"
-        >
-          <Text style={styles.signOutText}>Sign Out</Text>
-        </TouchableOpacity>
+        <View style={styles.headerActions}>
+          {/* TODO(remove-after-testing): Temporary Demo Splash trigger */}
+          <TouchableOpacity
+            style={styles.headerDemoButton}
+            onPress={triggerDemoSplash}
+            hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}
+            accessibilityRole="button"
+            accessibilityLabel="Preview flying Chorpy splash screen"
+          >
+            <Text style={styles.headerDemoText}>Demo Splash</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.signOutButton}
+            onPress={handleSignOut}
+            hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}
+            accessibilityRole="button"
+            accessibilityLabel="Sign out of Chorpy"
+          >
+            <Text style={styles.signOutText}>Sign Out</Text>
+          </TouchableOpacity>
+        </View>
       </View>
 
       {/* Dynamic RBAC Navigation Bar */}
@@ -172,68 +193,49 @@ function AppContent() {
 }
 
 export default function App() {
-  const [fontsLoaded] = useFonts({
+  const [fontsLoaded, fontError] = useFonts({
     Fredoka_400Regular, Fredoka_600SemiBold, Fredoka_700Bold,
     Poppins_400Regular, Poppins_500Medium, Poppins_600SemiBold, Poppins_700Bold,
   });
+  const appReady = fontsLoaded || Boolean(fontError);
 
-  if (!fontsLoaded) {
-    return <AppLoaderScreen message="Loading Chorpy..." subMessage="Setting up theme and typography..." />;
-  }
+  const onLayoutRootView = useCallback(() => {
+    if (appReady) {
+      SplashScreen.hideAsync().catch(() => {});
+    }
+  }, [appReady]);
+
+  if (!appReady) return null;
 
   return (
-    <AuthProvider>
-      <AppContent />
-    </AuthProvider>
+    <View style={styles.rootContainer} onLayout={onLayoutRootView}>
+      <AuthProvider>
+        <AppContent />
+      </AuthProvider>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  authSafeArea: { flex: 1, backgroundColor: 'transparent' },
+  rootContainer: { flex: 1, backgroundColor: colors.background },
+  authSafeArea: { flex: 1, backgroundColor: colors.background },
   safeArea: { flex: 1, backgroundColor: colors.background },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    backgroundColor: colors.surface,
-    paddingHorizontal: '2.5%',
-    paddingVertical: spacing.sm,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border,
-  },
+  demoBar: { backgroundColor: colors.surface, borderTopWidth: 1, borderTopColor: colors.border, paddingHorizontal: spacing.md, paddingVertical: spacing.sm, alignItems: 'center' },
+  demoSplashButton: { minHeight: 48, minWidth: 180, paddingHorizontal: spacing.lg, borderRadius: borderRadius.md, borderWidth: 1, borderColor: colors.primary, backgroundColor: colors.primarySoft, alignItems: 'center', justifyContent: 'center' },
+  demoSplashText: { fontFamily: typography.fontFamily.secondarySemiBold, fontSize: typography.fontSizes.sm, color: colors.primary },
+  header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', backgroundColor: colors.surface, paddingHorizontal: '2.5%', paddingVertical: spacing.sm, borderBottomWidth: 1, borderBottomColor: colors.border },
   headerLeft: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
-  headerMascot: { fontSize: 24 },
+  headerBadge: { width: 32, height: 32, borderRadius: borderRadius.full, backgroundColor: colors.primary, alignItems: 'center', justifyContent: 'center' },
+  headerBadgeText: { fontFamily: typography.fontFamily.mainBold, fontSize: typography.fontSizes.lg, color: colors.textLight },
   headerTitle: { fontFamily: typography.fontFamily.mainBold, fontSize: 18, color: colors.primary },
   headerUser: { fontFamily: typography.fontFamily.secondaryMedium, fontSize: 11, color: colors.textSecondary },
-  signOutButton: {
-    paddingVertical: spacing.xs,
-    paddingHorizontal: spacing.md,
-    backgroundColor: colors.dangerSoft,
-    borderColor: colors.dangerBorder,
-    borderWidth: 1,
-    borderRadius: borderRadius.sm,
-    minHeight: 36,
-    justifyContent: 'center',
-  },
+  headerActions: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
+  headerDemoButton: { paddingVertical: spacing.xs, paddingHorizontal: spacing.sm, backgroundColor: colors.primarySoft, borderColor: colors.primary, borderWidth: 1, borderRadius: borderRadius.sm, minHeight: 38, justifyContent: 'center' },
+  headerDemoText: { fontFamily: typography.fontFamily.secondarySemiBold, fontSize: 12, color: colors.primary },
+  signOutButton: { paddingVertical: spacing.xs, paddingHorizontal: spacing.md, backgroundColor: colors.dangerSoft, borderColor: colors.dangerBorder, borderWidth: 1, borderRadius: borderRadius.sm, minHeight: 38, justifyContent: 'center' },
   signOutText: { fontFamily: typography.fontFamily.secondarySemiBold, fontSize: 12, color: colors.danger },
-  navBar: {
-    flexDirection: 'row',
-    backgroundColor: colors.surface,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border,
-    paddingVertical: spacing.sm,
-    paddingHorizontal: '2.5%',
-    justifyContent: 'space-around',
-    zIndex: 10,
-  },
-  navButton: {
-    paddingVertical: spacing.xs,
-    paddingHorizontal: spacing.md,
-    borderRadius: borderRadius.md,
-    minHeight: 36,
-    justifyContent: 'center',
-    overflow: 'hidden',
-  },
+  navBar: { flexDirection: 'row', backgroundColor: colors.surface, borderBottomWidth: 1, borderBottomColor: colors.border, paddingVertical: spacing.sm, paddingHorizontal: '2.5%', justifyContent: 'space-around', zIndex: 10 },
+  navButton: { paddingVertical: spacing.xs, paddingHorizontal: spacing.md, borderRadius: borderRadius.md, minHeight: 36, justifyContent: 'center', overflow: 'hidden' },
   navButtonActive: { backgroundColor: colors.primary },
   navButtonBgImage: { position: 'absolute', top: 0, left: '-6%', right: '-6%', bottom: 0, width: '112%', height: '100%', zIndex: 1 },
   navButtonText: { fontFamily: typography.fontFamily.secondarySemiBold, fontSize: 12, color: colors.textSecondary },
