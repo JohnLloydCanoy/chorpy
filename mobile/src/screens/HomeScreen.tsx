@@ -1,6 +1,5 @@
 import React from 'react';
 import { StyleSheet, Text, View, ScrollView, TouchableOpacity, Dimensions, Image } from 'react-native';
-import Svg, { Path } from 'react-native-svg';
 import { colors, spacing, borderRadius, typography } from '../theme';
 
 const primaryBgAsset = require('../../assets/Background-of-Primary-Color.png');
@@ -37,20 +36,6 @@ export default function HomeScreen({ onNavigateToFamily }: HomeScreenProps) {
           <Text style={styles.manageFamilyText}>Manage My Family</Text>
         </TouchableOpacity>
       </ScrollView>
-
-      {/* Floating Notification Cube sitting ON TOP OF EVERYTHING in top right */}
-      <TouchableOpacity
-        style={styles.notificationCube}
-        accessibilityRole="button"
-        accessibilityLabel="Notifications"
-        hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-      >
-        <Svg width={22} height={22} viewBox="0 0 24 24" fill="none">
-          <Path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" stroke={colors.primary} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
-          <Path d="M13.73 21a2 2 0 0 1-3.46 0" stroke={colors.primary} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
-        </Svg>
-        <View style={styles.badgeDot} />
-      </TouchableOpacity>
     </View>
   );
 }
@@ -123,33 +108,5 @@ const styles = StyleSheet.create({
     fontFamily: typography.fontFamily.secondaryBold,
     color: colors.textLight,
     textAlign: 'center',
-  },
-  notificationCube: {
-    position: 'absolute',
-    top: spacing.sm,
-    right: '2.5%',
-    zIndex: 20,
-    width: 48,
-    height: 48,
-    backgroundColor: colors.surface,
-    borderRadius: borderRadius.md,
-    borderWidth: 1,
-    borderColor: colors.border,
-    alignItems: 'center',
-    justifyContent: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.15,
-    shadowRadius: 4,
-    elevation: 5,
-  },
-  badgeDot: {
-    position: 'absolute',
-    top: 10,
-    right: 10,
-    width: 8,
-    height: 8,
-    borderRadius: borderRadius.full,
-    backgroundColor: colors.danger,
   },
 });
