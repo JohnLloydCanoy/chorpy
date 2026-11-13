@@ -1,6 +1,47 @@
 import React from 'react';
 import { StyleSheet, Text, View, TouchableOpacity } from 'react-native';
+import Svg, { Circle, Path } from 'react-native-svg';
 import { colors, spacing, borderRadius, typography } from '../../theme';
+
+const KeyIcon = React.memo(function KeyIcon() {
+  return (
+    <Svg
+      width={22}
+      height={22}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke={colors.primary}
+      strokeWidth={2}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <Circle cx="7" cy="12" r="4" />
+      <Path d="M11 12h10M17 12v4M21 12v3" />
+    </Svg>
+  );
+});
+
+const FamilyIcon = React.memo(function FamilyIcon() {
+  return (
+    <Svg
+      width={22}
+      height={22}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke={colors.primary}
+      strokeWidth={2}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <Circle cx="6.5" cy="7.5" r="2.5" />
+      <Path d="M2 18v-1.5a4 4 0 0 1 4-4h1" />
+      <Circle cx="17.5" cy="7.5" r="2.5" />
+      <Path d="M22 18v-1.5a4 4 0 0 0-4-4h-1" />
+      <Circle cx="12" cy="11.5" r="2" />
+      <Path d="M8.5 20v-1a3.5 3.5 0 0 1 7 0v1" />
+    </Svg>
+  );
+});
 
 interface OnboardingFamilyForkProps {
   onSelectJoin: () => void;
@@ -30,7 +71,7 @@ export function OnboardingFamilyFork({
           accessibilityLabel="Yes, I already have a family"
         >
           <View style={styles.iconCircle}>
-            <Text style={styles.icon}>🔑</Text>
+            <KeyIcon />
           </View>
           <View style={styles.choiceTextContainer}>
             <Text style={styles.choiceTitle}>Yes, I already have a family</Text>
@@ -49,7 +90,7 @@ export function OnboardingFamilyFork({
           accessibilityLabel="No, I dont have a family"
         >
           <View style={styles.iconCircle}>
-            <Text style={styles.icon}>🏡</Text>
+            <FamilyIcon />
           </View>
           <View style={styles.choiceTextContainer}>
             <Text style={styles.choiceTitle}>{"No, I don't have a family"}</Text>
@@ -124,9 +165,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: spacing.md,
-  },
-  icon: {
-    fontSize: 22,
   },
   choiceTextContainer: {
     flex: 1,
