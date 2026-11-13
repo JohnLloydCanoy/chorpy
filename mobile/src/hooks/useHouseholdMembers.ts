@@ -1,4 +1,5 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import { supabase } from '../lib/supabase';
 import { householdService } from '../services/householdService';
 import { Profile } from '../types';
 
@@ -15,6 +16,37 @@ export function useHouseholdMembers(householdId?: string | null) {
     error: null,
   });
   const [retrying, setRetrying] = useState(false);
+  const isMountedRef = useRef(true);
+
+  useEffect(() => {
+    isMountedRef.current = true;
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []);
+
+  const refreshQuietly = useCallback(async () => {
+    if (!householdId) return;
+
+    try {
+      const data = await householdService.getHouseholdMembers(householdId);
+      if (isMountedRef.current) {
+        setMembersState({ householdId, list: data, error: null });
+      }
+    } catch (err: unknown) {
+      if (isMountedRef.current) {
+        const msg =
+          err instanceof Error && err.message.trim().length > 0
+            ? err.message
+            : 'Unable to load household members.';
+        setMembersState((prev) => ({
+          householdId,
+          list: prev.householdId === householdId ? prev.list : [],
+          error: msg,
+        }));
+      }
+    }
+  }, [householdId]);
 
   const refetchMembers = useCallback(async () => {
     if (!householdId) return;
@@ -22,15 +54,21 @@ export function useHouseholdMembers(householdId?: string | null) {
     setRetrying(true);
     try {
       const data = await householdService.getHouseholdMembers(householdId);
-      setMembersState({ householdId, list: data, error: null });
+      if (isMountedRef.current) {
+        setMembersState({ householdId, list: data, error: null });
+      }
     } catch (err: unknown) {
-      const msg =
-        err instanceof Error && err.message.trim().length > 0
-          ? err.message
-          : 'Unable to load household members.';
-      setMembersState({ householdId, list: [], error: msg });
+      if (isMountedRef.current) {
+        const msg =
+          err instanceof Error && err.message.trim().length > 0
+            ? err.message
+            : 'Unable to load household members.';
+        setMembersState({ householdId, list: [], error: msg });
+      }
     } finally {
-      setRetrying(false);
+      if (isMountedRef.current) {
+        setRetrying(false);
+      }
     }
   }, [householdId]);
 
@@ -55,10 +93,27 @@ export function useHouseholdMembers(householdId?: string | null) {
         }
       });
 
+    const channel = supabase
+      .channel(`household_members:${householdId}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'profiles',
+          filter: `household_id=eq.${householdId}`,
+        },
+        () => {
+          void refreshQuietly();
+        }
+      )
+      .subscribe();
+
     return () => {
       active = false;
+      supabase.removeChannel(channel);
     };
-  }, [householdId]);
+  }, [householdId, refreshQuietly]);
 
   const members = useMemo(
     () => (householdId && membersState.householdId === householdId ? membersState.list : []),
