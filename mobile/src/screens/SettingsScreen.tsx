@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { StyleSheet, Text, View, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { useAuthContext } from '../context/AuthContext';
+import { HouseholdPinCard } from '../components/settings/HouseholdPinCard';
 import { colors, spacing, borderRadius, typography } from '../theme';
 
 export default function SettingsScreen() {
@@ -62,25 +63,7 @@ export default function SettingsScreen() {
       {/* Preferences & Household Info */}
       <View style={styles.section}>
         <Text style={styles.sectionHeader}>Household Circle</Text>
-        <View style={styles.card}>
-          <View style={styles.infoRow}>
-            <Text style={styles.infoLabel}>Circle Status</Text>
-            <View style={styles.statusBadge}>
-              <Text style={styles.statusDot}>●</Text>
-              <Text style={styles.statusBadgeText}>Active & Synced</Text>
-            </View>
-          </View>
-          <View style={styles.infoRow}>
-            <Text style={styles.infoLabel}>Pairing PIN</Text>
-            <Text style={styles.pinValue}>482910</Text>
-          </View>
-          <View style={styles.infoRow}>
-            <Text style={styles.infoLabel}>Household ID</Text>
-            <Text style={styles.infoValue}>
-              {profile?.household_id ? `${profile.household_id.substring(0, 12)}...` : 'Default Family Circle'}
-            </Text>
-          </View>
-        </View>
+        <HouseholdPinCard householdId={profile?.household_id ?? null} role={role} />
       </View>
 
       {/* App & Device Wellbeing Section */}
@@ -166,10 +149,6 @@ const styles = StyleSheet.create({
   infoLabel: { fontFamily: typography.fontFamily.secondaryMedium, fontSize: typography.fontSizes.sm, color: colors.textSecondary },
   infoValue: { fontFamily: typography.fontFamily.secondarySemiBold, fontSize: typography.fontSizes.sm, color: colors.text },
   infoValueSuccess: { fontFamily: typography.fontFamily.secondarySemiBold, fontSize: typography.fontSizes.sm, color: colors.success },
-  statusBadge: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs },
-  statusDot: { color: colors.success, fontSize: typography.fontSizes.xs },
-  statusBadgeText: { fontFamily: typography.fontFamily.secondarySemiBold, fontSize: typography.fontSizes.sm, color: colors.success },
-  pinValue: { fontFamily: typography.fontFamily.secondaryBold, fontSize: typography.fontSizes.sm, color: colors.primary, backgroundColor: colors.primarySoft, paddingHorizontal: spacing.sm, paddingVertical: 2, borderRadius: borderRadius.sm },
   aboutHeader: { flexDirection: 'row', alignItems: 'center', marginBottom: spacing.xs, gap: spacing.sm },
   mascot: { fontSize: 28 },
   aboutInfo: { flex: 1 },
