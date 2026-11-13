@@ -8,6 +8,9 @@ import { CreateChoreParams } from '../services/choreService';
 import { UserRole } from '../types';
 import { AddChoreForm } from '../components/family/AddChoreForm';
 import { ChoreTable } from '../components/family/ChoreTable';
+import { FamilyMembersList } from '../components/family/FamilyMembersList';
+import { FamilySubNav, FamilySubTab } from '../components/family/FamilySubNav';
+import { InviteFamilyModal } from '../components/family/InviteFamilyModal';
 
 interface MyFamilyScreenProps {
   role?: UserRole;
@@ -28,7 +31,9 @@ export default function MyFamilyScreen({ role }: MyFamilyScreenProps) {
     return 'Member';
   }, [fullName, userEmail]);
 
+  const [activeTab, setActiveTab] = useState<FamilySubTab>('chores');
   const [isAddFormOpen, setIsAddFormOpen] = useState(false);
+  const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
 
   const {
     chores,
@@ -71,21 +76,45 @@ export default function MyFamilyScreen({ role }: MyFamilyScreenProps) {
     return chores.filter((chore) => chore.assigned_child_id === userId);
   }, [chores, effectiveRole, userId]);
 
-  const handleToggleAddForm = useCallback(() => {
-    setIsAddFormOpen((prev) => !prev);
+  const handleSelectTab = useCallback((tab: FamilySubTab) => {
+    setActiveTab(tab);
+    setIsAddFormOpen(false);
+    setIsInviteModalOpen(false);
+    if (tab === 'family') {
+      void refetchMembers();
+    }
+  }, [refetchMembers]);
+
+  const handleOpenInviteModal = useCallback(() => {
+    setIsInviteModalOpen(true);
   }, []);
+
+  const handleCloseInviteModal = useCallback(() => {
+    setIsInviteModalOpen(false);
+  }, []);
+
+  const handleToggleAddForm = useCallback(() => {
+    if (activeTab !== 'chores') {
+      setActiveTab('chores');
+      setIsAddFormOpen(true);
+      return;
+    }
+    setIsAddFormOpen((prev) => !prev);
+  }, [activeTab]);
 
   const handleCloseAddForm = useCallback(() => {
     setIsAddFormOpen(false);
   }, []);
 
   const handleOpenAddForm = useCallback(() => {
+    setActiveTab('chores');
     setIsAddFormOpen(true);
   }, []);
 
   const handleSubmitChore = useCallback(
     async (params: CreateChoreParams) => {
       await createChoreOptimistic(params);
+      setActiveTab('chores');
     },
     [createChoreOptimistic]
   );
@@ -98,109 +127,100 @@ export default function MyFamilyScreen({ role }: MyFamilyScreenProps) {
             <Text style={styles.greeting} numberOfLines={1}>Hello, {displayName}!</Text>
             <Text style={styles.subgreeting}>Canoy Family Circle</Text>
           </View>
-          {effectiveRole === 'parent' ? (
+          {effectiveRole === 'parent' && activeTab !== 'calendar' ? (
             <TouchableOpacity
               style={styles.addChoreButton}
-              onPress={handleToggleAddForm}
+              onPress={activeTab === 'family' ? handleOpenInviteModal : handleToggleAddForm}
               accessibilityRole="button"
-              accessibilityLabel={isAddFormOpen ? 'Close add chore form' : 'Add a new chore'}
-              accessibilityState={{ expanded: isAddFormOpen }}
+              accessibilityLabel={
+                activeTab === 'family'
+                  ? 'Invite family members'
+                  : isAddFormOpen
+                    ? 'Close add chore form'
+                    : 'Add a new chore'
+              }
+              accessibilityState={{
+                expanded: activeTab === 'family' ? isInviteModalOpen : isAddFormOpen,
+              }}
               activeOpacity={0.8}
             >
-              <Text style={styles.addChoreButtonText}>Add Chore</Text>
+              <Text style={styles.addChoreButtonText}>
+                {activeTab === 'family' ? 'Invite Family' : 'Add Chore'}
+              </Text>
             </TouchableOpacity>
           ) : null}
         </View>
 
-        {effectiveRole === 'parent' && isAddFormOpen ? (
-          <AddChoreForm
-            householdId={householdId}
-            childMembers={childMembers}
-            membersLoading={membersLoading}
-            membersError={membersError}
-            onRetryMembers={refetchMembers}
-            onSubmitChore={handleSubmitChore}
-            onCancel={handleCloseAddForm}
-          />
-        ) : null}
+        <FamilySubNav activeTab={activeTab} onSelectTab={handleSelectTab} />
 
-        <View style={styles.tableSection}>
-          <Text style={styles.sectionTitle}>
-            {effectiveRole === 'parent' ? 'Household Chores' : 'My Chores'}
-          </Text>
-          <ChoreTable
-            chores={visibleChores}
-            role={effectiveRole}
-            loading={loading}
-            error={error}
-            isPartial={isPartial}
-            mutationError={mutationError}
-            pendingIds={pendingIds}
-            memberNameMap={memberNameMap}
-            hasHousehold={Boolean(householdId)}
-            onRetry={refetch}
-            onDismissMutationError={clearMutationError}
-            onOpenAddChore={effectiveRole === 'parent' ? handleOpenAddForm : undefined}
-          />
-        </View>
+        {activeTab === 'chores' ? (
+          <View style={styles.tableSection}>
+            <Text style={styles.sectionTitle}>
+              {effectiveRole === 'parent' ? 'Household Chores' : 'My Chores'}
+            </Text>
+            <ChoreTable
+              chores={visibleChores}
+              role={effectiveRole}
+              loading={loading}
+              error={error}
+              isPartial={isPartial}
+              mutationError={mutationError}
+              pendingIds={pendingIds}
+              memberNameMap={memberNameMap}
+              hasHousehold={Boolean(householdId)}
+              onRetry={refetch}
+              onDismissMutationError={clearMutationError}
+              onOpenAddChore={effectiveRole === 'parent' ? handleOpenAddForm : undefined}
+            />
+          </View>
+        ) : activeTab === 'family' ? (
+          <View style={styles.tableSection}>
+            <Text style={styles.sectionTitle}>Family Members</Text>
+            <FamilyMembersList
+              members={members}
+              loading={membersLoading}
+              error={membersError}
+              hasHousehold={Boolean(householdId)}
+              currentUserId={userId}
+              onRetry={refetchMembers}
+            />
+          </View>
+        ) : (
+          <View style={styles.calendarEmptyContainer} />
+        )}
       </View>
+
+      <AddChoreForm
+        visible={effectiveRole === 'parent' && isAddFormOpen}
+        householdId={householdId}
+        childMembers={childMembers}
+        membersLoading={membersLoading}
+        membersError={membersError}
+        onRetryMembers={refetchMembers}
+        onSubmitChore={handleSubmitChore}
+        onCancel={handleCloseAddForm}
+      />
+
+      <InviteFamilyModal
+        visible={effectiveRole === 'parent' && isInviteModalOpen}
+        householdId={householdId}
+        role={effectiveRole}
+        onClose={handleCloseInviteModal}
+      />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  screenWrapper: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
-  container: {
-    flex: 1,
-    width: '95%',
-    alignSelf: 'center',
-    paddingVertical: spacing.md,
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: spacing.lg,
-    marginTop: spacing.md,
-    gap: spacing.sm,
-  },
-  headerTextBlock: {
-    flex: 1,
-  },
-  greeting: {
-    fontSize: typography.fontSizes.xl,
-    fontFamily: typography.fontFamily.mainBold,
-    color: colors.primary,
-  },
-  subgreeting: {
-    fontSize: typography.fontSizes.sm,
-    fontFamily: typography.fontFamily.secondary,
-    color: colors.textSecondary,
-  },
-  addChoreButton: {
-    minHeight: 48,
-    backgroundColor: colors.primary,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
-    borderRadius: borderRadius.md,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  addChoreButtonText: {
-    color: colors.textLight,
-    fontFamily: typography.fontFamily.secondaryBold,
-    fontSize: typography.fontSizes.sm,
-  },
-  tableSection: {
-    flex: 1,
-  },
-  sectionTitle: {
-    fontSize: typography.fontSizes.base,
-    fontFamily: typography.fontFamily.mainSemiBold,
-    color: colors.text,
-    marginBottom: spacing.sm,
-  },
+  screenWrapper: { flex: 1, backgroundColor: colors.background },
+  container: { flex: 1, width: '95%', alignSelf: 'center', paddingVertical: spacing.md },
+  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: spacing.md, marginTop: spacing.md, gap: spacing.sm },
+  headerTextBlock: { flex: 1 },
+  greeting: { fontSize: typography.fontSizes.xl, fontFamily: typography.fontFamily.mainBold, color: colors.primary },
+  subgreeting: { fontSize: typography.fontSizes.sm, fontFamily: typography.fontFamily.secondary, color: colors.textSecondary },
+  addChoreButton: { minHeight: 48, backgroundColor: colors.primary, paddingHorizontal: spacing.md, paddingVertical: spacing.sm, borderRadius: borderRadius.md, alignItems: 'center', justifyContent: 'center' },
+  addChoreButtonText: { color: colors.textLight, fontFamily: typography.fontFamily.secondaryBold, fontSize: typography.fontSizes.sm },
+  tableSection: { flex: 1 },
+  calendarEmptyContainer: { flex: 1 },
+  sectionTitle: { fontSize: typography.fontSizes.base, fontFamily: typography.fontFamily.mainSemiBold, color: colors.text, marginBottom: spacing.sm },
 });
