@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import { StyleSheet, Text, View, TextInput, TouchableOpacity } from 'react-native';
 import { validateEmail, evaluatePasswordEntropy, formatTitleCase, formatE164Phone, calculateAgeFromDOB } from '../../utils/validation';
+import { validateAgeInput, validateStep1Submission } from '../../utils/onboardingValidation';
 import { PasswordEntropyChips } from '../PasswordEntropyChips';
 import { DeveloperQuickPreview } from '../DeveloperQuickPreview';
 import { RoleSelector } from '../RoleSelector';
 import { Button } from '../Button';
+import { DobWheelPicker } from './DobWheelPicker';
 import { colors, spacing, borderRadius, typography } from '../../theme';
 import { UserRole } from '../../types';
 
@@ -13,6 +15,7 @@ export interface Step1FormData {
   email: string;
   phone: string;
   dob: string;
+  age: number | null;
   role: UserRole;
   password: string;
 }
@@ -24,34 +27,48 @@ interface OnboardingStep1FormProps {
   onDemoLogin?: (role?: 'parent' | 'child') => void;
 }
 
-function formatDobInput(raw: string): string {
-  const digits = raw.replace(/\D/g, '').slice(0, 8);
-  if (digits.length <= 4) return digits;
-  if (digits.length <= 6) return `${digits.slice(0, 4)}-${digits.slice(4)}`;
-  return `${digits.slice(0, 4)}-${digits.slice(4, 6)}-${digits.slice(6, 8)}`;
-}
-
-export function OnboardingStep1Form({
-  initialValues,
-  onContinue,
-  onNavigateToLogin,
-  onDemoLogin,
-}: OnboardingStep1FormProps) {
+export function OnboardingStep1Form({ initialValues, onContinue, onNavigateToLogin, onDemoLogin }: OnboardingStep1FormProps) {
   const [fullName, setFullName] = useState(initialValues.fullName);
   const [email, setEmail] = useState(initialValues.email);
   const [phone, setPhone] = useState(initialValues.phone);
   const [dob, setDob] = useState(initialValues.dob);
+  const [ageText, setAgeText] = useState(initialValues.age !== null ? String(initialValues.age) : '');
   const [role, setRole] = useState<UserRole>(initialValues.role);
   const [password, setPassword] = useState(initialValues.password);
   const [agreeTerms, setAgreeTerms] = useState(false);
   const [emailError, setEmailError] = useState<string | null>(null);
+  const [ageError, setAgeError] = useState<string | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
 
   const phoneResult = formatE164Phone(phone);
   const ageResult = calculateAgeFromDOB(dob);
+  const parsedAge = ageText.trim() ? parseInt(ageText.trim(), 10) : null;
   const entropy = evaluatePasswordEntropy(password);
-  const isParentDisabled = Boolean(ageResult.isValidDate && ageResult.isUnder18);
+  const isParentDisabled = Boolean((ageResult.isValidDate && ageResult.isUnder18) || (parsedAge !== null && !Number.isNaN(parsedAge) && parsedAge < 18));
   const effectiveRole: UserRole = isParentDisabled ? 'child' : role;
+
+  function handleDobChange(nextDob: string) {
+    setDob(nextDob);
+    const nextAge = calculateAgeFromDOB(nextDob);
+    if (nextAge.isValidDate && nextAge.age !== null) {
+      setAgeText(String(nextAge.age));
+      if (ageError) setAgeError(null);
+    }
+    if (formError) setFormError(null);
+  }
+
+  function handleAgeChange(raw: string) {
+    const digits = raw.replace(/\D/g, '').slice(0, 3);
+    setAgeText(digits);
+    if (ageError) setAgeError(null);
+    if (formError) setFormError(null);
+  }
+
+  function handleAgeBlur() {
+    if (!ageText.trim()) return setAgeError(null);
+    const res = validateAgeInput(ageText);
+    setAgeError(res.isValid ? null : res.error || 'Invalid age.');
+  }
 
   function handleEmailBlur() {
     if (!email.trim()) return setEmailError(null);
@@ -61,27 +78,10 @@ export function OnboardingStep1Form({
 
   function handleContinue() {
     setFormError(null);
-    if (!fullName.trim()) {
-      return setFormError('Please enter your full name.');
-    }
-    const emailRes = validateEmail(email);
-    if (!emailRes.isValid) {
-      return setFormError(emailRes.error || 'Please enter a valid email address.');
-    }
-    if (phone.trim() && !phoneResult.isValid) {
-      return setFormError('Please enter a valid phone number (e.g. 09171234567 or +639171234567).');
-    }
-    if (!dob.trim()) {
-      return setFormError('Please enter your date of birth (YYYY-MM-DD).');
-    }
-    if (!ageResult.isValidDate || ageResult.age === null) {
-      return setFormError(ageResult.error || 'Please enter a valid date of birth (YYYY-MM-DD).');
-    }
-    if (!entropy.isValid) {
-      return setFormError('Password must meet all 4 security requirements below.');
-    }
-    if (!agreeTerms) {
-      return setFormError('Please agree to the Chorpy rules and regulations to continue.');
+    const result = validateStep1Submission({ fullName, email, phone, dob, ageText, password, agreeTerms });
+    if (result.error || result.age === null) {
+      if (result.ageError) setAgeError(result.ageError);
+      return setFormError(result.error || 'Please review your account details.');
     }
 
     onContinue({
@@ -89,6 +89,7 @@ export function OnboardingStep1Form({
       email: email.trim(),
       phone: phone.trim() && phoneResult.isValid ? phoneResult.e164 : phone.trim(),
       dob: dob.trim(),
+      age: result.age,
       role: effectiveRole,
       password,
     });
@@ -146,20 +147,8 @@ export function OnboardingStep1Form({
         <Text style={styles.hintSuccess}>Standardized: {phoneResult.formatted}</Text>
       ) : null}
 
-      <Text style={styles.label}>Date of Birth (YYYY-MM-DD)</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="YYYY-MM-DD (e.g. 2011-05-10)"
-        placeholderTextColor={colors.textMuted}
-        value={dob}
-        onChangeText={(v) => {
-          setDob(formatDobInput(v));
-          if (formError) setFormError(null);
-        }}
-        autoCapitalize="none"
-        maxLength={10}
-        keyboardType="numeric"
-      />
+      <Text style={styles.label}>Date of Birth</Text>
+      <DobWheelPicker value={dob} onChange={handleDobChange} hasError={Boolean(dob.trim() && ageResult.error)} />
       {dob.trim() && ageResult.isValidDate && ageResult.age !== null ? (
         <Text style={styles.hintSuccess}>
           Calculated Age: {ageResult.age} years old {ageResult.isUnder18 ? '• Under 18' : ''}
@@ -167,6 +156,20 @@ export function OnboardingStep1Form({
       ) : dob.trim() && ageResult.error ? (
         <Text style={styles.fieldError}>{ageResult.error}</Text>
       ) : null}
+
+      <Text style={styles.label}>Age</Text>
+      <TextInput
+        style={[styles.input, ageError ? styles.inputError : null]}
+        placeholder="Auto-filled from Date of Birth"
+        placeholderTextColor={colors.textMuted}
+        value={ageText}
+        onChangeText={handleAgeChange}
+        onBlur={handleAgeBlur}
+        keyboardType="number-pad"
+        maxLength={3}
+        accessibilityLabel="Age"
+      />
+      {ageError ? <Text style={styles.fieldError}>{ageError}</Text> : null}
 
       <RoleSelector role={effectiveRole} onSelectRole={setRole} isParentDisabled={isParentDisabled} />
 
@@ -195,11 +198,7 @@ export function OnboardingStep1Form({
         <Text style={styles.termsText}>I agree to the Chorpy rules and regulations</Text>
       </TouchableOpacity>
 
-      <Button
-        title="Continue to Family Setup"
-        variant="primary"
-        onPress={handleContinue}
-      />
+      <Button title="Continue to Family Setup" variant="primary" onPress={handleContinue} />
 
       <View style={styles.footerRow}>
         <Text style={styles.footerText}>Already have an account? </Text>
