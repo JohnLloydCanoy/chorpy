@@ -40,6 +40,7 @@ export const colors = {
   // Borders & Dividers
   border: '#E2E8F0',         // Soft border
   borderDark: '#334155',     // Dark mode border
+  overlay: 'rgba(15, 23, 42, 0.55)', // Modal & popup scrim backdrop
 
   // Typography Colors
   text: '#0F172A',           // Primary dark text (Headings)
@@ -55,6 +56,13 @@ export const spacing = {
   lg: 24,
   xl: 32,
   xxl: 48,
+};
+
+export const iconSizes = {
+  sm: 16,
+  md: 20,
+  lg: 24,
+  xl: 32,
 };
 
 export const borderRadius = {
