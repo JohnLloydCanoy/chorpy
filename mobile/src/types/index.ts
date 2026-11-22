@@ -4,6 +4,13 @@ export type LockStatus = 'locked' | 'unlocked';
 
 export type ChoreStatus = 'pending' | 'awaiting_approval' | 'approved' | 'rejected';
 
+export type ChoreLockMode =
+  | 'immediate'
+  | 'offset_30m'
+  | 'offset_1h'
+  | 'offset_2h'
+  | 'custom';
+
 export interface Profile {
   id: string;
   household_id: string | null;
@@ -41,6 +48,9 @@ export interface Chore {
   description: string | null;
   status: ChoreStatus;
   proof_image_url: string | null;
+  scheduled_at: string;
+  lock_at: string;
+  lock_mode: ChoreLockMode;
   created_at: string;
   updated_at: string;
 }
