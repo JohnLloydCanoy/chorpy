@@ -1,41 +1,146 @@
-import React from 'react';
-import { StyleSheet, Text, View, ScrollView, TouchableOpacity, Dimensions, Image } from 'react-native';
-import { colors, spacing, borderRadius, typography } from '../theme';
-
-const primaryBgAsset = require('../../assets/Background-of-Primary-Color.png');
+import React, { useCallback } from 'react';
+import { StyleSheet, Text, View } from 'react-native';
+import { colors, spacing, typography } from '../theme';
+import { UserRole } from '../types';
+import { CreateChoreParams, UpdateChoreParams } from '../services/choreService';
+import { useHouseholdChoreData } from '../hooks/useHouseholdChoreData';
+import { useChoreSheetState } from '../hooks/useChoreSheetState';
+import { ChoreCalendarView } from '../components/calendar/ChoreCalendarView';
+import { FloatingAddButton } from '../components/common/FloatingAddButton';
+import { AddChoreForm } from '../components/family/AddChoreForm';
+import { HomeHeaderActions } from '../components/home/HomeHeaderActions';
 
 interface HomeScreenProps {
-  role?: 'parent' | 'child';
-  dbStatus?: 'checking' | 'connected' | 'error';
-  statusMessage?: string;
-  onNavigateToFamily?: () => void;
+  role?: UserRole;
 }
 
-export default function HomeScreen({ onNavigateToFamily }: HomeScreenProps) {
-  const heroCardHeight = Math.max(190, Math.round(Dimensions.get('window').height * 0.25));
+export default function HomeScreen({ role }: HomeScreenProps) {
+  const {
+    effectiveRole,
+    householdId,
+    hasHousehold,
+    displayName,
+    visibleChores,
+    childMembers,
+    memberNameMap,
+    loading,
+    error,
+    isPartial,
+    pendingIds,
+    mutationError,
+    refetch,
+    createChoreOptimistic,
+    updateChoreOptimistic,
+    clearMutationError,
+    membersLoading,
+    membersError,
+    refetchMembers,
+  } = useHouseholdChoreData(role);
+
+  const {
+    isOpen,
+    mode,
+    selectedChore,
+    initialScheduledAt,
+    sessionKey,
+    openCreate,
+    openChore,
+    closeSheet,
+  } = useChoreSheetState(effectiveRole);
+
+  const handleOpenAddButton = useCallback(() => {
+    openCreate();
+  }, [openCreate]);
+
+  const handleSubmitChore = useCallback(
+    async (params: CreateChoreParams) => {
+      await createChoreOptimistic(params);
+    },
+    [createChoreOptimistic]
+  );
+
+  const handleUpdateChore = useCallback(
+    async (params: UpdateChoreParams) => {
+      await updateChoreOptimistic(params);
+    },
+    [updateChoreOptimistic]
+  );
+
+  const selectedAssignedLabel = selectedChore
+    ? memberNameMap[selectedChore.assigned_child_id] || 'Assigned Child'
+    : undefined;
 
   return (
     <View style={styles.screenWrapper}>
-      {/* Scrollable Dashboard Body */}
-      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-        {/* 25% Screen Height Hero Card directly below top navigation bar */}
-        <View style={[styles.heroCard, { height: heroCardHeight }]}>
-          <Image source={primaryBgAsset} style={styles.heroBgImage} resizeMode="cover" />
-          <Text style={styles.heroMascot}>🐦</Text>
-          <Text style={styles.heroTitle}>Chorpy</Text>
+      <View style={styles.container}>
+        <View style={styles.header}>
+          <View style={styles.headerTextBlock}>
+            <Text style={styles.title} numberOfLines={1}>
+              {effectiveRole === 'parent' ? 'Household Calendar' : 'My Chore Calendar'}
+            </Text>
+            <Text style={styles.subtitle} numberOfLines={1}>
+              Hello, {displayName}
+            </Text>
+          </View>
+
+          <HomeHeaderActions
+            role={effectiveRole}
+            chores={visibleChores}
+            memberNameMap={memberNameMap}
+            loading={loading}
+            error={error}
+            isPartial={isPartial}
+            pendingIds={pendingIds}
+            onRetry={refetch}
+            onSelectChore={openChore}
+          />
         </View>
 
-        {/* Manage My Family Button auto-adjusting to 95% width directly below hero card */}
-        <TouchableOpacity
-          style={styles.manageFamilyBtn}
-          onPress={onNavigateToFamily}
-          accessibilityRole="button"
-          accessibilityLabel="Manage My Family"
-          activeOpacity={0.8}
-        >
-          <Text style={styles.manageFamilyText}>Manage My Family</Text>
-        </TouchableOpacity>
-      </ScrollView>
+        <View style={styles.calendarSection}>
+          <ChoreCalendarView
+            chores={visibleChores}
+            role={effectiveRole}
+            loading={loading}
+            error={error}
+            isPartial={isPartial}
+            mutationError={mutationError}
+            pendingIds={pendingIds}
+            memberNameMap={memberNameMap}
+            hasHousehold={hasHousehold}
+            onRetry={refetch}
+            onDismissMutationError={clearMutationError}
+            onOpenAddChore={effectiveRole === 'parent' ? openCreate : undefined}
+            onSelectChore={openChore}
+          />
+        </View>
+      </View>
+
+      {effectiveRole === 'parent' && !isOpen ? (
+        <FloatingAddButton
+          onPress={handleOpenAddButton}
+          accessibilityLabel="Add a new chore"
+          accessibilityHint="Opens the form to assign a household chore"
+          expanded={isOpen}
+        />
+      ) : null}
+
+      <AddChoreForm
+        visible={isOpen}
+        mode={mode}
+        role={effectiveRole}
+        chore={selectedChore}
+        assignedLabel={selectedAssignedLabel}
+        initialScheduledAt={initialScheduledAt}
+        openSessionKey={sessionKey}
+        householdId={householdId}
+        childMembers={childMembers}
+        membersLoading={membersLoading}
+        membersError={membersError}
+        onRetryMembers={refetchMembers}
+        onSubmitChore={effectiveRole === 'parent' ? handleSubmitChore : undefined}
+        onUpdateChore={effectiveRole === 'parent' ? handleUpdateChore : undefined}
+        onCancel={closeSheet}
+      />
     </View>
   );
 }
@@ -44,69 +149,35 @@ const styles = StyleSheet.create({
   screenWrapper: {
     flex: 1,
     backgroundColor: colors.background,
-    position: 'relative',
   },
-  scrollContent: {
-    alignItems: 'center',
-    paddingBottom: spacing.xl,
-  },
-  heroCard: {
+  container: {
+    flex: 1,
     width: '95%',
     alignSelf: 'center',
-    marginTop: spacing.sm,
-    borderRadius: borderRadius.xl,
-    overflow: 'hidden',
+    paddingVertical: spacing.md,
+  },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: spacing.md,
-    backgroundColor: colors.primary,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.15,
-    shadowRadius: 6,
-    elevation: 4,
-    position: 'relative',
+    marginBottom: spacing.sm,
+    gap: spacing.sm,
   },
-  heroBgImage: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    width: '100%',
-    height: '100%',
+  headerTextBlock: {
+    flex: 1,
+    minWidth: 0,
   },
-  heroMascot: {
-    fontSize: 56,
-    marginBottom: spacing.xs,
-  },
-  heroTitle: {
-    fontSize: typography.fontSizes.display,
+  title: {
+    fontSize: typography.fontSizes.xl,
     fontFamily: typography.fontFamily.mainBold,
-    color: colors.textLight,
-    textAlign: 'center',
+    color: colors.primary,
   },
-  manageFamilyBtn: {
-    width: '95%',
-    alignSelf: 'center',
-    minHeight: 48,
-    backgroundColor: colors.primary,
-    borderRadius: borderRadius.md,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: spacing.sm + 4,
-    paddingHorizontal: spacing.lg,
-    marginBottom: spacing.md,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
+  subtitle: {
+    fontSize: typography.fontSizes.sm,
+    fontFamily: typography.fontFamily.secondary,
+    color: colors.textSecondary,
   },
-  manageFamilyText: {
-    fontSize: typography.fontSizes.base,
-    fontFamily: typography.fontFamily.secondaryBold,
-    color: colors.textLight,
-    textAlign: 'center',
+  calendarSection: {
+    flex: 1,
   },
 });
