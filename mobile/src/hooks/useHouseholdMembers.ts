@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef, useId } from 'react';
 import { supabase } from '../lib/supabase';
 import { householdService } from '../services/householdService';
 import { Profile } from '../types';
@@ -10,6 +10,7 @@ interface MembersState {
 }
 
 export function useHouseholdMembers(householdId?: string | null) {
+  const instanceId = useId();
   const [membersState, setMembersState] = useState<MembersState>({
     householdId: null,
     list: [],
@@ -94,7 +95,7 @@ export function useHouseholdMembers(householdId?: string | null) {
       });
 
     const channel = supabase
-      .channel(`household_members:${householdId}`)
+      .channel(`household_members:${householdId}:${instanceId}`)
       .on(
         'postgres_changes',
         {
@@ -113,7 +114,7 @@ export function useHouseholdMembers(householdId?: string | null) {
       active = false;
       supabase.removeChannel(channel);
     };
-  }, [householdId, refreshQuietly]);
+  }, [householdId, refreshQuietly, instanceId]);
 
   const members = useMemo(
     () => (householdId && membersState.householdId === householdId ? membersState.list : []),
