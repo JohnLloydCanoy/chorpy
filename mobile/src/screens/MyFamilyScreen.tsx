@@ -1,42 +1,32 @@
-import React, { useState, useCallback, useMemo } from 'react';
-import { StyleSheet, Text, View, TouchableOpacity } from 'react-native';
-import { colors, spacing, borderRadius, typography } from '../theme';
-import { useAuthContext } from '../context/AuthContext';
-import { useChores } from '../hooks/useChores';
-import { useHouseholdMembers } from '../hooks/useHouseholdMembers';
-import { CreateChoreParams } from '../services/choreService';
+import React, { useCallback, useState } from 'react';
+import { StyleSheet, Text, View } from 'react-native';
+import { colors, spacing, typography } from '../theme';
+import { useHouseholdChoreData } from '../hooks/useHouseholdChoreData';
+import { useChoreSheetState } from '../hooks/useChoreSheetState';
+import { CreateChoreParams, UpdateChoreParams } from '../services/choreService';
 import { UserRole } from '../types';
+import { FloatingAddButton } from '../components/common/FloatingAddButton';
 import { AddChoreForm } from '../components/family/AddChoreForm';
 import { ChoreTable } from '../components/family/ChoreTable';
 import { FamilyMembersList } from '../components/family/FamilyMembersList';
 import { FamilySubNav, FamilySubTab } from '../components/family/FamilySubNav';
 import { InviteFamilyModal } from '../components/family/InviteFamilyModal';
+import { HomeHeaderActions } from '../components/home/HomeHeaderActions';
 
 interface MyFamilyScreenProps {
   role?: UserRole;
 }
 
 export default function MyFamilyScreen({ role }: MyFamilyScreenProps) {
-  const { user, profile } = useAuthContext();
-  const effectiveRole: UserRole = role ?? profile?.role ?? 'parent';
-  const householdId = profile?.household_id ?? null;
-  const userId = user?.id;
-  const fullName = profile?.full_name;
-  const userEmail = user?.email;
-
-  const displayName = useMemo(() => {
-    const trimmedName = fullName?.trim();
-    if (trimmedName) return trimmedName;
-    if (userEmail) return userEmail.split('@')[0];
-    return 'Member';
-  }, [fullName, userEmail]);
-
-  const [activeTab, setActiveTab] = useState<FamilySubTab>('chores');
-  const [isAddFormOpen, setIsAddFormOpen] = useState(false);
-  const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
-
   const {
-    chores,
+    effectiveRole,
+    householdId,
+    hasHousehold,
+    userId,
+    displayName,
+    visibleChores,
+    childMembers,
+    memberNameMap,
     loading,
     error,
     isPartial,
@@ -44,46 +34,39 @@ export default function MyFamilyScreen({ role }: MyFamilyScreenProps) {
     mutationError,
     refetch,
     createChoreOptimistic,
+    updateChoreOptimistic,
     clearMutationError,
-  } = useChores(householdId);
+    members,
+    membersLoading,
+    membersError,
+    refetchMembers,
+  } = useHouseholdChoreData(role);
+
+  const [activeTab, setActiveTab] = useState<FamilySubTab>('chores');
+  const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
 
   const {
-    members,
-    loading: membersLoading,
-    error: membersError,
-    refetchMembers,
-  } = useHouseholdMembers(householdId);
+    isOpen,
+    mode,
+    selectedChore,
+    initialScheduledAt,
+    sessionKey,
+    openCreate,
+    openChore,
+    closeSheet,
+  } = useChoreSheetState(effectiveRole);
 
-  const childMembers = useMemo(
-    () => members.filter((member) => member.role === 'child'),
-    [members]
+  const handleSelectTab = useCallback(
+    (tab: FamilySubTab) => {
+      setActiveTab(tab);
+      closeSheet();
+      setIsInviteModalOpen(false);
+      if (tab === 'family') {
+        void refetchMembers();
+      }
+    },
+    [closeSheet, refetchMembers]
   );
-
-  const memberNameMap = useMemo(() => {
-    const map: Record<string, string> = {};
-    for (const member of members) {
-      map[member.id] = member.full_name?.trim() || member.email.split('@')[0] || 'Child';
-    }
-    if (profile?.id && !map[profile.id]) {
-      map[profile.id] = profile.full_name?.trim() || profile.email.split('@')[0] || 'Member';
-    }
-    return map;
-  }, [members, profile]);
-
-  const visibleChores = useMemo(() => {
-    if (effectiveRole === 'parent') return chores;
-    if (!userId) return [];
-    return chores.filter((chore) => chore.assigned_child_id === userId);
-  }, [chores, effectiveRole, userId]);
-
-  const handleSelectTab = useCallback((tab: FamilySubTab) => {
-    setActiveTab(tab);
-    setIsAddFormOpen(false);
-    setIsInviteModalOpen(false);
-    if (tab === 'family') {
-      void refetchMembers();
-    }
-  }, [refetchMembers]);
 
   const handleOpenInviteModal = useCallback(() => {
     setIsInviteModalOpen(true);
@@ -93,31 +76,29 @@ export default function MyFamilyScreen({ role }: MyFamilyScreenProps) {
     setIsInviteModalOpen(false);
   }, []);
 
-  const handleToggleAddForm = useCallback(() => {
-    if (activeTab !== 'chores') {
-      setActiveTab('chores');
-      setIsAddFormOpen(true);
-      return;
-    }
-    setIsAddFormOpen((prev) => !prev);
-  }, [activeTab]);
-
-  const handleCloseAddForm = useCallback(() => {
-    setIsAddFormOpen(false);
-  }, []);
-
-  const handleOpenAddForm = useCallback(() => {
-    setActiveTab('chores');
-    setIsAddFormOpen(true);
-  }, []);
+  const handleOpenAddButton = useCallback(() => {
+    openCreate();
+  }, [openCreate]);
 
   const handleSubmitChore = useCallback(
     async (params: CreateChoreParams) => {
       await createChoreOptimistic(params);
-      setActiveTab('chores');
     },
     [createChoreOptimistic]
   );
+
+  const handleUpdateChore = useCallback(
+    async (params: UpdateChoreParams) => {
+      await updateChoreOptimistic(params);
+    },
+    [updateChoreOptimistic]
+  );
+
+  const selectedAssignedLabel = selectedChore
+    ? memberNameMap[selectedChore.assigned_child_id] || 'Assigned Child'
+    : undefined;
+
+  const showParentFab = effectiveRole === 'parent' && !isOpen && !isInviteModalOpen;
 
   return (
     <View style={styles.screenWrapper}>
@@ -125,30 +106,20 @@ export default function MyFamilyScreen({ role }: MyFamilyScreenProps) {
         <View style={styles.header}>
           <View style={styles.headerTextBlock}>
             <Text style={styles.greeting} numberOfLines={1}>Hello, {displayName}!</Text>
-            <Text style={styles.subgreeting}>Canoy Family Circle</Text>
+            <Text style={styles.subgreeting} numberOfLines={1}>Canoy Family Circle</Text>
           </View>
-          {effectiveRole === 'parent' && activeTab !== 'calendar' ? (
-            <TouchableOpacity
-              style={styles.addChoreButton}
-              onPress={activeTab === 'family' ? handleOpenInviteModal : handleToggleAddForm}
-              accessibilityRole="button"
-              accessibilityLabel={
-                activeTab === 'family'
-                  ? 'Invite family members'
-                  : isAddFormOpen
-                    ? 'Close add chore form'
-                    : 'Add a new chore'
-              }
-              accessibilityState={{
-                expanded: activeTab === 'family' ? isInviteModalOpen : isAddFormOpen,
-              }}
-              activeOpacity={0.8}
-            >
-              <Text style={styles.addChoreButtonText}>
-                {activeTab === 'family' ? 'Invite Family' : 'Add Chore'}
-              </Text>
-            </TouchableOpacity>
-          ) : null}
+
+          <HomeHeaderActions
+            role={effectiveRole}
+            chores={visibleChores}
+            memberNameMap={memberNameMap}
+            loading={loading}
+            error={error}
+            isPartial={isPartial}
+            pendingIds={pendingIds}
+            onRetry={refetch}
+            onSelectChore={openChore}
+          />
         </View>
 
         <FamilySubNav activeTab={activeTab} onSelectTab={handleSelectTab} />
@@ -167,38 +138,59 @@ export default function MyFamilyScreen({ role }: MyFamilyScreenProps) {
               mutationError={mutationError}
               pendingIds={pendingIds}
               memberNameMap={memberNameMap}
-              hasHousehold={Boolean(householdId)}
+              hasHousehold={hasHousehold}
               onRetry={refetch}
               onDismissMutationError={clearMutationError}
-              onOpenAddChore={effectiveRole === 'parent' ? handleOpenAddForm : undefined}
+              onOpenAddChore={effectiveRole === 'parent' ? handleOpenAddButton : undefined}
+              onSelectChore={openChore}
             />
           </View>
-        ) : activeTab === 'family' ? (
+        ) : (
           <View style={styles.tableSection}>
             <Text style={styles.sectionTitle}>Family Members</Text>
             <FamilyMembersList
               members={members}
               loading={membersLoading}
               error={membersError}
-              hasHousehold={Boolean(householdId)}
+              hasHousehold={hasHousehold}
               currentUserId={userId}
               onRetry={refetchMembers}
             />
           </View>
-        ) : (
-          <View style={styles.calendarEmptyContainer} />
         )}
       </View>
 
+      {showParentFab ? (
+        <FloatingAddButton
+          onPress={activeTab === 'family' ? handleOpenInviteModal : handleOpenAddButton}
+          accessibilityLabel={
+            activeTab === 'family' ? 'Invite family members' : 'Add a new chore'
+          }
+          accessibilityHint={
+            activeTab === 'family'
+              ? 'Opens the family invite PIN modal'
+              : 'Opens the form to assign a household chore'
+          }
+          expanded={activeTab === 'family' ? isInviteModalOpen : isOpen}
+        />
+      ) : null}
+
       <AddChoreForm
-        visible={effectiveRole === 'parent' && isAddFormOpen}
+        visible={isOpen}
+        mode={mode}
+        role={effectiveRole}
+        chore={selectedChore}
+        assignedLabel={selectedAssignedLabel}
+        initialScheduledAt={initialScheduledAt}
+        openSessionKey={sessionKey}
         householdId={householdId}
         childMembers={childMembers}
         membersLoading={membersLoading}
         membersError={membersError}
         onRetryMembers={refetchMembers}
-        onSubmitChore={handleSubmitChore}
-        onCancel={handleCloseAddForm}
+        onSubmitChore={effectiveRole === 'parent' ? handleSubmitChore : undefined}
+        onUpdateChore={effectiveRole === 'parent' ? handleUpdateChore : undefined}
+        onCancel={closeSheet}
       />
 
       <InviteFamilyModal
@@ -214,13 +206,10 @@ export default function MyFamilyScreen({ role }: MyFamilyScreenProps) {
 const styles = StyleSheet.create({
   screenWrapper: { flex: 1, backgroundColor: colors.background },
   container: { flex: 1, width: '95%', alignSelf: 'center', paddingVertical: spacing.md },
-  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: spacing.md, marginTop: spacing.md, gap: spacing.sm },
-  headerTextBlock: { flex: 1 },
+  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: spacing.sm, gap: spacing.sm },
+  headerTextBlock: { flex: 1, minWidth: 0 },
   greeting: { fontSize: typography.fontSizes.xl, fontFamily: typography.fontFamily.mainBold, color: colors.primary },
   subgreeting: { fontSize: typography.fontSizes.sm, fontFamily: typography.fontFamily.secondary, color: colors.textSecondary },
-  addChoreButton: { minHeight: 48, backgroundColor: colors.primary, paddingHorizontal: spacing.md, paddingVertical: spacing.sm, borderRadius: borderRadius.md, alignItems: 'center', justifyContent: 'center' },
-  addChoreButtonText: { color: colors.textLight, fontFamily: typography.fontFamily.secondaryBold, fontSize: typography.fontSizes.sm },
   tableSection: { flex: 1 },
-  calendarEmptyContainer: { flex: 1 },
   sectionTitle: { fontSize: typography.fontSizes.base, fontFamily: typography.fontFamily.mainSemiBold, color: colors.text, marginBottom: spacing.sm },
 });
