@@ -73,9 +73,106 @@ create table if not exists public.chores (
     description text,
     status text check (status in ('pending', 'awaiting_approval', 'approved', 'rejected')) default 'pending' not null,
     proof_image_url text,
+    scheduled_at timestamp with time zone default timezone('utc'::text, now()) not null,
+    lock_at timestamp with time zone default timezone('utc'::text, now()) not null,
+    lock_mode text default 'immediate' not null,
     created_at timestamp with time zone default timezone('utc'::text, now()) not null,
-    updated_at timestamp with time zone default timezone('utc'::text, now()) not null
+    updated_at timestamp with time zone default timezone('utc'::text, now()) not null,
+    constraint chores_lock_mode_chk check (lock_mode in ('immediate', 'offset_30m', 'offset_1h', 'offset_2h', 'custom')),
+    constraint chores_lock_after_schedule_chk check (lock_at >= scheduled_at)
 );
+
+create index if not exists idx_chores_household_scheduled
+  on public.chores (household_id, scheduled_at desc);
+
+create index if not exists idx_chores_pending_lock_at
+  on public.chores (assigned_child_id, lock_at)
+  where status in ('pending', 'rejected');
+
+create or replace function public.get_my_role()
+returns text
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select role
+  from public.profiles
+  where id = auth.uid()
+  limit 1;
+$$;
+
+revoke all on function public.get_my_role() from public;
+grant execute on function public.get_my_role() to authenticated;
+
+create or replace function public.enforce_chore_update_guard()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_role text;
+begin
+  new.updated_at := timezone('utc'::text, now());
+
+  if new.household_id is distinct from old.household_id then
+    raise exception 'Chore household cannot be changed.';
+  end if;
+
+  if auth.uid() is not null then
+    v_role := public.get_my_role();
+    if v_role is distinct from 'parent' then
+      if new.title is distinct from old.title
+        or new.description is distinct from old.description
+        or new.assigned_child_id is distinct from old.assigned_child_id
+        or new.scheduled_at is distinct from old.scheduled_at
+        or new.lock_at is distinct from old.lock_at
+        or new.lock_mode is distinct from old.lock_mode
+        or new.created_at is distinct from old.created_at
+      then
+        raise exception 'Only parents and co-parents can edit chore details.';
+      end if;
+    end if;
+  end if;
+
+  return new;
+end;
+$$;
+
+drop trigger if exists on_chore_before_update_guard on public.chores;
+create trigger on_chore_before_update_guard
+  before update on public.chores
+  for each row execute function public.enforce_chore_update_guard();
+
+create or replace function public.sync_immediate_chore_device_lock()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  if new.lock_mode = 'immediate' and new.status in ('pending', 'rejected') then
+    if tg_op = 'INSERT'
+      or old.lock_mode is distinct from new.lock_mode
+      or old.assigned_child_id is distinct from new.assigned_child_id
+      or old.status is distinct from new.status
+    then
+      update public.devices
+        set lock_status = 'locked',
+            last_seen = timezone('utc'::text, now())
+        where child_id = new.assigned_child_id;
+    end if;
+  end if;
+  return new;
+end;
+$$;
+
+drop trigger if exists on_chore_created_immediate_lock on public.chores;
+drop trigger if exists on_chore_synced_immediate_lock on public.chores;
+create trigger on_chore_synced_immediate_lock
+  after insert or update of lock_mode, assigned_child_id, status on public.chores
+  for each row execute function public.sync_immediate_chore_device_lock();
 
 -- 7. Automatic Profile Creation on Signup Trigger
 create or replace function public.handle_new_user()
@@ -450,32 +547,127 @@ create policy "Allow members to read their own household"
     id = (select household_id from public.profiles where id = auth.uid())
   );
 
-create policy "Allow users to read household chores"
+drop policy if exists "Allow users to read household chores" on public.chores;
+drop policy if exists "Allow household members to read household chores" on public.chores;
+create policy "Allow household members to read household chores"
   on public.chores for select
   to authenticated
-  using (true);
+  using (
+    household_id is not null
+    and household_id = public.get_my_household_id()
+    and (
+      public.get_my_role() = 'parent'
+      or assigned_child_id = auth.uid()
+    )
+  );
 
-create policy "Allow users to insert chores"
+drop policy if exists "Allow users to insert chores" on public.chores;
+drop policy if exists "Allow household parents to insert chores" on public.chores;
+create policy "Allow household parents to insert chores"
   on public.chores for insert
   to authenticated
-  with check (true);
+  with check (
+    public.get_my_role() = 'parent'
+    and household_id = public.get_my_household_id()
+    and exists (
+      select 1
+      from public.profiles p
+      where p.id = assigned_child_id
+        and p.household_id = public.get_my_household_id()
+        and p.role = 'child'
+    )
+  );
 
-create policy "Allow users to update chores"
+drop policy if exists "Allow users to update chores" on public.chores;
+drop policy if exists "Allow household parents to update chores" on public.chores;
+create policy "Allow household parents to update chores"
   on public.chores for update
   to authenticated
-  using (true);
+  using (
+    public.get_my_role() = 'parent'
+    and household_id = public.get_my_household_id()
+  )
+  with check (
+    public.get_my_role() = 'parent'
+    and household_id = public.get_my_household_id()
+    and exists (
+      select 1
+      from public.profiles p
+      where p.id = assigned_child_id
+        and p.household_id = public.get_my_household_id()
+        and p.role = 'child'
+    )
+  );
 
-create policy "Allow authenticated users to read devices"
+drop policy if exists "Allow assigned child to submit chore proof" on public.chores;
+create policy "Allow assigned child to submit chore proof"
+  on public.chores for update
+  to authenticated
+  using (
+    public.get_my_role() = 'child'
+    and household_id = public.get_my_household_id()
+    and assigned_child_id = auth.uid()
+    and status in ('pending', 'rejected')
+  )
+  with check (
+    public.get_my_role() = 'child'
+    and household_id = public.get_my_household_id()
+    and assigned_child_id = auth.uid()
+    and status = 'awaiting_approval'
+    and proof_image_url is not null
+  );
+
+drop policy if exists "Allow authenticated users to read devices" on public.devices;
+drop policy if exists "Allow household members to read devices" on public.devices;
+create policy "Allow household members to read devices"
   on public.devices for select
   to authenticated
-  using (true);
+  using (
+    child_id = auth.uid()
+    or (
+      public.get_my_role() = 'parent'
+      and exists (
+        select 1
+        from public.profiles p
+        where p.id = child_id
+          and p.household_id = public.get_my_household_id()
+      )
+    )
+  );
 
-create policy "Allow authenticated users to update devices"
+drop policy if exists "Allow authenticated users to update devices" on public.devices;
+drop policy if exists "Allow child or household parent to update devices" on public.devices;
+create policy "Allow child or household parent to update devices"
   on public.devices for update
   to authenticated
-  using (true);
+  using (
+    child_id = auth.uid()
+    or (
+      public.get_my_role() = 'parent'
+      and exists (
+        select 1
+        from public.profiles p
+        where p.id = child_id
+          and p.household_id = public.get_my_household_id()
+      )
+    )
+  )
+  with check (
+    child_id = auth.uid()
+    or (
+      public.get_my_role() = 'parent'
+      and exists (
+        select 1
+        from public.profiles p
+        where p.id = child_id
+          and p.household_id = public.get_my_household_id()
+      )
+    )
+  );
 
-create policy "Allow authenticated users to register devices"
+drop policy if exists "Allow authenticated users to register devices" on public.devices;
+drop policy if exists "Allow child to register own device" on public.devices;
+create policy "Allow child to register own device"
   on public.devices for insert
   to authenticated
-  with check (true);
+  with check (child_id = auth.uid());

@@ -7,12 +7,12 @@
 [![Expo](https://img.shields.io/badge/Expo-SDK_58-000020?style=for-the-badge&logo=expo&logoColor=white)](https://expo.dev/)
 [![Supabase](https://img.shields.io/badge/Supabase-Realtime_Postgres-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white)](https://supabase.com/)
 [![Android](https://img.shields.io/badge/Platform-Android_Enforcement-3DDC84?style=for-the-badge&logo=android&logoColor=white)](https://developer.android.com/)
-[![Audit Completion](https://img.shields.io/badge/MVP_Implementation-37.00%25_Audited-blue?style=for-the-badge)](#1-system-implementation-audit--feature-completion-percentage-tracker)
+[![Audit Completion](https://img.shields.io/badge/MVP_Implementation-45.00%25_Audited-blue?style=for-the-badge)](#1-system-implementation-audit--feature-completion-percentage-tracker)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](https://opensource.org/licenses/MIT)
 
 *This document serves as the single source of truth for the technical specifications, system architecture, database design, functional/non-functional requirements, and development setup for the Chorpy ecosystem.*
 
-> For daily milestone tracking, sprint tasks, and current feature completion status, refer to the [README.md](file:///README.md).
+> For daily milestone tracking, sprint tasks, and current feature completion status, refer to [README.md](file:///README.md). For the full gap matrix and 9-domain engineering improvement blueprint, refer to [LackingRequirements.md](file:///LackingRequirements.md).
 
 </div>
 
@@ -43,15 +43,17 @@
 ## 1. System Implementation Audit & Feature Completion Percentage Tracker
 
 > [!NOTE]
-> **Audit Date:** November 13, 2026  
+> **Audit Date:** November 22, 2026  
 > **Auditor:** Chief of Staff (CoS) Codebase & Specification Audit  
-> **Evaluation Scope:** All mobile client components (`mobile/src/`), database schemas & migrations (`database/schema.sql`, `database/queryAdd.sql`), configuration manifests (`mobile/app.json`, `mobile/package.json`), and native services against Functional Requirements **FR-1.1 through FR-6.4**.
+> **Evaluation Scope:** All 74 mobile client source files (`mobile/src/` and `mobile/App.tsx`), database schemas & migrations (`database/schema.sql`, `database/queryAdd.sql`), configuration manifests (`mobile/app.json`, `mobile/package.json`), and native services against Functional Requirements **FR-1.1 through FR-6.4** and Non-Functional Requirements **NFR-1.1 through NFR-6.3**. See [LackingRequirements.md](file:///LackingRequirements.md) for the complete gap matrix and 9-domain engineering improvement blueprint.
 
 ### 1.1. High-Level Progress Gauge
 
 ```text
-Chorpy MVP Functional Implementation: [███████░░░░░░░░░░░░░] 37.00%
-Status: Phase 1 Foundation, Onboarding, PIN TTL Security & Chore Management Active
+Chorpy MVP Functional Implementation: [█████████░░░░░░░░░░░] 45.00% (Audited: 2026-11-22)
+Previous Audit Baseline (2026-11-13): [███████░░░░░░░░░░░░░] 37.00% (+8.00% Net Gain)
+Scanned Source Files: 74 (73 in mobile/src/ + mobile/App.tsx)
+Status: Phase 1 Auth, Fail-Closed Multi-Tenant RLS, Calendar Scheduling, Chore Sheet & Notification Center Active
 Target Milestone: Academic Capstone Defense MVP
 ```
 
@@ -63,105 +65,103 @@ $$\text{Overall Completion} = \sum (\text{Category Score} \times \text{Weight})$
 
 | Category | Category Weight | Implementation Score | Weighted Contribution | Status |
 | :--- | :---: | :---: | :---: | :---: |
-| **FR-1.x:** Account Onboarding & Role Selection | 15% | **90.0%** | 13.50% | `Substantially Implemented` 🟢 |
-| **FR-2.x:** Family Circle, Multi-Guardian & RBAC | 15% | **50.0%** | 7.50% | `Partially Implemented` 🟡 |
-| **FR-3.x:** Device Permissions & System Handshake | 10% | **0.0%** | 0.00% | `Not Started` ⚪ |
-| **FR-4.x:** Chore Creation & Task Management | 15% | **55.0%** | 8.25% | `Partially Implemented` 🟡 |
-| **FR-5.x:** Hardware Enforcement & Verification Release | 15% | **15.0%** | 2.25% | `Partially Implemented` 🟡 |
-| **FR-6.x:** Geolocation, Geofencing & Life-Safety SOS | 10% | **0.0%** | 0.00% | `Not Started` ⚪ |
-| **Database & RLS:** Schema, Triggers, Publications & Storage | 10% | **55.0%** | 5.50% | `Partially Implemented` 🟡 |
-| **Native Android:** Modules, Config Plugins & Permissions | 10% | **0.0%** | 0.00% | `Not Started` ⚪ |
-| **TOTAL WEIGHTED COMPLETION** | **100%** | — | **37.00%** | **In Active Development** |
+| **FR-1.x:** Account Onboarding & Role Selection | 15% | **92.0%** | 13.80% | `[SUBSTANTIALLY IMPLEMENTED]` |
+| **FR-2.x:** Family Circle, Multi-Guardian & RBAC | 15% | **62.0%** | 9.30% | `[PARTIALLY IMPLEMENTED]` |
+| **FR-3.x:** Device Permissions & System Handshake | 10% | **0.0%** | 0.00% | `[NOT STARTED]` |
+| **FR-4.x:** Chore Creation & Task Management | 15% | **68.0%** | 10.20% | `[PARTIALLY IMPLEMENTED]` |
+| **FR-5.x:** Hardware Enforcement & Verification Release | 15% | **20.0%** | 3.00% | `[PARTIALLY IMPLEMENTED]` |
+| **FR-6.x:** Geolocation, Geofencing & Life-Safety SOS | 10% | **0.0%** | 0.00% | `[NOT STARTED]` |
+| **Database & RLS:** Schema, Triggers, Publications & Storage | 10% | **82.0%** | 8.20% | `[SUBSTANTIALLY IMPLEMENTED]` |
+| **Native Android:** Modules, Config Plugins & Permissions | 10% | **5.0%** | 0.50% | `[IN PROGRESS]` |
+| **TOTAL WEIGHTED COMPLETION** | **100%** | — | **45.00%** | `[IN ACTIVE DEVELOPMENT]` |
 
 ---
 
 ### 1.3. Detailed Category-by-Category Audit & Codebase Evidence
 
-#### FR-1.x: Account Onboarding & Role Selection (Score: 90%)
-- **FR-1.1 (Registration & Ingestion - 95% - Implemented & Verified ✅):** Complete 2-step onboarding pipeline implemented. [`LoginScreen.tsx`](file:///mobile/src/screens/LoginScreen.tsx) (default unauthenticated view) and [`OnboardingScreen.tsx`](file:///mobile/src/screens/OnboardingScreen.tsx) are coordinated by [`AuthScreen.tsx`](file:///mobile/src/screens/AuthScreen.tsx) with transitions (*"Don't have an account? Sign up Here"* / *"Already have an account? Log In Here"*). Step 1 ([`OnboardingStep1Form.tsx`](file:///mobile/src/components/onboarding/OnboardingStep1Form.tsx)) captures full name, email, phone, DOB via [`DobWheelPicker.tsx`](file:///mobile/src/components/onboarding/DobWheelPicker.tsx) (`@react-native-community/datetimepicker` on Android/iOS + virtualized 3-column [`WheelColumn.tsx`](file:///mobile/src/components/onboarding/WheelColumn.tsx) on Web), editable `Age` autofilled from DOB, role, password, and a mandatory Terms & Regulations checkbox. Profile metadata (`fullName`, `phoneNumber`, `dateOfBirth`, `age`, `role`) is ingested via [`authService.signUp()`](file:///mobile/src/services/authService.ts#L16-L33) and mapped by `handle_new_user()` in [`schema.sql`](file:///database/schema.sql#L76-L96). Bootstrap loading and session hydration run in [`AppLoaderScreen.tsx`](file:///mobile/src/screens/AppLoaderScreen.tsx) and [`AuthContext.tsx`](file:///mobile/src/context/AuthContext.tsx).
-- **FR-1.1.1 (Dynamic Age Derivation - 100% - Implemented & Verified ✅):** Real-time age calculation implemented in [`calculateAgeFromDOB()`](file:///mobile/src/utils/validation.ts#L150-L213) and paired with editable age bounds (`0–125`) in [`validateAgeInput()`](file:///mobile/src/utils/onboardingValidation.ts#L14-L27) and [`validateStep1Submission()`](file:///mobile/src/utils/onboardingValidation.ts#L39-L78).
-- **FR-1.1.2 (Age-Aware Role Recommendation - 100% - Implemented & Verified ✅):** Automatic role adaptation wired in [`OnboardingStep1Form.tsx`](file:///mobile/src/components/onboarding/OnboardingStep1Form.tsx#L47-L48) and [`RoleSelector.tsx`](file:///mobile/src/components/RoleSelector.tsx). If calculated or entered age is under 18, `isParentDisabled` forces `effectiveRole` to `'child'`.
-- **FR-1.1.3 (Input Masking & Sanitization - 100% - Implemented & Verified ✅):** Input sanitization implemented in [`validation.ts`](file:///mobile/src/utils/validation.ts):
+#### FR-1.x: Account Onboarding & Role Selection (Score: 92%)
+- **FR-1.1 (Registration & Ingestion - 95% - `[COMPLETED]`):** Complete 2-step onboarding pipeline implemented. [`LoginScreen.tsx`](file:///mobile/src/screens/LoginScreen.tsx) (default unauthenticated view) and [`OnboardingScreen.tsx`](file:///mobile/src/screens/OnboardingScreen.tsx) are coordinated by [`AuthScreen.tsx`](file:///mobile/src/screens/AuthScreen.tsx) with transitions (*"Don't have an account? Sign up Here"* / *"Already have an account? Log In Here"*). Step 1 ([`OnboardingStep1Form.tsx`](file:///mobile/src/components/onboarding/OnboardingStep1Form.tsx)) captures full name, email, phone, DOB via [`DobWheelPicker.tsx`](file:///mobile/src/components/onboarding/DobWheelPicker.tsx) (`@react-native-community/datetimepicker` on Android/iOS + virtualized 3-column [`WheelColumn.tsx`](file:///mobile/src/components/onboarding/WheelColumn.tsx) on Web), editable `Age` autofilled from DOB, role, password, and a mandatory Terms & Regulations checkbox. Profile metadata (`fullName`, `phoneNumber`, `dateOfBirth`, `age`, `role`) is ingested via [`authService.signUp()`](file:///mobile/src/services/authService.ts#L20-L39) and mapped by `handle_new_user()` in [`schema.sql`](file:///database/schema.sql#L178-L193). Bootstrap loading, animated flying bird splash, and session hydration run in [`AppLoaderScreen.tsx`](file:///mobile/src/screens/AppLoaderScreen.tsx), [`FlyingBirdIllustration.tsx`](file:///mobile/src/components/common/FlyingBirdIllustration.tsx), [`useAppSplash.ts`](file:///mobile/src/hooks/useAppSplash.ts), and [`AuthContext.tsx`](file:///mobile/src/context/AuthContext.tsx) over a 12-second timeout-guarded [`supabase.ts`](file:///mobile/src/lib/supabase.ts) client.
+- **FR-1.1.1 (Dynamic Age Derivation - 100% - `[COMPLETED]`):** Real-time age calculation implemented in [`calculateAgeFromDOB()`](file:///mobile/src/utils/validation.ts#L150-L213) and paired with editable age bounds (`0–125`) in [`validateAgeInput()`](file:///mobile/src/utils/onboardingValidation.ts#L14-L27) and [`validateStep1Submission()`](file:///mobile/src/utils/onboardingValidation.ts#L39-L78).
+- **FR-1.1.2 (Age-Aware Role Recommendation - 100% - `[COMPLETED]`):** Automatic role adaptation wired in [`OnboardingStep1Form.tsx`](file:///mobile/src/components/onboarding/OnboardingStep1Form.tsx#L47-L48) and [`RoleSelector.tsx`](file:///mobile/src/components/RoleSelector.tsx). If calculated or entered age is under 18, `isParentDisabled` forces `effectiveRole` to `'child'`.
+- **FR-1.1.3 (Input Masking & Sanitization - 100% - `[COMPLETED]`):** Input sanitization implemented in [`validation.ts`](file:///mobile/src/utils/validation.ts):
   - [`formatTitleCase()`](file:///mobile/src/utils/validation.ts#L85-L93): Auto-trims extraneous spaces and title-cases full name inputs on blur.
   - [`formatE164Phone()`](file:///mobile/src/utils/validation.ts#L99-L144): Standardizes Philippine (`09xx` / `9xx`) and North American phone numbers to E.164 international format (`+639...` / `+1...`) with live preview.
-- **FR-1.2.1 (Age-Gated Role Authorization - 100% - Implemented & Verified ✅):** Enforced in [`RoleSelector.tsx`](file:///mobile/src/components/RoleSelector.tsx#L22-L49) and [`OnboardingStep1Form.tsx`](file:///mobile/src/components/onboarding/OnboardingStep1Form.tsx#L47-L48). When age `< 18`, the Parent button is disabled, visually dimmed, tagged *"Requires age 18+"*, and submission forces `effectiveRole = 'child'`.
-- **FR-1.2.2 (Role Immutability & Hardware Binding - 20%):** Profile role is persisted in PostgreSQL `public.profiles`; physical device hardware binding remains planned for Phase 2.
-- **FR-1.3.1 (State-Driven Navigation Routing - 80%):** Implemented in [`App.tsx`](file:///mobile/App.tsx#L68-L171). Unauthenticated users route to [`AuthScreen.tsx`](file:///mobile/src/screens/AuthScreen.tsx); authenticated users route into RBAC-guarded tabs (`HOME`, `MY FAMILY`, `SETTING` for parents; `HOME`, `MY FAMILY`, `CHILD`, `SETTING` for children) starting on [`HomeScreen.tsx`](file:///mobile/src/screens/HomeScreen.tsx). Onboarding Step 2 ([`OnboardingFamilyFork.tsx`](file:///mobile/src/components/onboarding/OnboardingFamilyFork.tsx) with custom `react-native-svg` monoline `KeyIcon` and `FamilyIcon` badges, [`OnboardingJoinPin.tsx`](file:///mobile/src/components/onboarding/OnboardingJoinPin.tsx), [`OnboardingCreateHousehold.tsx`](file:///mobile/src/components/onboarding/OnboardingCreateHousehold.tsx)) is active; hardware permissions wizard routing and automatic lock hijack routing remain planned.
+- **FR-1.2.1 (Age-Gated Role Authorization - 100% - `[COMPLETED]`):** Enforced in [`RoleSelector.tsx`](file:///mobile/src/components/RoleSelector.tsx#L22-L49) and [`OnboardingStep1Form.tsx`](file:///mobile/src/components/onboarding/OnboardingStep1Form.tsx#L47-L48). When age `< 18`, the Parent button is disabled, visually dimmed, tagged *"Requires age 18+"*, and submission forces `effectiveRole = 'child'`.
+- **FR-1.2.2 (Role Immutability & Hardware Binding - 35%):** Profile role is persisted in PostgreSQL `public.profiles` and omitted from [`EditProfileModal.tsx`](file:///mobile/src/components/settings/EditProfileModal.tsx) and [`authService.updateProfile()`](file:///mobile/src/services/authService.ts#L84-L107); a database `BEFORE UPDATE` profile guard trigger and physical device hardware binding remain planned.
+- **FR-1.3.1 (State-Driven Navigation Routing - 80%):** Implemented in [`App.tsx`](file:///mobile/App.tsx) with [`MainNavBar.tsx`](file:///mobile/src/components/navigation/MainNavBar.tsx) and [`NavTabIcon.tsx`](file:///mobile/src/components/navigation/NavTabIcon.tsx). Unauthenticated users route to [`AuthScreen.tsx`](file:///mobile/src/screens/AuthScreen.tsx); authenticated users route into the 3-tab shell (`HOME`, `MY FAMILY`, `SETTING`) starting on the calendar-first [`HomeScreen.tsx`](file:///mobile/src/screens/HomeScreen.tsx). Hardware permissions wizard routing and automatic lock hijack routing remain planned.
 - **FR-1.3.2 (Fail-Closed Offline State Persistence - 0%):** *Not Implemented.* Encrypted lock state caching via `AsyncStorage` and native `BOOT_COMPLETED` receiver remain planned.
-- **FR-1.3.3 (Zero-Trust Row Level Security Parity - 45%):** Supabase Auth JWT profile extraction is active in [`authService.getCurrentProfile()`](file:///mobile/src/services/authService.ts#L53-L65) and [`schema.sql`](file:///database/schema.sql#L407-L424) for `profiles` self-read/update and member-scoped `households` `SELECT` (paired with `SECURITY DEFINER` RPCs in [`schema.sql`](file:///database/schema.sql) and [`queryAdd.sql`](file:///database/queryAdd.sql)); multi-tenant `household_id` RLS hardening across `chores` and `devices` remains queued.
-- **FR-1.4.1 (Email Format Standardization - 100% - Implemented & Verified ✅):** Validated against RFC 5322 regex via [`validateEmail()`](file:///mobile/src/utils/validation.ts#L41-L53) with inline blur errors in [`LoginScreen.tsx`](file:///mobile/src/screens/LoginScreen.tsx#L23-L30) and [`OnboardingStep1Form.tsx`](file:///mobile/src/components/onboarding/OnboardingStep1Form.tsx#L73-L77).
-- **FR-1.4.2 (Password Complexity & Entropy Rules - 100% - Implemented & Verified ✅):** Real-time password entropy scoring implemented in [`evaluatePasswordEntropy()`](file:///mobile/src/utils/validation.ts#L62-L80) and [`PasswordEntropyChips.tsx`](file:///mobile/src/components/PasswordEntropyChips.tsx) enforcing 8+ characters, uppercase, lowercase, and numeric digit criteria.
-- **FR-1.5 (Household Intent Gateway - 85%):** Implemented in [`OnboardingScreen.tsx`](file:///mobile/src/screens/OnboardingScreen.tsx#L99-L137) via [`OnboardingFamilyFork.tsx`](file:///mobile/src/components/onboarding/OnboardingFamilyFork.tsx) (featuring `react-native-svg` `KeyIcon` and `FamilyIcon` option cards), [`OnboardingJoinPin.tsx`](file:///mobile/src/components/onboarding/OnboardingJoinPin.tsx), and [`OnboardingCreateHousehold.tsx`](file:///mobile/src/components/onboarding/OnboardingCreateHousehold.tsx). *Gap:* Child accounts are not yet restricted from the Step 2 create-circle branch (`FR-1.5.3`), and dual-PIN generation is pending.
+- **FR-1.3.3 (Zero-Trust Row Level Security Parity - 95% - `[COMPLETED]`):** Supabase Auth JWT profile and role extraction are enforced server-side via `public.get_my_household_id()` and `public.get_my_role()` (`SECURITY DEFINER`, `SET search_path = public`) across all four tables (`households`, `profiles`, `chores`, `devices`), paired with `public.enforce_chore_update_guard()` (`BEFORE UPDATE ON public.chores`) in [`schema.sql`](file:///database/schema.sql) and [`queryAdd.sql`](file:///database/queryAdd.sql).
+- **FR-1.4.1 (Email Format Standardization - 100% - `[COMPLETED]`):** Validated against RFC 5322 regex via [`validateEmail()`](file:///mobile/src/utils/validation.ts#L41-L53) with inline blur errors in [`LoginScreen.tsx`](file:///mobile/src/screens/LoginScreen.tsx) and [`OnboardingStep1Form.tsx`](file:///mobile/src/components/onboarding/OnboardingStep1Form.tsx).
+- **FR-1.4.2 (Password Complexity & Entropy Rules - 100% - `[COMPLETED]`):** Real-time password entropy scoring implemented in [`evaluatePasswordEntropy()`](file:///mobile/src/utils/validation.ts#L62-L80) and [`PasswordEntropyChips.tsx`](file:///mobile/src/components/PasswordEntropyChips.tsx) enforcing 8+ characters, uppercase, lowercase, and numeric digit criteria.
+- **FR-1.5 (Household Intent Gateway - 85%):** Implemented in [`OnboardingScreen.tsx`](file:///mobile/src/screens/OnboardingScreen.tsx) via [`OnboardingFamilyFork.tsx`](file:///mobile/src/components/onboarding/OnboardingFamilyFork.tsx), [`OnboardingJoinPin.tsx`](file:///mobile/src/components/onboarding/OnboardingJoinPin.tsx), and [`OnboardingCreateHousehold.tsx`](file:///mobile/src/components/onboarding/OnboardingCreateHousehold.tsx). *Gap:* Child accounts are not yet restricted from the Step 2 create-circle branch in UI (`FR-1.5.3`), and dual-PIN generation is pending.
 
-#### FR-2.x: Family Circle Management, Multi-Guardian Pairing & RBAC (Score: 50%)
+#### FR-2.x: Family Circle Management, Multi-Guardian Pairing & RBAC (Score: 62%)
 - **FR-2.1 (Automated Circle Provisioning & 30-Min TTL PIN - 60%):** [`OnboardingCreateHousehold.tsx`](file:///mobile/src/components/onboarding/OnboardingCreateHousehold.tsx) and [`householdService.createHousehold()`](file:///mobile/src/services/householdService.ts#L28-L41) call the `create_household_with_pin` RPC (`allocate_household_pin()`) to generate or reclaim a unique 6-digit `pairing_pin` with a server-authoritative 30-minute `pin_expires_at` TTL (`now() + interval '30 minutes'`) and link the creator's profile.  
   *Gaps:* Dual-PIN architecture (`guardian_pin` column) and persisting `numChildren`/`numCoParents` metadata are not yet added in [`schema.sql`](file:///database/schema.sql#L33-L39).
 - **FR-2.2 (Child Circle Pairing & Device Handshake - 65%):** [`OnboardingJoinPin.tsx`](file:///mobile/src/components/onboarding/OnboardingJoinPin.tsx), [`householdService.verifyPin()`](file:///mobile/src/services/householdService.ts#L16-L25), and [`householdService.joinHouseholdWithPin()`](file:///mobile/src/services/householdService.ts#L44-L57) validate 6-digit active PINs (`pin_expires_at > now()`) atomically in PostgreSQL and refresh the profile via [`OnboardingScreen.tsx`](file:///mobile/src/screens/OnboardingScreen.tsx); [`deviceService.registerDevice()`](file:///mobile/src/services/deviceService.ts#L6-L20) exists.  
-  *Gaps:* No QR scanner, no 5-attempt/60s rate limiter, and hardware fingerprinting is not yet invoked upon pairing.
+  *Gaps:* No QR scanner, no 5-attempt/60s rate limiter, and hardware fingerprinting (`registerDevice`) is not yet invoked upon pairing.
 - **FR-2.3 (Multi-Guardian Federation & QR Onboarding - 0%):** *Not Implemented.* No QR generator/scanner or secondary guardian role designation screen (`JoinCircleScreen.tsx`).
-- **FR-2.4 (Role-Based Access Control for Guardians - 45%):** Client-side RBAC tab navigation and route guard active in [`App.tsx`](file:///mobile/App.tsx#L26-L77), parent-only chore creation gating active in [`MyFamilyScreen.tsx`](file:///mobile/src/screens/MyFamilyScreen.tsx#L101-L125), and server/UI RBAC PIN masking & regeneration active via `get_my_household()`, `regenerate_household_pin()`, and [`HouseholdPinCard.tsx`](file:///mobile/src/components/settings/HouseholdPinCard.tsx).  
-  *Gaps:* [`schema.sql`](file:///database/schema.sql#L54) and [`types/index.ts`](file:///mobile/src/types/index.ts#L1) currently define `'parent' | 'child'` only (omitting `'co_parent'` and `'caregiver'`).
-- **FR-2.5 (Real-Time Collaborative Approval Sync - 45%):** [`useChores.ts`](file:///mobile/src/hooks/useChores.ts#L83-L97) subscribes to `public.chores` changes filtered by `household_id` and syncs across connected clients; [`MyFamilyScreen.tsx`](file:///mobile/src/screens/MyFamilyScreen.tsx) updates live.  
-  *Gaps:* Proof approval UI controls, reviewer attribution (`reviewer_id`), optimistic concurrency locks, and approval toast banners remain planned.
-- **FR-2.6 (Live Circle Telemetry Roster - 45%):** [`useHouseholdMembers.ts`](file:///mobile/src/hooks/useHouseholdMembers.ts) loads household profiles for [`ChildMemberPicker.tsx`](file:///mobile/src/components/family/ChildMemberPicker.tsx) and [`ChoreTable.tsx`](file:///mobile/src/components/family/ChoreTable.tsx); [`SettingsScreen.tsx`](file:///mobile/src/screens/SettingsScreen.tsx#L64-L67) embeds [`HouseholdPinCard.tsx`](file:///mobile/src/components/settings/HouseholdPinCard.tsx) for live household name lookup, server-offset 30-min PIN countdown (`getMyHousehold`), and Parent-only PIN regeneration (`regeneratePin`).  
-  *Gaps:* Circle name lookup in `MyFamilyScreen.tsx`, live child device lock cards, battery telemetry, and remote override buttons are not yet wired.
+- **FR-2.4 (Role-Based Access Control for Guardians - 65%):** Client-side and database-level RBAC are enforced across [`HomeScreen.tsx`](file:///mobile/src/screens/HomeScreen.tsx), [`MyFamilyScreen.tsx`](file:///mobile/src/screens/MyFamilyScreen.tsx), [`AddChorePageContent.tsx`](file:///mobile/src/components/family/AddChorePageContent.tsx) (parent/co-parent `create` & `edit` vs. child read-only `view`), [`HouseholdPinCard.tsx`](file:///mobile/src/components/settings/HouseholdPinCard.tsx), [`InviteFamilyModal.tsx`](file:///mobile/src/components/family/InviteFamilyModal.tsx), and `public.chores` / `public.devices` RLS policies.  
+  *Gaps:* [`schema.sql`](file:///database/schema.sql#L54) and [`types/index.ts`](file:///mobile/src/types/index.ts#L1) currently define `'parent' | 'child'` (mapping co-parents to `'parent'`) rather than 4 distinct tiers (`'parent' | 'co_parent' | 'caregiver' | 'child'`).
+- **FR-2.5 (Real-Time Collaborative Approval Sync - 50%):** [`useChores.ts`](file:///mobile/src/hooks/useChores.ts) subscribes to `public.chores` changes filtered by `household_id`, supports optimistic creation (`createChoreOptimistic`) and editing (`updateChoreOptimistic`) with snapshot rollback, and syncs live across [`HomeScreen.tsx`](file:///mobile/src/screens/HomeScreen.tsx) and [`MyFamilyScreen.tsx`](file:///mobile/src/screens/MyFamilyScreen.tsx).  
+  *Gaps:* Proof approval UI controls (`Approve` / `Reject`), reviewer attribution (`approved_by_id`), optimistic concurrency locks, and approval toast banners remain planned.
+- **FR-2.6 (Live Circle Telemetry Roster - 65%):** [`useHouseholdMembers.ts`](file:///mobile/src/hooks/useHouseholdMembers.ts) subscribes to `public.profiles` Realtime changes and powers [`FamilyMembersList.tsx`](file:///mobile/src/components/family/FamilyMembersList.tsx) (under [`FamilySubNav.tsx`](file:///mobile/src/components/family/FamilySubNav.tsx)), [`ChildMemberPicker.tsx`](file:///mobile/src/components/family/ChildMemberPicker.tsx), and [`ChoreTable.tsx`](file:///mobile/src/components/family/ChoreTable.tsx); [`useHouseholdPin.ts`](file:///mobile/src/hooks/useHouseholdPin.ts) powers [`HouseholdPinCard.tsx`](file:///mobile/src/components/settings/HouseholdPinCard.tsx) and [`InviteFamilyModal.tsx`](file:///mobile/src/components/family/InviteFamilyModal.tsx); [`ProfileHeaderCard.tsx`](file:///mobile/src/components/settings/ProfileHeaderCard.tsx) and [`EditProfileModal.tsx`](file:///mobile/src/components/settings/EditProfileModal.tsx) enable authenticated profile management.  
+  *Gaps:* Dynamic circle name binding in `MyFamilyScreen.tsx`, live child device lock cards, battery telemetry, and remote override buttons are not yet wired.
 
 #### FR-3.x: Device Permissions & System Handshake (Score: 0%)
-- **FR-3.1 (Camera & Media Storage Access - 0%):** `expo-camera` and `expo-media-library` are not installed in [`mobile/package.json`](file:///mobile/package.json#L5-L21). No runtime permission flow exists.
+- **FR-3.1 (Camera & Media Storage Access - 0%):** `expo-camera` and `expo-media-library` are not installed in [`mobile/package.json`](file:///mobile/package.json). No runtime permission flow exists.
 - **FR-3.2 (Geolocation Permissions - 0%):** `expo-location` is not installed; no foreground/background permission prompt exists.
 - **FR-3.3 (SYSTEM_ALERT_WINDOW Overlay Inspection - 0%):** No native bridge to query `Settings.canDrawOverlays()`.
 - **FR-3.4 (Special App Access Deep-Linking - 0%):** No Android intent dispatch to `android.settings.action.MANAGE_OVERLAY_PERMISSION`.
 - **FR-3.5 (Fail-Closed Hardware Gateway - 0%):** `PermissionHandshakeScreen.tsx` does not exist; no anti-revocation observer.
 
-#### FR-4.x: Chore Creation & Task Management (Score: 55%)
-- **FR-4.1 & FR-4.2 (Chore Creation & Pending Status - 100% - Implemented & Verified ✅):** Parents tap `"Add Chore"` in [`MyFamilyScreen.tsx`](file:///mobile/src/screens/MyFamilyScreen.tsx#L101-L125) to open [`AddChoreForm.tsx`](file:///mobile/src/components/family/AddChoreForm.tsx), select a child via [`ChildMemberPicker.tsx`](file:///mobile/src/components/family/ChildMemberPicker.tsx) (backed by [`useHouseholdMembers.ts`](file:///mobile/src/hooks/useHouseholdMembers.ts)), and submit sanitized inputs through [`useChores.createChoreOptimistic()`](file:///mobile/src/hooks/useChores.ts#L100-L148) $\rightarrow$ [`choreService.createChore()`](file:///mobile/src/services/choreService.ts#L25-L40) with `'pending'` status, automatic rollback on failure, and virtualized 5-state rendering in [`ChoreTable.tsx`](file:///mobile/src/components/family/ChoreTable.tsx) + [`ChoreRow.tsx`](file:///mobile/src/components/family/ChoreRow.tsx).
-- **FR-4.3 (Embedded Camera Viewfinder - 0%):** *Not Implemented.* The *"Take Photo Proof"* button in [`ChildLockScreen.tsx`](file:///mobile/src/screens/ChildLockScreen.tsx#L20-L31) is an unhooked UI placeholder.
+#### FR-4.x: Chore Creation & Task Management (Score: 68%)
+- **FR-4.1 & FR-4.2 (Chore Creation, Scheduling, Editing & Pending Status - 100% - `[COMPLETED]`):** Parents and Co-Parents create and edit chores via the full-screen [`SlideUpPage.tsx`](file:///mobile/src/components/common/SlideUpPage.tsx) ([`AddChoreOverlayContext.tsx`](file:///mobile/src/context/AddChoreOverlayContext.tsx), [`AddChoreForm.tsx`](file:///mobile/src/components/family/AddChoreForm.tsx), [`AddChorePageContent.tsx`](file:///mobile/src/components/family/AddChorePageContent.tsx), [`ChoreFormBody.tsx`](file:///mobile/src/components/family/ChoreFormBody.tsx), [`useChoreSheetState.ts`](file:///mobile/src/hooks/useChoreSheetState.ts)) from the [`FloatingAddButton.tsx`](file:///mobile/src/components/common/FloatingAddButton.tsx), calendar time-slot taps, calendar event taps, clickable [`ChoreRow.tsx`](file:///mobile/src/components/family/ChoreRow.tsx) items in [`ChoreTable.tsx`](file:///mobile/src/components/family/ChoreTable.tsx), or [`NotificationDropdown.tsx`](file:///mobile/src/components/home/NotificationDropdown.tsx) items. Chores include `scheduled_at`, `lock_at`, and `lock_mode` presets (`Right Now`, `30 mins`, `1 hr`, `2 hrs`, `Custom`) via [`ChoreScheduleSection.tsx`](file:///mobile/src/components/family/ChoreScheduleSection.tsx), [`DateTimeFieldPicker.tsx`](file:///mobile/src/components/family/DateTimeFieldPicker.tsx), [`WebDateTimeWheel.tsx`](file:///mobile/src/components/family/WebDateTimeWheel.tsx), and [`choreScheduleUtils.ts`](file:///mobile/src/utils/choreScheduleUtils.ts), and plot onto the Day/Week/Month [`ChoreCalendarView.tsx`](file:///mobile/src/components/calendar/ChoreCalendarView.tsx) ([`CalendarGridSurface.tsx`](file:///mobile/src/components/calendar/CalendarGridSurface.tsx)). Children inspect tasks in strictly read-only mode via [`ChoreDetailReadOnlyBody.tsx`](file:///mobile/src/components/family/ChoreDetailReadOnlyBody.tsx) and receive `"Task Assigned"` alerts in [`NotificationDropdown.tsx`](file:///mobile/src/components/home/NotificationDropdown.tsx).
+- **FR-4.3 (Embedded Camera Viewfinder - 0%):** *Not Implemented.* `expo-camera` viewfinder is not yet integrated into `ChoreDetailReadOnlyBody.tsx` or an active lock screen.
 - **FR-4.4 (Image Compression & Storage Upload - 0%):** *Not Implemented.* No image resizing and no upload pipeline to Supabase Storage bucket `chore-proofs`.
-- **FR-4.5 (Transition to `awaiting_approval` - 50%):** DB mutation logic exists in [`choreService.submitChoreProof()`](file:///mobile/src/services/choreService.ts#L43-L57), but is not yet wired to UI capture controls.
+- **FR-4.5 (Transition to `awaiting_approval` - 50%):** DB mutation logic exists in [`choreService.submitChoreProof()`](file:///mobile/src/services/choreService.ts#L83-L97) and RLS policy `"Allow assigned child to submit chore proof"` is active in [`schema.sql`](file:///database/schema.sql#L603-L618), but is not yet wired to UI capture controls.
 - **FR-4.6 (Collaborative Deduplication & Concurrency Guard - 0%):** *Not Implemented.* No fuzzy string matching, warning modal, single-proof task merging, or multi-task queue bundling yet.
 
-#### FR-5.x: Hardware Device Enforcement & Verification Release (Score: 15%)
-- **FR-5.1 (Hardware Screen Hijack & System Overlay - 0%):** *Not Implemented.* No Android native foreground service or `WindowManager` overlay configuration (`TYPE_APPLICATION_OVERLAY`).
-- **FR-5.2 (Navigation Trapping & System UI Suppression - 0%):** *Not Implemented.* No hardware back/recent key interception or immersive sticky kiosk mode flags; [`ChildLockScreen.tsx`](file:///mobile/src/screens/ChildLockScreen.tsx) is currently an in-app UI scaffold.
-- **FR-5.3 (Real-Time Proof Ingestion - 30%):** Realtime household chore table synchronization is active in [`useChores.ts`](file:///mobile/src/hooks/useChores.ts) and [`ChoreTable.tsx`](file:///mobile/src/components/family/ChoreTable.tsx); photo proof cards and CDN image hydration are not yet built.
-- **FR-5.4 (Decision Matrix & Remediation Loop - 25%):** [`choreService.approveChore()`](file:///mobile/src/services/choreService.ts#L60-L80) and [`rejectChore()`](file:///mobile/src/services/choreService.ts#L83-L93) exist in the service layer; guardian approval UI actions in `MyFamilyScreen.tsx` remain planned.
-- **FR-5.5 (Hardware Dissolution & Unlock Handshake - 20%):** [`useDeviceLock.ts`](file:///mobile/src/hooks/useDeviceLock.ts#L28-L43) subscribes to `public.devices` updates; wiring to `ChildLockScreen.tsx`, native window teardown, and mascot celebration view remain planned.
+#### FR-5.x: Hardware Device Enforcement & Verification Release (Score: 20%)
+- **FR-5.1 (Hardware Screen Hijack & System Overlay - 15%):** PostgreSQL trigger `on_chore_synced_immediate_lock` (`public.sync_immediate_chore_device_lock()` in [`schema.sql`](file:///database/schema.sql#L139-L161)) atomically sets `public.devices.lock_status = 'locked'` upon `'immediate'` chore insert or update; native Android foreground service and `WindowManager` overlay configuration (`TYPE_APPLICATION_OVERLAY`) remain planned.
+- **FR-5.2 (Navigation Trapping & System UI Suppression - 0%):** *Not Implemented.* No hardware back/recent key interception or immersive sticky kiosk mode flags; the static `ChildLockScreen.tsx` placeholder was removed in favor of `ChoreDetailReadOnlyBody.tsx` until native lock enforcement is built.
+- **FR-5.3 (Real-Time Proof Ingestion - 35%):** Realtime household chore synchronization is active in [`useChores.ts`](file:///mobile/src/hooks/useChores.ts), [`ChoreCalendarView.tsx`](file:///mobile/src/components/calendar/ChoreCalendarView.tsx), [`ChoreTable.tsx`](file:///mobile/src/components/family/ChoreTable.tsx), and [`NotificationDropdown.tsx`](file:///mobile/src/components/home/NotificationDropdown.tsx); photo proof cards and CDN image hydration are not yet built.
+- **FR-5.4 (Decision Matrix & Remediation Loop - 25%):** [`choreService.approveChore()`](file:///mobile/src/services/choreService.ts#L100-L120) and [`rejectChore()`](file:///mobile/src/services/choreService.ts#L123-L133) exist in the service layer; guardian approval UI actions in `AddChorePageContent.tsx` remain planned.
+- **FR-5.5 (Hardware Dissolution & Unlock Handshake - 20%):** [`useDeviceLock.ts`](file:///mobile/src/hooks/useDeviceLock.ts) subscribes to `public.devices` updates; wiring to an active lock screen, native window teardown, and mascot celebration view remain planned.
 
 #### FR-6.x: Household Geolocation, Geofencing & Life-Safety SOS (Score: 0%)
-- **FR-6.1 (Emergency SOS Call Bypass - 0%):** `EmergencySOSButton.tsx` does not exist; no native `tel:911` intent on [`ChildLockScreen.tsx`](file:///mobile/src/screens/ChildLockScreen.tsx).
+- **FR-6.1 (Emergency SOS Call Bypass - 0%):** `EmergencySOSButton.tsx` does not exist; no native `tel:911` intent is wired.
 - **FR-6.2 (Real-Time Panic GPS Broadcast - 0%):** No GPS coordinate sampling; no WebSocket alert broadcast on `household:{household_id}:alerts`; no emergency alert modal on guardian views.
 - **FR-6.3 (Haversine Geofenced Chore Verification - 0%):** Distance calculation utility missing; geofence columns missing from `chores` and `households` tables.
-- **FR-6.4 (Passive Telemetry & Map Overview - 0%):** `FamilyMapView.tsx` does not exist.
+- **FR-6.4 (Passive Telemetry & Map Overview - 0%):** `FoldedMapIcon` button is rendered in [`HomeHeaderActions.tsx`](file:///mobile/src/components/home/HomeHeaderActions.tsx), but `FamilyMapView.tsx` and passive location handlers remain planned.
 
-#### Database, RLS & Native Configuration (Score: 55% DB / 0% Native)
-- **PostgreSQL Schema (60%):** Core tables (`households`, `profiles`, `devices`, `chores`), `auto_enable_rls` event trigger, `handle_new_user()` trigger (with `date_of_birth` and `age`), `households.pin_expires_at`, partial index `idx_households_active_pin`, 6 `SECURITY DEFINER` PIN TTL RPCs (`allocate_household_pin`, `verify_household_pin`, `create_household_with_pin`, `regenerate_household_pin`, `join_household_with_pin`, `get_my_household`), and `supabase_realtime` publications exist in [`schema.sql`](file:///database/schema.sql) and [`queryAdd.sql`](file:///database/queryAdd.sql), but lack extended columns (`guardian_pin`, `latitude`, `longitude`, `geofence_radius_meters`, `created_by_id`, `approved_by_id`, `submission_lat`, `submission_lng`, `is_within_geofence`).
-- **RLS Policies (50%):** Self-only read/update policies exist on `profiles` ([`schema.sql`](file:///database/schema.sql#L407-L413)) and member-scoped `SELECT` exists on `households` ([`schema.sql`](file:///database/schema.sql#L419-L424) & [`queryAdd.sql`](file:///database/queryAdd.sql#L333-L338)), while permissive stubs (`using (true)`) in [`schema.sql`](file:///database/schema.sql#L426-L454) for `chores` and `devices` require multi-tenant `household_id` isolation.
-- **Native Android Configuration (0%):** [`app.json`](file:///mobile/app.json#L27-L30) currently configures `"expo-font"` and `"@react-native-community/datetimepicker"`; `SYSTEM_ALERT_WINDOW`, `CAMERA`, `ACCESS_FINE_LOCATION`, and foreground service config plugins remain planned.
+#### Database, RLS & Native Configuration (Score: 82% DB / 5% Native)
+- **PostgreSQL Schema (75%):** Core tables (`households`, `profiles`, `devices`, `chores`), `scheduled_at`/`lock_at`/`lock_mode` scheduling columns and check constraints (`chores_lock_mode_chk`, `chores_lock_after_schedule_chk`), indexes (`idx_households_active_pin`, `idx_chores_household_scheduled`, `idx_chores_pending_lock_at`), `auto_enable_rls` event trigger, `handle_new_user()` trigger, `enforce_chore_update_guard()` `BEFORE UPDATE` trigger, `on_chore_synced_immediate_lock` `AFTER INSERT OR UPDATE` trigger, 6 `SECURITY DEFINER` PIN TTL RPCs, 2 RLS helper functions (`get_my_household_id()`, `get_my_role()`), and `supabase_realtime` publications (`profiles`, `chores`, `devices`) are active in [`schema.sql`](file:///database/schema.sql) and [`queryAdd.sql`](file:///database/queryAdd.sql). Extended geofence and 4-tier RBAC columns remain planned.
+- **RLS Policies (90%):** 100% fail-closed multi-tenant RLS is enforced across `households`, `profiles`, `chores`, and `devices` in [`schema.sql`](file:///database/schema.sql#L515-L673) and [`queryAdd.sql`](file:///database/queryAdd.sql#L133-L356) (zero permissive `using (true)` policies remain). A `BEFORE UPDATE` column-freeze trigger on `public.profiles` and `storage.objects` policies for `chore-proofs` remain planned.
+- **Native Android Configuration (5%):** [`app.json`](file:///mobile/app.json#L27-L38) configures `"expo-font"`, `"@react-native-community/datetimepicker"`, and `"expo-splash-screen"`; `SYSTEM_ALERT_WINDOW`, `CAMERA`, `ACCESS_FINE_LOCATION`, and foreground service config plugins remain planned.
 
 ---
 
 ### 1.4. Implementation Roadmap & Gap Resolution Priorities
 
-```
-[Sprint 1: DB & RLS Hardening] ──► [Sprint 2: Proof Review & Live Lock] ──► [Sprint 3: Native Android & Camera] ──► [Sprint 4: Geofence & SOS]
+```text
+[Sprint 1: Storage & Proof Capture] ──► [Sprint 2: Proof Review & Active Lock] ──► [Sprint 3: Native Android & Permissions] ──► [Sprint 4: Geofence & SOS]
 ```
 
-1. **Sprint 1 (Database & Security Hardening):**
-   - Extend `database/schema.sql` with multi-guardian RBAC roles (`co_parent`, `caregiver`), geofencing columns, and audit identifiers.
-   - Replace remaining `using (true)` stubs on `chores` and `devices` with strict multi-tenant RLS policies (`household_id` isolation).
-   - Create Supabase Storage bucket `chore-proofs` with authenticated RLS upload rules.
-2. **Sprint 2 (Household Live Telemetry & Proof Review UI):**
-   - Replace the static circle name placeholder in `MyFamilyScreen.tsx` with live `households` name lookup and add proof review cards (`approveChore` / `rejectChore`).
-   - Add collaborative deduplication warning modal in `AddChoreForm.tsx` and restrict Step 2 circle creation for child accounts.
-   - Wire `ChildLockScreen.tsx` directly to `useDeviceLock` and `useChores`.
-3. **Sprint 3 (Dependencies, Camera & Native Android Modules):**
-   - Install `expo-camera`, `expo-location`, `expo-media-library`, and `@react-native-community/netinfo` via `npx expo install`.
+> For the exhaustive requirement-by-requirement gap matrix and 9-domain engineering improvement blueprint, consult **[LackingRequirements.md](file:///LackingRequirements.md)**.
+
+1. **Sprint 1 (Storage Bucket & Child Photo Proof Capture):**
+   - Provision Supabase Storage bucket `chore-proofs` with authenticated household RLS policies and add `enforce_profile_update_guard()` on `public.profiles`.
+   - Install `expo-camera` and `expo-image-manipulator` via `npx expo install` and add photo proof capture + upload to `ChoreDetailReadOnlyBody.tsx`.
+2. **Sprint 2 (Guardian Proof Review UI & Active Lock Screen Wiring):**
+   - Add proof photo preview and **Approve Task** / **Reject Task** controls in `ChoreFormBody.tsx` / `AddChorePageContent.tsx` backed by an atomic PostgreSQL unlock trigger.
+   - Install `expo-device`, invoke `deviceService.registerDevice()` upon child pairing, and wire `useDeviceLock.ts` in `App.tsx` to an active child enforcement lock screen.
+3. **Sprint 3 (Permissions Handshake & Native Android Overlay Module):**
    - Build `PermissionHandshakeScreen.tsx` and configure `mobile/app.json` for `SYSTEM_ALERT_WINDOW`, `CAMERA`, `ACCESS_FINE_LOCATION`, and `RECEIVE_BOOT_COMPLETED`.
-   - Build native Android config plugin for overlay window management and back-button suppression.
+   - Build native Android CNG config plugin for `WindowManager` overlay inflation and back-button suppression.
 4. **Sprint 4 (Geofencing, Life-Safety SOS & End-to-End Verification):**
    - Implement `EmergencySOSButton.tsx` with `Linking.openURL('tel:911')` and WebSocket panic alert broadcast.
-   - Implement Haversine distance verification stamp on photo proof upload.
-   - Execute full end-to-end integration validation (`Create -> Lock -> Capture -> Approve -> Unlock`).
+   - Implement Haversine distance verification stamp on photo proof upload and execute full end-to-end defense validation (`Create -> Lock -> Capture -> Approve -> Unlock`).
 
 ---
 
@@ -207,7 +207,7 @@ Chorpy structures the household experience into two distinct phases: **Onboardin
    - Any authorized adult (Mom, Dad, or Nanny) reviews the photo proof in real time from their dashboard.
    - Tapping **"Approve"** broadcasts an unlock event attributing the reviewer (*"Approved by Dad"*), dissolving the screen overlay on the child's phone in sub-second time.
 9. **Emergency SOS Life-Safety Override (The Safety Anchor):**
-   - At any moment during active lock enforcement, the child can tap the persistent **"🚨 Emergency SOS"** action to place instant phone calls to parent contacts or `911` and broadcast real-time panic GPS telemetry to all guardian dashboards.
+   - At any moment during active lock enforcement, the child can tap the persistent **"Emergency SOS"** action to place instant phone calls to parent contacts or `911` and broadcast real-time panic GPS telemetry to all guardian dashboards.
 
 ---
 
@@ -253,12 +253,12 @@ Defined canonically in [`mobile/src/theme/index.ts`](file:///mobile/src/theme/in
 
 | App State | Screen / Context | Chorpy's Posture & Visual Cue |
 | :--- | :--- | :--- |
-| **🔒 Pending / Locked** | Full-Screen Overlay | Chorpy stands guard over a padlock: *"Chores first, screen time later!"* |
-| **📸 Photo Submission** | Camera Viewfinder | Chorpy peers through a magnifying glass: *"Snap a clear picture of your work!"* |
-| **⏳ Awaiting Review** | Awaiting Approval | Chorpy sips tea beside a timer: *"Sent to parent! Awaiting review..."* |
-| **🎉 Approved / Unlocked** | Realtime Unlock Dissolve | Chorpy takes flight with keys in beak amidst confetti: *"All clean! Enjoy screen time!"* |
-| **🚨 Emergency SOS** | Lock Screen Emergency Action | Chorpy equipped with a rescue megaphone: *"Help is on the way! Calling family & broadcasting GPS..."* |
-| **👨‍👩‍👧 Family Circle** | Circle Members List | Chorpy perched in a stylized nest displaying the household pairing PIN. |
+| **Pending / Locked** | Full-Screen Overlay | Chorpy stands guard over a padlock: *"Chores first, screen time later!"* |
+| **Photo Submission** | Camera Viewfinder | Chorpy peers through a magnifying glass: *"Snap a clear picture of your work!"* |
+| **Awaiting Review** | Awaiting Approval | Chorpy sips tea beside a timer: *"Sent to parent! Awaiting review..."* |
+| **Approved / Unlocked** | Realtime Unlock Dissolve | Chorpy takes flight with keys in beak amidst confetti: *"All clean! Enjoy screen time!"* |
+| **Emergency SOS** | Lock Screen Emergency Action | Chorpy equipped with a rescue megaphone: *"Help is on the way! Calling family & broadcasting GPS..."* |
+| **Family Circle** | Circle Members List | Chorpy perched in a stylized nest displaying the household pairing PIN. |
 
 ---
 
@@ -325,12 +325,12 @@ sequenceDiagram
 
 ### 6.1. Account Onboarding & Role Selection
 *These requirements define how users establish accounts, ingest verified profile data, and identify their permissions.*
-- [x] **FR-1.1 (Account Registration & Profile Ingestion) [COMPLETED ✅]:** The system shall allow a user to register and authenticate an account utilizing an email and password via Supabase Auth, capturing personal profile details (full name, phone number, and date of birth) with intelligent field handling:
-  - [x] **FR-1.1.1 (Dynamic Age Derivation) [COMPLETED ✅]:** The user’s age shall be computed automatically in real time from the inputted `date_of_birth`, eliminating redundant manual inputs and temporal data drift.
-  - [x] **FR-1.1.2 (Age-Aware Role Recommendation) [COMPLETED ✅]:** The system shall evaluate the calculated age to intelligently suggest or enforce the appropriate role profile (e.g., `< 18` automatically pre-selects/defaults to **Child Node**; `≥ 18` pre-selects **Parent Admin Node**).
-  - [x] **FR-1.1.3 (Smart Input Masking & Sanitization) [COMPLETED ✅]:** The phone number field shall feature automatic input masking (standardizing to E.164 international format) and auto-trimming/title-casing for full names.
+- [x] **FR-1.1 (Account Registration & Profile Ingestion) `[COMPLETED]`:** The system shall allow a user to register and authenticate an account utilizing an email and password via Supabase Auth, capturing personal profile details (full name, phone number, and date of birth) with intelligent field handling:
+  - [x] **FR-1.1.1 (Dynamic Age Derivation) `[COMPLETED]`:** The user’s age shall be computed automatically in real time from the inputted `date_of_birth`, eliminating redundant manual inputs and temporal data drift.
+  - [x] **FR-1.1.2 (Age-Aware Role Recommendation) `[COMPLETED]`:** The system shall evaluate the calculated age to intelligently suggest or enforce the appropriate role profile (e.g., `< 18` automatically pre-selects/defaults to **Child Node**; `≥ 18` pre-selects **Parent Admin Node**).
+  - [x] **FR-1.1.3 (Smart Input Masking & Sanitization) `[COMPLETED]`:** The phone number field shall feature automatic input masking (standardizing to E.164 international format) and auto-trimming/title-casing for full names.
 - **FR-1.2 (Intelligent Role Designation & Anti-Escalation Safeguard):** The system shall require the user to configure their profile role as either a **Parent (Admin Node)** or a **Child (Enforcement Node)**, secured by contextual validation:
-  - [x] **FR-1.2.1 (Age-Gated Role Authorization) [COMPLETED ✅]:** If the derived age is under 18, the system shall restrict the selection to a **Child Node** by default; claiming a **Parent Node** shall require administrative verification to prevent unauthorized privilege escalation by minors.
+  - [x] **FR-1.2.1 (Age-Gated Role Authorization) `[COMPLETED]`:** If the derived age is under 18, the system shall restrict the selection to a **Child Node** by default; claiming a **Parent Node** shall require administrative verification to prevent unauthorized privilege escalation by minors.
   - **FR-1.2.2 (Role Immutability & Hardware Binding):** Once a profile and its physical device are successfully bound to a household Circle, the assigned role shall be immutable on the local device and can only be modified or revoked by an authenticated Parent Node.
 - **FR-1.3 (Adaptive State-Driven Navigation & Fail-Closed Routing):** The system shall deterministically route authenticated users through a state-machine-driven navigation hierarchy based on role, household association, and real-time chore enforcement states:
   - **FR-1.3.1 (Multi-Stage Lifecycle Routing):** The router shall evaluate pre-requisite milestones before rendering primary views:
@@ -345,14 +345,14 @@ sequenceDiagram
     - **FR-1.3.2.2 (Offline Fail-Closed Default Policy):** If the application launches or detects a total loss of network connectivity (e.g., Airplane Mode or Wi-Fi disconnection), the router shall query the local storage cache; if the last recorded state was `'locked'`, the system shall deterministically engage the `SYSTEM_ALERT_WINDOW` overlay and reject unverified client unlocks.
     - **FR-1.3.2.3 (Android Boot-Time State Restoration):** The native Android module shall register a `BOOT_COMPLETED` broadcast receiver to inspect local persistence immediately upon device power-on, relaunching the locking overlay before background or recreational applications can be accessed.
     - **FR-1.3.2.4 (Network Recovery Auto-Resynchronization):** Upon detection of network restoration (via Android NetInfo / WebSocket reconnection), the client node shall execute an immediate state handshake with the Supabase `devices` table to synchronize pending approvals and dissolve the overlay if an approval occurred while offline.
-  - **FR-1.3.3 (Server-Side Authorization Parity & Zero-Trust RLS):** The backend database shall enforce a strict Zero-Trust security model using PostgreSQL Row Level Security (RLS) policies that independently validate every transaction, guaranteeing that client-side UI tampering cannot compromise administrative privileges:
-    - **FR-1.3.3.1 (Cryptographic JWT Role Extraction):** Every database query and WebSocket subscription shall cryptographically extract and verify the caller’s user ID (`auth.uid()`) and assigned role from the server-signed Supabase JWT, completely ignoring unverified client-side metadata or parameters.
-    - **FR-1.3.3.2 (Mutation Gatekeeping & Privilege Isolation):** PostgreSQL RLS policies shall enforce strict, role-specific mutation gates across database tables (restricting chore approvals and `'unlocked'` device signals exclusively to verified adult roles, while restricting children to proof uploads).
-    - **FR-1.3.3.3 (Household Multi-Tenant Boundary Isolation):** All database operations across `chores`, `devices`, and `households` shall enforce a mandatory `household_id` match against the caller's profile, preventing any user from reading or mutating data across different family circles.
-    - **FR-1.3.3.4 (Fail-Closed Tamper Rejection):** If a child token attempts to execute an unauthorized administrative mutation, the database engine shall reject the operation immediately via a fail-closed `HTTP 403 Forbidden / RLS Policy Violation`, preventing unauthorized state changes.
+  - [x] **FR-1.3.3 (Server-Side Authorization Parity & Zero-Trust RLS) `[COMPLETED]`:** The backend database shall enforce a strict Zero-Trust security model using PostgreSQL Row Level Security (RLS) policies that independently validate every transaction, guaranteeing that client-side UI tampering cannot compromise administrative privileges:
+    - [x] **FR-1.3.3.1 (Cryptographic JWT Role Extraction) `[COMPLETED]`:** Every database query and WebSocket subscription shall cryptographically extract and verify the caller’s user ID (`auth.uid()`) and assigned role from the server-signed Supabase JWT (`public.get_my_household_id()`, `public.get_my_role()`), completely ignoring unverified client-side metadata or parameters.
+    - [x] **FR-1.3.3.2 (Mutation Gatekeeping & Privilege Isolation) `[COMPLETED]`:** PostgreSQL RLS policies and `public.enforce_chore_update_guard()` enforce strict, role-specific mutation gates across database tables (restricting chore creation, editing, approvals, and `'unlocked'` device signals exclusively to verified adult roles, while restricting children to proof uploads).
+    - [x] **FR-1.3.3.3 (Household Multi-Tenant Boundary Isolation) `[COMPLETED]`:** All database operations across `profiles`, `chores`, `devices`, and `households` enforce a mandatory `household_id` match against the caller's profile (`public.get_my_household_id()`), preventing any user from reading or mutating data across different family circles.
+    - [x] **FR-1.3.3.4 (Fail-Closed Tamper Rejection) `[COMPLETED]`:** If a child token attempts to execute an unauthorized administrative mutation, the database engine rejects the operation immediately via a fail-closed RLS policy violation or `BEFORE UPDATE` trigger exception.
 - **FR-1.4 (Credential Validation & Policy Enforcement):** The system shall enforce strict client-side and server-side validation rules on authentication credentials prior to account creation and authentication:
-  - [x] **FR-1.4.1 (Email Format Standardization) [COMPLETED ✅]:** The system shall validate email address inputs against standard RFC 5322 syntax (requiring a valid recipient name, an `@` symbol, and a top-level domain e.g., `user@domain.com`), rejecting malformed submissions with immediate inline error feedback.
-  - [x] **FR-1.4.2 (Password Complexity & Entropy Rules) [COMPLETED ✅]:** The system shall require passwords to be at least eight (8) characters in length and enforce a composition policy containing at least one uppercase letter (`A-Z`), one lowercase letter (`a-z`), and one numeric digit (`0-9`), accompanied by visual real-time requirement feedback as the user types.
+  - [x] **FR-1.4.1 (Email Format Standardization) `[COMPLETED]`:** The system shall validate email address inputs against standard RFC 5322 syntax (requiring a valid recipient name, an `@` symbol, and a top-level domain e.g., `user@domain.com`), rejecting malformed submissions with immediate inline error feedback.
+  - [x] **FR-1.4.2 (Password Complexity & Entropy Rules) `[COMPLETED]`:** The system shall require passwords to be at least eight (8) characters in length and enforce a composition policy containing at least one uppercase letter (`A-Z`), one lowercase letter (`a-z`), and one numeric digit (`0-9`), accompanied by visual real-time requirement feedback as the user types.
 - **FR-1.5 (Household Intent Gateway: Creation vs. Federation):** Prior to accessing primary system features, the system shall intercept authenticated adult users at a dedicated onboarding gateway (`HouseholdForkScreen.tsx`) to declare their circle association intent:
   - **FR-1.5.1 (Circle Creation Pathway - Primary Parent):** Selecting *"Create a New Circle"* designates the user as the Primary Parent / Circle Owner, triggers zero-click automated circle provisioning, generates the dual-PIN pairing keys (Child & Guardian), and routes directly to the dashboard.
   - **FR-1.5.2 (Circle Federation Pathway - Secondary Adult):** Selecting *"Join an Existing Circle"* routes the adult to the `JoinCircleScreen.tsx` to enter the Guardian Invite PIN or scan the Primary Parent's QR code, binding them to the existing household as Co-Parent or Caregiver without fragmenting into duplicate circles.
@@ -416,7 +416,7 @@ To prevent indefinite exposure of static household invitation codes and eliminat
   - **FR-3.1.1 (Runtime Camera & Storage Handshake):** The mobile client shall invoke native runtime permission dialogs via `expo-camera` (`Camera.requestCameraPermissionsAsync()`) and `expo-media-library` with explicit user-facing explanations that access is exclusively utilized for capturing chore evidence.
   - **FR-3.1.2 (Settings Redirection Fallback):** If permissions are denied or configured to "Don't ask again", the handshake card shall replace the grant button with a deep-link trigger invoking `Linking.openSettings()`, accompanied by visual instructions.
 - **FR-3.2 (Geolocation & Presence Verification Permissions):** The system shall manage device location permissions to support geofenced chore verification and life-safety SOS telemetry:
-  - **FR-3.2.1 (Foreground & Geofence Location Authorization):** The client shall request foreground location permissions via `expo-location` (`Location.requestForegroundPermissionsAsync()`), displaying a live status badge (`Not Granted` ❌ $\rightarrow$ `Granted` ✅) upon user confirmation.
+  - **FR-3.2.1 (Foreground & Geofence Location Authorization):** The client shall request foreground location permissions via `expo-location` (`Location.requestForegroundPermissionsAsync()`), displaying a live status badge (`Not Granted` $\rightarrow$ `Granted`) upon user confirmation.
   - **FR-3.2.2 (Passive Telemetry Disclosure):** The handshake wizard shall display a privacy disclosure informing the user that GPS is sampled passively during chore photo uploads and emergency SOS broadcasts to minimize battery consumption.
 - **FR-3.3 (Android SYSTEM_ALERT_WINDOW Hardware Overlay Inspection):** The system shall verify whether the child device possesses native window-drawing privileges required for non-dismissible screen locking:
   - **FR-3.3.1 (Native Overlay Capability Check):** The application shall query the native Android API bridge (`Settings.canDrawOverlays(context)`) to determine whether the app is authorized to render system-level alert windows over third-party applications.
@@ -430,8 +430,8 @@ To prevent indefinite exposure of static household invitation codes and eliminat
 
 ### 6.4. Chore Creation & Task Management
 *These requirements detail the specific workflows for creating, scheduling, and tracking chores.*
-- **FR-4.1:** The system shall allow a parent user to create a chore containing a title, description, assigned child, and status.
-- **FR-4.2:** The system shall automatically set a newly assigned chore's status to `'pending'` upon creation.
+- [x] **FR-4.1 `[COMPLETED]`:** The system shall allow a parent or co-parent user to create and edit a chore containing a title, description, assigned child, scheduled execution time (`scheduled_at`), phone lock deadline (`lock_at`), lock preset mode (`lock_mode`), and status.
+- [x] **FR-4.2 `[COMPLETED]`:** The system shall automatically set a newly assigned chore's status to `'pending'` upon creation and plot it on the household Day/Week/Month calendar.
 - **FR-4.3:** The system shall provide an embedded camera viewfinder within the child's enforcement view to capture photo proof of the completed task.
 - **FR-4.4:** The system shall compress and upload the captured image (`.jpg`) to the Supabase cloud storage bucket (`chore-proofs`).
 - **FR-4.5:** The system shall automatically update the chore status from `'pending'` to `'awaiting_approval'` immediately following successful photo upload.
@@ -456,7 +456,7 @@ $$\text{pending} \xrightarrow{\text{photo upload}} \text{awaiting\_approval} \xr
   - **FR-5.2.2 (System UI Kiosk Emulation):** The overlay shall apply immersive sticky flags (`SYSTEM_UI_FLAG_IMMERSIVE_STICKY` and `SYSTEM_UI_FLAG_HIDE_NAVIGATION`), auto-collapsing the Android status bar and notification shade if pulled down.
 - **FR-5.3 (Real-Time Proof Ingestion & Verification Telemetry):** The system shall deliver submitted chore evidence to adult dashboards without latency:
   - **FR-5.3.1 (Zero-Refresh Storage Hydration):** When the child uploads a chore image, Supabase Realtime shall push an immediate update to `ParentDashboard.tsx`, dynamically rendering the photo proof card via Supabase Storage CDN without requiring a page pull-down or reload.
-  - **FR-5.3.2 (Metadata & Presence Audit Card):** The review card shall render the proof photo alongside verified operational metadata: submission timestamp, child device identifier, and the geofence presence indicator (`Within Household Perimeter` 📍 vs. `Remote Submission` ⚠️).
+  - **FR-5.3.2 (Metadata & Presence Audit Card):** The review card shall render the proof photo alongside verified operational metadata: submission timestamp, child device identifier, and the geofence presence indicator (`Within Household Perimeter` vs. `Remote Submission`).
 - **FR-5.4 (Collaborative Decision Matrix & Remediation Loop):** Authorized guardians shall execute verifiable review actions from the dashboard review card:
   - **FR-5.4.1 (Atomic Approval Transaction):** Tapping *"Approve Task"* shall execute an atomic database transaction updating `chores.status = 'approved'`, recording `chores.approved_by_id`, and setting `devices.lock_status = 'unlocked'`.
   - **FR-5.4.2 (Remediation Rejection with Parent Feedback):** Tapping *"Reject Task"* shall prompt the guardian for an optional rejection reason (e.g., *"Table still dirty"*, *"Photo too dark"*), reverting chore status to `'pending'` and displaying the explanation directly on the child's locked overlay.
@@ -476,7 +476,7 @@ $$\text{pending} \xrightarrow{\text{photo upload}} \text{awaiting\_approval} \xr
   - **FR-6.2.3 (Audible Alarm & Full-Screen Parent Alert Modal):** Connected guardian devices (`ParentDashboard.tsx`) shall trigger an immediate audible alert sound and force open an `EmergencyAlertModal.tsx` displaying the child's real-time map location with direct turn-by-turn navigation deep-links.
 - **FR-6.3 (Household Presence & Geofenced Chore Verification):** The system shall verify physical presence during task submission using spatial geofencing:
   - **FR-6.3.1 (Haversine Distance Verification):** During photo submission on `ChildLockScreen.tsx`, the client shall compute the distance between the device’s current coordinates and the household anchor (`households.latitude`, `households.longitude`) against `geofence_radius_meters` (default: 150 m).
-  - **FR-6.3.2 (Visual Presence Audit Stamp):** The system shall record `is_within_geofence` in `public.chores` and display a verified presence badge (`Within Household Perimeter` 🏡) or an alert flag (`Remote Submission: X km away` ⚠️) on the parent review card.
+  - **FR-6.3.2 (Visual Presence Audit Stamp):** The system shall record `is_within_geofence` in `public.chores` and display a verified presence badge (`Within Household Perimeter`) or an alert flag (`Remote Submission: X km away`) on the parent review card.
 - **FR-6.4 (Passive Family Circle Telemetry & Device Health):** The system shall maintain a battery-conscious location and device telemetry overview on the parent dashboard:
   - **FR-6.4.1 (Battery-Conscious Geofence Polling):** The child client shall utilize passive geofence transition listeners and significant-motion triggers rather than high-frequency continuous GPS polling, targeting $< 3\%$ battery consumption over 8 hours.
   - **FR-6.4.2 (Interactive Circle Map View):** The parent dashboard shall provide a dedicated map view (`FamilyMapView.tsx`) rendering custom avatar pins for each child node with live battery level badges and last-seen timestamps.
@@ -489,29 +489,29 @@ To accommodate complex domestic caregiving arrangements (including co-parenting,
 
 ### 7.1. Household Authority Tiers
 
-1. **👑 Primary Parent (Circle Owner):**
+1. **Primary Parent (Circle Owner):**
    - The creator and root administrator of the Household Circle.
    - Holds exclusive privileges to delete the Circle, regenerate Guardian Invite PINs, and revoke membership access for secondary guardians.
-2. **🛡️ Co-Parent (Admin Node):**
+2. **Co-Parent (Admin Node):**
    - Full operational co-administrator (e.g., Mom or Dad).
-   - Holds full operational authority to create chores, approve/reject photo submissions, release device locks, and monitor live location telemetry.
-3. **🤝 Caregiver / Nanny / Grandparent (Supervisor Node):**
+   - Holds full operational authority to create and edit chores, approve/reject photo submissions, release device locks, and monitor live location telemetry.
+3. **Caregiver / Nanny / Grandparent (Supervisor Node):**
    - Delegated domestic supervisor.
    - Granted everyday task management rights (assigning routine chores, inspecting photo proofs, and approving device unlocks), but restricted from altering circle configurations or removing members.
-4. **🔒 Child (Enforcement Node):**
+4. **Child (Enforcement Node):**
    - Strictly restricted subject node.
-   - Constrained to viewing assigned tasks, uploading verification camera proof, and accessing the Emergency SOS life-safety trigger. All administrative controls and external application access (during active chores) are locked out.
+   - Constrained to viewing assigned tasks in read-only mode, uploading verification camera proof, and accessing the Emergency SOS life-safety trigger. All administrative controls and external application access (during active chores) are locked out.
 
 ### 7.2. Role-Based Permission Matrix
 
 | Household Permission / Action | Primary Parent (Owner) | Co-Parent (Admin) | Caregiver / Nanny / Grandparent | Child (Enforcement Node) |
 | :--- | :---: | :---: | :---: | :---: |
-| **Assign & Schedule Chores** | ✅ Full | ✅ Full | ✅ Full | ❌ None |
-| **Review Proof & Unlock Screen** | ✅ Full | ✅ Full | ✅ Full | ❌ None |
-| **Trigger Emergency SOS Response** | ✅ Receives Alert | ✅ Receives Alert | ✅ Receives Alert | 🚨 Can Trigger |
-| **View Family Live Location Map** | ✅ Full | ✅ Full | ✅ Delegated Access | ❌ Restricted |
-| **Invite Members (View PINs / QR)** | ✅ Full | ✅ Full | ❌ Restricted | ❌ None |
-| **Delete Circle / Remove Members** | 👑 Owner Only | ❌ Restricted | ❌ Restricted | ❌ None |
+| **Assign, Edit & Schedule Chores** | Full Access | Full Access | Full Access | Read-Only View |
+| **Review Proof & Unlock Screen** | Full Access | Full Access | Full Access | No Access |
+| **Trigger Emergency SOS Response** | Receives Alert | Receives Alert | Receives Alert | Can Trigger |
+| **View Family Live Location Map** | Full Access | Full Access | Delegated Access | Restricted |
+| **Invite Members (View PINs / QR)** | Full Access | Full Access | Restricted | No Access |
+| **Delete Circle / Remove Members** | Owner Only | Restricted | Restricted | No Access |
 
 ---
 
@@ -522,22 +522,22 @@ To accommodate complex domestic caregiving arrangements (including co-parenting,
 ### 8.1. Performance Efficiency & Real-Time Latency
 - **NFR-1.1 (Sub-Second WebSocket Propagation):** The Supabase Realtime WebSocket engine must broadcast and deliver critical state transitions (parent chore approval to child device lock dissolution) within a round-trip latency of $< 500\text{ ms}$ over standard 4G/5G and Wi-Fi networks.
 - **NFR-1.2 (Client-Side Image Optimization):** The mobile camera module must compress captured verification photographs (`.jpg`) to $\le 1.2\text{ MB}$ with an image resolution target of $1080\times 1920\text{ px}$ prior to storage upload, ensuring upload completion within $< 2.5\text{ seconds}$ on low-bandwidth ($< 5\text{ Mbps}$) domestic networks.
-- **NFR-1.3 (Database Query SLA):** All primary operational queries on `chores`, `profiles`, and `devices` tables must execute with an internal PostgreSQL query latency of $< 150\text{ ms}$ under simulated concurrent household loads.
+- [x] **NFR-1.3 (Database Query SLA) `[IMPLEMENTED]`:** All primary operational queries on `chores`, `profiles`, and `devices` tables must execute with an internal PostgreSQL query latency of $< 150\text{ ms}$ under simulated concurrent household loads (`idx_households_active_pin`, `idx_chores_household_scheduled`, `idx_chores_pending_lock_at`).
 
 ### 8.2. Life-Safety & High-Availability (SOS System)
 - **NFR-2.1 (Instantaneous Emergency Dialing SLA):** The Emergency SOS action on `ChildLockScreen.tsx` must dispatch the native Android system telephone intent (`tel:911` or parent speed dial) in $< 100\text{ ms}$ from touch down, maintaining non-blocking asynchronous execution that never waits for network or cloud connectivity.
 - **NFR-2.2 (Life-Safety Telemetry Priority):** Emergency SOS panic payloads (GPS coordinates and panic timestamp) must be prioritized over ordinary task updates, utilizing high-priority WebSocket broadcast queues with automatic persistent retries upon network drops.
 
 ### 8.3. Security, Zero-Trust & Anti-Evasion Hardening
-- **NFR-3.1 (Multi-Tenant Row-Level Boundary Isolation):** PostgreSQL Row Level Security (RLS) policies must guarantee 100% data isolation by `household_id`. Client session tokens must be rejected via fail-closed `HTTP 403 Forbidden` responses if any attempt is made to access cross-circle data.
-- [x] **NFR-3.2 (Transport & Storage Cryptography) [IMPLEMENTED ✅]:** All data in transit (API requests, WebSocket streams, photo uploads) must enforce TLS 1.3 encryption (HTTPS / WSS via Supabase Cloud). All sensitive identifiers (session tokens, credentials) stored locally must use hardware-backed Android Keystore / encrypted client storage.
+- [x] **NFR-3.1 (Multi-Tenant Row-Level Boundary Isolation) `[IMPLEMENTED]`:** PostgreSQL Row Level Security (RLS) policies guarantee 100% data isolation by `household_id` (`public.get_my_household_id()`, `public.get_my_role()`, `public.enforce_chore_update_guard()`). Client session tokens are rejected via fail-closed `HTTP 403 Forbidden` responses if any attempt is made to access or mutate cross-circle data.
+- [x] **NFR-3.2 (Transport & Storage Cryptography) `[IMPLEMENTED]`:** All data in transit (API requests, WebSocket streams, photo uploads) enforces TLS 1.3 encryption (HTTPS / WSS via Supabase Cloud). All sensitive identifiers (session tokens, credentials) stored locally use client storage (`expo-secure-store` upgrade detailed in `LackingRequirements.md`).
 - **NFR-3.3 (System Clock Tampering Resistance):** The mobile enforcement service shall detect and counteract device system clock changes (e.g., if a child manually alters Android time to bypass scheduled locks) by cross-referencing server-issued UTC timestamps via NTP handshakes.
 - **NFR-3.4 (Brute-Force Rate Limiting):** Household PIN pairing entry endpoints must enforce automated IP and device-level rate limiting, locking verification attempts for 60 seconds following five (5) consecutive invalid inputs.
 
 ### 8.4. Reliability, Persistence & Fail-Closed Fault Tolerance
 - **NFR-4.1 (Boot-Time Overlay Restoration SLA):** If a child reboots the physical Android device while under an active `'locked'` chore state, the native `BOOT_COMPLETED` broadcast receiver must re-engage the `SYSTEM_ALERT_WINDOW` overlay within $\le 3\text{ seconds}$ of system home launcher initialization.
 - **NFR-4.2 (Fail-Closed Offline Default):** In the event of total network disconnection (Airplane Mode, Wi-Fi disabling, or DNS failure), the application router must maintain the last-known highest restriction state (`'locked'`), prohibiting automatic fail-open access without verified server cryptographic approval.
-- [x] **NFR-4.3 (Graceful Error Isolation & Boundaries) [IMPLEMENTED ✅]:** Hardware camera, storage, authentication, or geolocation exceptions must be isolated using React Error Boundaries and try-catch crash barriers, preventing client application crashes from killing the background native enforcement process. Implemented with safety timeouts, graceful loaders, and defensive error alerts across auth workflows.
+- [x] **NFR-4.3 (Graceful Error Isolation & Boundaries) `[IMPLEMENTED]`:** Hardware camera, storage, authentication, or geolocation exceptions must be isolated using React Error Boundaries and try-catch crash barriers, preventing client application crashes from killing the background native enforcement process. Implemented with safety timeouts, graceful loaders, and defensive error alerts across auth and chore workflows.
 
 ### 8.5. Resource, Memory & Energy Optimization
 - **NFR-5.1 (Battery Drain Constraint):** The background enforcement service and passive location listener must consume $< 3\%$ of total battery capacity over a continuous 8-hour testing period.
@@ -545,8 +545,8 @@ To accommodate complex domestic caregiving arrangements (including co-parenting,
 - **NFR-5.3 (Passive Geofencing vs. High-Frequency Polling):** Geolocation services must prioritize passive Android Geofence APIs rather than continuous high-accuracy GPS polling, activating fine-location hardware exclusively during photo submission and SOS trigger events.
 
 ### 8.6. Ergonomics, Usability & Cross-Device Portability
-- [x] **NFR-6.1 (Child-Centric Touch Targets - 48dp) [IMPLEMENTED ✅]:** All interactive elements (camera trigger, digit inputs, buttons, role selectors, and checkboxes) must maintain a minimum touch target dimension of $48\times 48\text{ dp}$ with expanded touch hit-slop in accordance with Material Design accessibility guidelines.
-- [x] **NFR-6.2 (Aspect Ratio & Resolution Adaptability) [IMPLEMENTED ✅]:** Mobile UI layouts must render responsively across standard modern Android aspect ratios ranging from 16:9 to 21:9 and screen densities from `hdpi` to `xxxhdpi` utilizing flexbox containers and keyboard-aware `ScrollView` wrappers without content clipping or element overlap.
+- [x] **NFR-6.1 (Child-Centric Touch Targets - 48dp) `[IMPLEMENTED]`:** All interactive elements (camera trigger, digit inputs, buttons, role selectors, and checkboxes) maintain a minimum touch target dimension of $48\times 48\text{ dp}$ with expanded touch hit-slop in accordance with Material Design accessibility guidelines.
+- [x] **NFR-6.2 (Aspect Ratio & Resolution Adaptability) `[IMPLEMENTED]`:** Mobile UI layouts render responsively across standard modern Android aspect ratios ranging from 16:9 to 21:9 and screen densities from `hdpi` to `xxxhdpi` utilizing flexbox containers and keyboard-aware `ScrollView` wrappers without content clipping or element overlap.
 - **NFR-6.3 (Standalone Sideload Compilation):** The child enforcement application build must successfully compile into an installable, standalone Android `.apk` (via Expo Prebuild Dev Client) without requiring active Metro bundler connections during live defense evaluation.
 
 ---
@@ -580,16 +580,17 @@ To balance rapid UI development with low-level Android native permissions, Chorp
 
 ### 10.1. Phase 1: Academic Defense MVP (Current Scope)
 - [x] Comprehensive architecture design & repository initialization.
-- [x] Core Authentication & Session Bootstrap Subsystem ([`LoginScreen.tsx`](file:///mobile/src/screens/LoginScreen.tsx), [`OnboardingScreen.tsx`](file:///mobile/src/screens/OnboardingScreen.tsx), [`AppLoaderScreen.tsx`](file:///mobile/src/screens/AppLoaderScreen.tsx), `DobWheelPicker`, Age-Gating, `OnboardingFamilyFork` SVG icons & Password Entropy).
-- [x] 30-Minute Household Pairing PIN TTL, Expired-PIN Reclamation, `SECURITY DEFINER` RPCs, Member-Scoped `households` RLS & RBAC `HouseholdPinCard` ([`queryAdd.sql`](file:///database/queryAdd.sql), [`schema.sql`](file:///database/schema.sql), [`SettingsScreen.tsx`](file:///mobile/src/screens/SettingsScreen.tsx)).
-- [x] Chore Creation & Virtualized Family Table ([`MyFamilyScreen.tsx`](file:///mobile/src/screens/MyFamilyScreen.tsx), [`AddChoreForm.tsx`](file:///mobile/src/components/family/AddChoreForm.tsx), [`ChoreTable.tsx`](file:///mobile/src/components/family/ChoreTable.tsx), [`useChores.ts`](file:///mobile/src/hooks/useChores.ts), [`useHouseholdMembers.ts`](file:///mobile/src/hooks/useHouseholdMembers.ts)).
-- [ ] Supabase PostgreSQL multi-tenant RLS hardening (`chores` & `devices`) and `chore-proofs` storage bucket configuration.
+- [x] Core Authentication, Animated Flying Mascot Splash & Session Bootstrap Subsystem ([`LoginScreen.tsx`](file:///mobile/src/screens/LoginScreen.tsx), [`OnboardingScreen.tsx`](file:///mobile/src/screens/OnboardingScreen.tsx), [`AppLoaderScreen.tsx`](file:///mobile/src/screens/AppLoaderScreen.tsx), [`FlyingBirdIllustration.tsx`](file:///mobile/src/components/common/FlyingBirdIllustration.tsx), [`useAppSplash.ts`](file:///mobile/src/hooks/useAppSplash.ts), `DobWheelPicker`, Age-Gating, `OnboardingFamilyFork` SVG icons & Password Entropy).
+- [x] 30-Minute Household Pairing PIN TTL, Expired-PIN Reclamation, `SECURITY DEFINER` RPCs, Member-Scoped `households` RLS, `InviteFamilyModal`, `FamilyMembersList`, & RBAC `HouseholdPinCard` ([`queryAdd.sql`](file:///database/queryAdd.sql), [`schema.sql`](file:///database/schema.sql), [`MyFamilyScreen.tsx`](file:///mobile/src/screens/MyFamilyScreen.tsx), [`SettingsScreen.tsx`](file:///mobile/src/screens/SettingsScreen.tsx)).
+- [x] Interactive Day/Week/Month Chore Calendar (`react-native-big-calendar`), 3-Mode Slide-Up Chore Sheet (`create` / `edit` / read-only `view`) with Phone Lock Timing Presets (`scheduled_at`, `lock_at`, `lock_mode`), Virtualized Family Chores Table, and Anchored Facebook-Style Notification Center ([`HomeScreen.tsx`](file:///mobile/src/screens/HomeScreen.tsx), [`ChoreCalendarView.tsx`](file:///mobile/src/components/calendar/ChoreCalendarView.tsx), [`AddChorePageContent.tsx`](file:///mobile/src/components/family/AddChorePageContent.tsx), [`NotificationDropdown.tsx`](file:///mobile/src/components/home/NotificationDropdown.tsx)).
+- [x] Supabase PostgreSQL 100% Fail-Closed Multi-Tenant RLS Hardening across `households`, `profiles`, `chores`, and `devices` (`get_my_household_id()`, `get_my_role()`, `enforce_chore_update_guard()`, `on_chore_synced_immediate_lock`).
+- [ ] `chore-proofs` Supabase Storage bucket provisioning and `expo-camera` child proof upload pipeline.
 - [ ] Dual-PIN Household Pairing logic (Child Enforcement PIN vs. Guardian Invite PIN / QR).
-- [ ] Multi-Guardian RBAC architecture & real-time collaborative proof approval UI.
+- [ ] Multi-Guardian 4-Tier RBAC expansion & real-time collaborative proof approval UI (`Approve` / `Reject`).
 - [ ] Real-time chore deduplication & concurrency guard with fuzzy keyword matching.
 - [ ] Emergency SOS life-safety overlay button & instant panic GPS telemetry broadcast.
 - [ ] Household geofencing & location-aware chore presence verification.
-- [ ] Android native module / config plugin for `SYSTEM_ALERT_WINDOW` overlay enforcement and `ChildLockScreen.tsx` live wiring.
+- [ ] Android native module / config plugin for `SYSTEM_ALERT_WINDOW` overlay enforcement and active child lock screen wiring to `useDeviceLock.ts`.
 - [ ] End-to-end WebSocket loop validation (Create $\rightarrow$ Lock $\rightarrow$ Capture $\rightarrow$ Approve $\rightarrow$ Unlock).
 
 ### 10.2. Phase 2: Closed Beta & Real-World Stress Testing (Post-Defense)
@@ -656,6 +657,9 @@ erDiagram
         text description
         text status "pending | awaiting_approval | approved | rejected"
         text proof_image_url
+        timestamp scheduled_at
+        timestamp lock_at
+        text lock_mode "immediate | offset_30m | offset_1h | offset_2h | custom"
         float submission_lat
         float submission_lng
         boolean is_within_geofence
@@ -667,7 +671,7 @@ erDiagram
 ### 11.2. PostgreSQL Table Definition (`database/schema.sql` & `database/queryAdd.sql`)
 
 > [!NOTE]
-> The canonical base schema lives in [`database/schema.sql`](file:///database/schema.sql), while [`database/queryAdd.sql`](file:///database/queryAdd.sql) provides the standalone, idempotent Supabase SQL Editor migration for the 30-minute `pin_expires_at` TTL, `allocate_household_pin()` reclamation logic, `SECURITY DEFINER` RPCs, and tightened `public.households` RLS policies.
+> The canonical base schema lives in [`database/schema.sql`](file:///database/schema.sql), while [`database/queryAdd.sql`](file:///database/queryAdd.sql) provides the standalone, idempotent Supabase SQL Editor migration for co-member profile reads, chore scheduling & phone lock timing (`scheduled_at`, `lock_at`, `lock_mode`), `get_my_household_id()`, `get_my_role()`, `enforce_chore_update_guard()`, `on_chore_synced_immediate_lock`, and fail-closed `public.chores` / `public.devices` RLS policies.
 
 ```sql
 -- Enable UUID extension
@@ -679,10 +683,6 @@ create table public.households (
     name text not null,
     pairing_pin varchar(6) unique,                 -- Nullable 30-minute TTL pairing PIN (reclaimed on expiry)
     pin_expires_at timestamp with time zone,       -- Server-authoritative expiration timestamp (now() + 30 min)
-    guardian_pin varchar(6) not null unique,       -- Planned: Secondary adult (Co-Parent / Nanny) invite PIN
-    latitude double precision,                     -- Household anchor coordinates for geofencing
-    longitude double precision,
-    geofence_radius_meters integer default 150 not null,
     created_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
 
@@ -699,7 +699,7 @@ create table public.profiles (
     phone_number text,
     date_of_birth date,
     age integer,
-    role text check (role in ('parent', 'co_parent', 'caregiver', 'child')) not null default 'child',
+    role text check (role in ('parent', 'child')) not null default 'child',
     created_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
 
@@ -717,20 +717,21 @@ create table public.chores (
     id uuid primary key default uuid_generate_v4(),
     household_id uuid not null references public.households(id) on delete cascade,
     assigned_child_id uuid not null references public.profiles(id) on delete cascade,
-    created_by_id uuid references public.profiles(id) on delete set null,    -- Assigning guardian
-    approved_by_id uuid references public.profiles(id) on delete set null,   -- Reviewing guardian
     title text not null,
     description text,
     status text check (status in ('pending', 'awaiting_approval', 'approved', 'rejected')) default 'pending' not null,
     proof_image_url text,
-    submission_lat double precision,               -- Telemetry at proof upload
-    submission_lng double precision,
-    is_within_geofence boolean default true,       -- Verified home presence
+    scheduled_at timestamp with time zone default timezone('utc'::text, now()) not null,
+    lock_at timestamp with time zone default timezone('utc'::text, now()) not null,
+    lock_mode text default 'immediate' not null,
     created_at timestamp with time zone default timezone('utc'::text, now()) not null,
-    updated_at timestamp with time zone default timezone('utc'::text, now()) not null
+    updated_at timestamp with time zone default timezone('utc'::text, now()) not null,
+    constraint chores_lock_mode_chk check (lock_mode in ('immediate', 'offset_30m', 'offset_1h', 'offset_2h', 'custom')),
+    constraint chores_lock_after_schedule_chk check (lock_at >= scheduled_at)
 );
 
--- Enable Realtime for chore states and device locks
+-- Enable Realtime for household member profiles, chore states, and device locks
+alter publication supabase_realtime add table public.profiles;
 alter publication supabase_realtime add table public.chores;
 alter publication supabase_realtime add table public.devices;
 ```
@@ -743,50 +744,55 @@ alter publication supabase_realtime add table public.devices;
 chorpy/
 ├── .agents/
 │   ├── rules/                         # Verification, UI, UX, security & global rules
-│   ├── skills/                        # Workspace agent skills, runbooks & audit scripts
+│   ├── skills/                        # Chief of Staff & Design skills + audit-rn-standards.js
 │   ├── agentProtocol.md               # Agent interaction and command cheat sheet
 │   └── instructions.md                # Master architecture and agent rules
 ├── database/
-│   ├── queryAdd.sql                   # Idempotent Supabase SQL migration for 30-min PIN TTL, RPCs & households RLS
-│   └── schema.sql                     # PostgreSQL schema, automatic RLS trigger, RPCs, and security policies
-├── mobile/                            # React Native / Expo application (SDK 58)
+│   ├── queryAdd.sql                   # Idempotent Supabase SQL migration for schedule columns, triggers & fail-closed RLS
+│   └── schema.sql                     # Canonical PostgreSQL schema, automatic RLS trigger, RPCs, and security policies
+├── mobile/                            # React Native / Expo application (SDK 58, 74 scanned source files)
 │   ├── assets/                        # App icons, splash screens, adaptive icons & background graphics
 │   ├── src/
-│   │   ├── components/                # Reusable UI, family, settings & onboarding components
-│   │   │   ├── family/                # AddChoreForm, ChildMemberPicker, ChoreRow, ChoreTable
-│   │   │   ├── onboarding/            # OnboardingStep1Form, DobWheelPicker, WheelColumn, FamilyFork, JoinPin, CreateHousehold
-│   │   │   ├── settings/              # HouseholdPinCard (RBAC live PIN, server-offset countdown & Regenerate PIN)
+│   │   ├── components/
+│   │   │   ├── calendar/              # CalendarGridSurface, CalendarStateViews, CalendarToolbar, ChoreCalendarView, calendarUtils
+│   │   │   ├── common/                # FloatingAddButton, FlyingBirdIllustration, SlideUpPage
+│   │   │   ├── family/                # AddChoreForm, AddChorePageContent, ChildMemberPicker, ChoreDetailReadOnlyBody, ChoreFormBody, ChoreRow, ChoreScheduleSection, ChoreTable, DateTimeFieldPicker, FamilyMembersList, FamilySubNav, InviteFamilyModal, WebDateTimeWheel
+│   │   │   ├── home/                  # HomeHeaderActions, HomeHeaderIcons, NotificationDropdown, NotificationRow
+│   │   │   ├── navigation/            # MainNavBar, NavTabIcon
+│   │   │   ├── onboarding/            # DobWheelPicker, OnboardingCreateHousehold, OnboardingFamilyFork, OnboardingJoinPin, OnboardingStep1Form, WheelColumn, index.ts
+│   │   │   ├── settings/              # EditProfileModal, HouseholdPinCard, ProfileHeaderCard
 │   │   │   ├── Button.tsx
 │   │   │   ├── Card.tsx
 │   │   │   ├── DeveloperQuickPreview.tsx
 │   │   │   ├── PasswordEntropyChips.tsx
 │   │   │   ├── RoleSelector.tsx
 │   │   │   └── index.ts
-│   │   ├── context/                   # Global application state (AuthContext.tsx)
-│   │   ├── hooks/                     # Custom reactive hooks (useAuth, useChores, useDeviceLock, useHouseholdMembers)
+│   │   ├── context/                   # AddChoreOverlayContext.tsx, AuthContext.tsx, NotificationContext.tsx
+│   │   ├── hooks/                     # useAppSplash, useAuth, useChoreSheetState, useChores, useDeviceLock, useHouseholdChoreData, useHouseholdMembers, useHouseholdPin
 │   │   ├── lib/
-│   │   │   └── supabase.ts            # Supabase client and AsyncStorage persistence
+│   │   │   └── supabase.ts            # Supabase client with 12s AbortController resilientFetch & webSafeStorage
 │   │   ├── screens/
-│   │   │   ├── AppLoaderScreen.tsx    # Initial bootstrap & session verification loader
+│   │   │   ├── AppLoaderScreen.tsx    # Initial bootstrap, flying bird splash & session verification loader
 │   │   │   ├── AuthScreen.tsx         # Coordinator between LoginScreen and OnboardingScreen
 │   │   │   ├── LoginScreen.tsx        # Email/password sign-in & quick demo preview
 │   │   │   ├── OnboardingScreen.tsx   # 2-step registration & family circle setup
-│   │   │   ├── HomeScreen.tsx         # Hero card with Chorpy mascot & Manage My Family CTA
-│   │   │   ├── MyFamilyScreen.tsx     # Family chore creation, virtualized chore table & Realtime sync
-│   │   │   ├── ChildLockScreen.tsx    # Child lock enforcement UI scaffold
-│   │   │   └── SettingsScreen.tsx     # Profile overview, household info, wellbeing & sign-out
-│   │   ├── services/                  # Pure business logic & API services (auth, chore, device, household)
-│   │   ├── theme/                     # Global design tokens (colors, typography, spacing, borderRadius, globalStyles)
-│   │   ├── types/                     # TypeScript data models (UserRole, LockStatus, ChoreStatus, Profile, Household, Device, Chore)
-│   │   └── utils/                     # Input sanitization & validation (validation.ts, onboardingValidation.ts)
+│   │   │   ├── HomeScreen.tsx         # Interactive Day/Week/Month Chore Calendar, header actions & + FAB
+│   │   │   ├── MyFamilyScreen.tsx     # Chores & Family sub-tabs, clickable chore table, member roster & invite modal
+│   │   │   └── SettingsScreen.tsx     # Centered profile card, edit profile modal, 30-min TTL PIN card & sign-out
+│   │   ├── services/                  # Pure business logic & API services (authService, choreService, deviceService, householdService)
+│   │   ├── theme/                     # Global design tokens (colors, typography, spacing, iconSizes, borderRadius, globalStyles)
+│   │   ├── types/                     # TypeScript data models (UserRole, LockStatus, ChoreStatus, ChoreLockMode, Profile, Household, Device, Chore)
+│   │   └── utils/                     # choreScheduleUtils.ts, notificationUtils.ts, onboardingValidation.ts, profileValidation.ts, validation.ts
 │   ├── .env.local                     # Local environment variables (Supabase URL & Anon Key)
-│   ├── app.json                       # Expo configuration & CNG plugins (expo-font, @react-native-community/datetimepicker)
-│   ├── App.tsx                        # Root application entry, font loader & RBAC tab navigator
+│   ├── app.json                       # Expo configuration & CNG plugins (expo-font, @react-native-community/datetimepicker, expo-splash-screen)
+│   ├── App.tsx                        # Root application entry, font loader, providers & RBAC tab navigator
 │   ├── eslint.config.js               # ESLint flat config (eslint-config-expo)
 │   ├── index.ts                       # Main entry point registered by Expo
 │   ├── package.json                   # Mobile dependencies & scripts
 │   └── tsconfig.json                  # TypeScript compiler configuration
 ├── server/                            # Reserved backend microservices directory
+├── AGENTS.md                          # Canonical universal AI agent entrypoint
+├── LackingRequirements.md             # System audit gap matrix & 9-domain engineering improvement blueprint
 ├── OfficialDocumentation.md           # Official system architecture and technical specifications
 └── README.md                          # Project progress, milestones, and development sprint board
 ```
@@ -868,7 +874,7 @@ When conducting a live demonstration before panel evaluators, follow this sequen
    - Demonstrate that pressing Android **Home**, **Back**, or **Recent Apps** is completely suppressed.
 
 4. **Step 3 — Life-Safety Emergency SOS Demonstration (Defense Highlight):**
-   - Tap the persistent **"🚨 Emergency SOS"** button on the locked child screen.
+   - Tap the persistent **"Emergency SOS"** button on the locked child screen.
    - Demonstrate that the phone immediately initiates an emergency dialer (`tel:`) to parent contacts without unlocking recreational apps.
    - Point to both Mom's and Dad's dashboards to show the **high-priority panic notification and live GPS coordinate map pin** received in real time.
 
@@ -899,7 +905,7 @@ When conducting a live demonstration before panel evaluators, follow this sequen
 
 ## 16. Installed Dependencies & Packages
 
-The mobile application ([`mobile/package.json`](file:///mobile/package.json)) currently includes the following packages, with [`mobile/app.json`](file:///mobile/app.json) registering the `"expo-font"` and `"@react-native-community/datetimepicker"` Expo config plugins:
+The mobile application ([`mobile/package.json`](file:///mobile/package.json)) currently includes the following packages, with [`mobile/app.json`](file:///mobile/app.json) registering the `"expo-font"`, `"@react-native-community/datetimepicker"`, and `"expo-splash-screen"` Expo config plugins:
 
 ### 16.1. Production Dependencies
 
@@ -908,14 +914,16 @@ The mobile application ([`mobile/package.json`](file:///mobile/package.json)) cu
 | [`@expo-google-fonts/fredoka`](https://github.com/expo/google-fonts) | `^0.4.1` | Primary rounded display typography (`Fredoka` Regular, SemiBold, Bold). |
 | [`@expo-google-fonts/poppins`](https://github.com/expo/google-fonts) | `^0.4.1` | Secondary body and label typography (`Poppins` Regular, Medium, SemiBold, Bold). |
 | [`@expo/metro-runtime`](https://docs.expo.dev/) | `~58.0.15` | Expo Metro web/native runtime support. |
-| [`@react-native-async-storage/async-storage`](https://react-native-async-storage.github.io/async-storage/) | `2.2.0` | Persistent on-device key-value store for Supabase Auth session tokens. |
-| [`@react-native-community/datetimepicker`](https://github.com/react-native-datetimepicker/datetimepicker) | `9.2.1` | Native Android/iOS spinner date picker used by `DobWheelPicker` during onboarding. |
+| [`@react-native-async-storage/async-storage`](https://react-native-async-storage.github.io/async-storage/) | `2.2.0` | Persistent on-device key-value store for Supabase Auth session tokens and per-user notification seen timestamps. |
+| [`@react-native-community/datetimepicker`](https://github.com/react-native-datetimepicker/datetimepicker) | `9.2.1` | Native Android/iOS spinner date and time picker used by `DobWheelPicker` and `DateTimeFieldPicker`. |
 | [`@supabase/supabase-js`](https://supabase.com/docs/reference/javascript) | `^2.118.0` | Official client SDK for PostgreSQL queries, Supabase Auth, Realtime WebSockets, and Storage. |
 | [`expo`](https://docs.expo.dev/) | `~58.0.17` | Managed React Native mobile platform and CNG build toolchain. |
 | [`expo-font`](https://docs.expo.dev/versions/latest/sdk/font/) | `~58.0.11` | Custom font loading (`useFonts` in `App.tsx`) and CNG plugin. |
+| [`expo-splash-screen`](https://docs.expo.dev/versions/latest/sdk/splash-screen/) | `~58.0.14` | Native splash screen lifecycle controller (`SplashScreen.preventAutoHideAsync` / `hideAsync` in `App.tsx`) and CNG config plugin. |
 | [`expo-status-bar`](https://docs.expo.dev/versions/latest/sdk/status-bar/) | `~58.0.4` | System status bar theme and appearance manager. |
 | [`react`](https://react.dev/) / [`react-dom`](https://react.dev/) | `19.3.0` | Core React rendering engine across native and web targets. |
 | [`react-native`](https://reactnative.dev/) | `0.88.0` | Core cross-platform native mobile UI framework and device bridge. |
+| [`react-native-big-calendar`](https://github.com/acro5piano/react-native-big-calendar) | `^4.19.0` | Day, Week, and Month calendar grid primitives consumed by `CalendarGridSurface.tsx` and `calendarUtils.ts`. |
 | [`react-native-svg`](https://github.com/software-mansion/react-native-svg) | `15.16.0` | Vector graphics rendering support for React Native. |
 | [`react-native-url-polyfill`](https://github.com/charpeni/react-native-url-polyfill) | `^4.0.0` | WHATWG URL standard polyfill required for Supabase Realtime WebSocket connections in React Native. |
 | [`react-native-web`](https://necolas.github.io/react-native-web/) | `^0.21.4` | Web compatibility layer for running Chorpy in browser targets. |

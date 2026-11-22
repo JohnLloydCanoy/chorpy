@@ -1,8 +1,8 @@
 import React, { useCallback } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { colors, spacing, borderRadius, typography } from '../../theme';
+import { borderRadius, colors, spacing, typography } from '../../theme';
 
-export type FamilySubTab = 'chores' | 'family' | 'calendar';
+export type FamilySubTab = 'chores' | 'family';
 
 interface FamilySubNavProps {
   activeTab: FamilySubTab;
@@ -16,10 +16,9 @@ interface SubNavButtonProps {
   onSelect: (tab: FamilySubTab) => void;
 }
 
-const TABS: readonly { id: FamilySubTab; label: string }[] = [
+const FAMILY_SUB_TABS: readonly { id: FamilySubTab; label: string }[] = [
   { id: 'chores', label: 'Chores' },
   { id: 'family', label: 'Family' },
-  { id: 'calendar', label: 'Calendar' },
 ];
 
 const SubNavButton = React.memo(function SubNavButton({
@@ -57,7 +56,7 @@ export const FamilySubNav = React.memo(function FamilySubNav({
 }: FamilySubNavProps) {
   return (
     <View style={styles.container} accessibilityRole="tablist">
-      {TABS.map((tab) => (
+      {FAMILY_SUB_TABS.map((tab) => (
         <SubNavButton
           key={tab.id}
           id={tab.id}

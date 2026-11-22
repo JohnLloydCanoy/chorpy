@@ -1,11 +1,25 @@
 import { supabase } from '../lib/supabase';
-import { Chore, ChoreStatus } from '../types';
+import { Chore, ChoreLockMode, ChoreStatus } from '../types';
 
 export interface CreateChoreParams {
   householdId: string;
   assignedChildId: string;
   title: string;
   description?: string;
+  scheduledAt: string;
+  lockAt: string;
+  lockMode: ChoreLockMode;
+}
+
+export interface UpdateChoreParams {
+  choreId: string;
+  householdId: string;
+  assignedChildId: string;
+  title: string;
+  description?: string | null;
+  scheduledAt: string;
+  lockAt: string;
+  lockMode: ChoreLockMode;
 }
 
 export const choreService = {
@@ -15,6 +29,7 @@ export const choreService = {
       .from('chores')
       .select('*')
       .eq('household_id', householdId)
+      .order('scheduled_at', { ascending: false })
       .order('created_at', { ascending: false });
 
     if (error) throw error;
@@ -31,7 +46,32 @@ export const choreService = {
         title: params.title,
         description: params.description || null,
         status: 'pending' as ChoreStatus,
+        scheduled_at: params.scheduledAt,
+        lock_at: params.lockAt,
+        lock_mode: params.lockMode,
       })
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data as Chore;
+  },
+
+  // Update an existing household chore's details and schedule (Parents & Co-Parents only via RLS)
+  async updateChore(params: UpdateChoreParams): Promise<Chore> {
+    const { data, error } = await supabase
+      .from('chores')
+      .update({
+        assigned_child_id: params.assignedChildId,
+        title: params.title,
+        description: params.description || null,
+        scheduled_at: params.scheduledAt,
+        lock_at: params.lockAt,
+        lock_mode: params.lockMode,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', params.choreId)
+      .eq('household_id', params.householdId)
       .select()
       .single();
 
