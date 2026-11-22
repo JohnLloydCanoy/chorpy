@@ -164,6 +164,7 @@ export const FamilyMembersList = React.memo(function FamilyMembersList({
         renderItem={renderItem}
         getItemLayout={getItemLayout}
         ListHeaderComponent={listHeader}
+        contentContainerStyle={styles.listContent}
         removeClippedSubviews
         maxToRenderPerBatch={15}
         showsVerticalScrollIndicator={false}
@@ -176,6 +177,7 @@ export const FamilyMembersList = React.memo(function FamilyMembersList({
 
 const styles = StyleSheet.create({
   tableContainer: { flex: 1, backgroundColor: colors.surface, borderRadius: borderRadius.lg, borderWidth: 1, borderColor: colors.border, overflow: 'hidden' },
+  listContent: { paddingBottom: spacing.xxl + spacing.lg },
   tableHeader: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: spacing.md, paddingVertical: spacing.sm, backgroundColor: colors.background, borderBottomWidth: 1, borderBottomColor: colors.border },
   headerCell: { fontSize: typography.fontSizes.xs, fontFamily: typography.fontFamily.secondaryBold, color: colors.textSecondary },
   colMember: { flex: 2.2, paddingRight: spacing.sm },
