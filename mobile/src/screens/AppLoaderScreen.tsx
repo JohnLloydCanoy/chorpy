@@ -10,6 +10,8 @@ interface AppLoaderScreenProps {
   subMessage?: string;
   error?: string | null;
   onRetry?: () => void;
+  secondaryActionLabel?: string;
+  onSecondaryAction?: () => void;
   // TODO(remove-after-testing): Temporary Demo Splash preview props
   demoStatusText?: string;
   onExitDemo?: () => void;
@@ -20,6 +22,8 @@ export default function AppLoaderScreen({
   subMessage = 'Checking session and syncing your profile...',
   error = null,
   onRetry,
+  secondaryActionLabel,
+  onSecondaryAction,
   demoStatusText,
   onExitDemo,
 }: AppLoaderScreenProps) {
@@ -46,6 +50,16 @@ export default function AppLoaderScreen({
               >
                 <Image source={primaryBgImage} style={styles.retryButtonBgImage} resizeMode="cover" />
                 <Text style={styles.retryButtonText}>Retry</Text>
+              </TouchableOpacity>
+            ) : null}
+            {secondaryActionLabel && onSecondaryAction ? (
+              <TouchableOpacity
+                style={styles.secondaryActionButton}
+                onPress={onSecondaryAction}
+                accessibilityRole="button"
+                accessibilityLabel={secondaryActionLabel}
+              >
+                <Text style={styles.secondaryActionText}>{secondaryActionLabel}</Text>
               </TouchableOpacity>
             ) : null}
           </View>
@@ -155,4 +169,17 @@ const styles = StyleSheet.create({
   },
   retryButtonBgImage: { position: 'absolute', top: 0, left: '-6%', right: '-6%', bottom: 0, width: '112%', height: '100%', zIndex: 1 },
   retryButtonText: { fontFamily: typography.fontFamily.secondaryBold, color: colors.textLight, fontSize: typography.fontSizes.sm, zIndex: 2, position: 'relative' },
+  secondaryActionButton: {
+    marginTop: spacing.sm,
+    backgroundColor: colors.surface,
+    borderColor: colors.border,
+    borderWidth: 1,
+    borderRadius: borderRadius.md,
+    minHeight: 48,
+    minWidth: 160,
+    paddingHorizontal: spacing.md,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  secondaryActionText: { fontFamily: typography.fontFamily.secondarySemiBold, fontSize: typography.fontSizes.xs, color: colors.primary },
 });
