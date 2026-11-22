@@ -17,6 +17,7 @@ interface ChoreTableProps {
   onRetry: () => void;
   onDismissMutationError: () => void;
   onOpenAddChore?: () => void;
+  onSelectChore?: (chore: Chore) => void;
 }
 
 export const ChoreTable = React.memo(function ChoreTable({
@@ -32,6 +33,7 @@ export const ChoreTable = React.memo(function ChoreTable({
   onRetry,
   onDismissMutationError,
   onOpenAddChore,
+  onSelectChore,
 }: ChoreTableProps) {
   const keyExtractor = useCallback((item: Chore) => item.id, []);
 
@@ -50,9 +52,11 @@ export const ChoreTable = React.memo(function ChoreTable({
         chore={item}
         assignedLabel={memberNameMap[item.assigned_child_id] || 'Assigned Child'}
         isPendingSync={Boolean(pendingIds[item.id])}
+        canEdit={role === 'parent'}
+        onPress={onSelectChore}
       />
     ),
-    [memberNameMap, pendingIds]
+    [memberNameMap, onSelectChore, pendingIds, role]
   );
 
   const listHeader = useMemo(
@@ -177,6 +181,7 @@ export const ChoreTable = React.memo(function ChoreTable({
         renderItem={renderItem}
         getItemLayout={getItemLayout}
         ListHeaderComponent={listHeader}
+        contentContainerStyle={styles.listContent}
         removeClippedSubviews
         maxToRenderPerBatch={15}
         showsVerticalScrollIndicator={false}
@@ -189,6 +194,7 @@ export const ChoreTable = React.memo(function ChoreTable({
 
 const styles = StyleSheet.create({
   tableContainer: { flex: 1, backgroundColor: colors.surface, borderRadius: borderRadius.lg, borderWidth: 1, borderColor: colors.border, overflow: 'hidden' },
+  listContent: { paddingBottom: spacing.xxl + spacing.lg },
   tableHeader: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: spacing.md, paddingVertical: spacing.sm, backgroundColor: colors.background, borderBottomWidth: 1, borderBottomColor: colors.border },
   headerCell: { fontSize: typography.fontSizes.xs, fontFamily: typography.fontFamily.secondaryBold, color: colors.textSecondary },
   colTitle: { flex: 2, paddingRight: spacing.sm },
