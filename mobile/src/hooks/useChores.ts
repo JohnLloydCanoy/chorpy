@@ -1,6 +1,6 @@
-import { useEffect, useState, useCallback, useRef } from 'react';
+import { useEffect, useState, useCallback, useRef, useId } from 'react';
 import { supabase } from '../lib/supabase';
-import { choreService, CreateChoreParams } from '../services/choreService';
+import { choreService, CreateChoreParams, UpdateChoreParams } from '../services/choreService';
 import { Chore } from '../types';
 
 function extractErrorMessage(err: unknown, fallback: string): string {
@@ -10,13 +10,29 @@ function extractErrorMessage(err: unknown, fallback: string): string {
   return fallback;
 }
 
+function sortChoresDescending(list: Chore[]): Chore[] {
+  return [...list].sort((a, b) => {
+    const schedDiff = Date.parse(b.scheduled_at || b.created_at) - Date.parse(a.scheduled_at || a.created_at);
+    if (!Number.isNaN(schedDiff) && schedDiff !== 0) {
+      return schedDiff;
+    }
+    return Date.parse(b.created_at) - Date.parse(a.created_at);
+  });
+}
+
 export function useChores(householdId?: string | null) {
+  const instanceId = useId();
   const [chores, setChores] = useState<Chore[]>([]);
   const [loading, setLoading] = useState<boolean>(Boolean(householdId));
   const [error, setError] = useState<string | null>(null);
   const [pendingIds, setPendingIds] = useState<Record<string, boolean>>({});
   const [mutationError, setMutationError] = useState<string | null>(null);
   const isMountedRef = useRef(true);
+  const choresRef = useRef<Chore[]>([]);
+
+  useEffect(() => {
+    choresRef.current = chores;
+  }, [chores]);
 
   useEffect(() => {
     isMountedRef.current = true;
@@ -81,7 +97,7 @@ export function useChores(householdId?: string | null) {
     }
 
     const channel = supabase
-      .channel(`public:chores:household:${householdId}`)
+      .channel(`public:chores:household:${householdId}:${instanceId}`)
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'chores', filter: `household_id=eq.${householdId}` },
@@ -95,7 +111,7 @@ export function useChores(householdId?: string | null) {
       active = false;
       supabase.removeChannel(channel);
     };
-  }, [householdId, fetchChores]);
+  }, [householdId, fetchChores, instanceId]);
 
   const createChoreOptimistic = useCallback(async (params: CreateChoreParams): Promise<Chore> => {
     const tempId = `temp-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
@@ -109,20 +125,23 @@ export function useChores(householdId?: string | null) {
       description: params.description || null,
       status: 'pending',
       proof_image_url: null,
+      scheduled_at: params.scheduledAt,
+      lock_at: params.lockAt,
+      lock_mode: params.lockMode,
       created_at: nowIso,
       updated_at: nowIso,
     };
 
     setMutationError(null);
     setPendingIds((prev) => ({ ...prev, [tempId]: true }));
-    setChores((prev) => [optimisticChore, ...prev]);
+    setChores((prev) => sortChoresDescending([optimisticChore, ...prev]));
 
     try {
       const created = await choreService.createChore(params);
       if (isMountedRef.current) {
         setChores((prev) => {
           const withoutDup = prev.filter((c) => c.id !== tempId && c.id !== created.id);
-          return [created, ...withoutDup];
+          return sortChoresDescending([created, ...withoutDup]);
         });
         setPendingIds((prev) => {
           const next = { ...prev };
@@ -134,11 +153,64 @@ export function useChores(householdId?: string | null) {
     } catch (err: unknown) {
       const message = extractErrorMessage(err, 'Failed to save chore. Changes were rolled back.');
       if (isMountedRef.current) {
-        // Roll back optimistic insertion on failure
         setChores((prev) => prev.filter((c) => c.id !== tempId));
         setPendingIds((prev) => {
           const next = { ...prev };
           delete next[tempId];
+          return next;
+        });
+        setMutationError(message);
+      }
+      throw new Error(message);
+    }
+  }, []);
+
+  const updateChoreOptimistic = useCallback(async (params: UpdateChoreParams): Promise<Chore> => {
+    const previousSnapshot = choresRef.current.find((c) => c.id === params.choreId) ?? null;
+    const updatedIso = new Date().toISOString();
+
+    setMutationError(null);
+    setPendingIds((prev) => ({ ...prev, [params.choreId]: true }));
+    if (previousSnapshot) {
+      const optimisticChore: Chore = {
+        ...previousSnapshot,
+        assigned_child_id: params.assignedChildId,
+        title: params.title,
+        description: params.description || null,
+        scheduled_at: params.scheduledAt,
+        lock_at: params.lockAt,
+        lock_mode: params.lockMode,
+        updated_at: updatedIso,
+      };
+      setChores((prev) =>
+        sortChoresDescending(prev.map((c) => (c.id === params.choreId ? optimisticChore : c)))
+      );
+    }
+
+    try {
+      const updated = await choreService.updateChore(params);
+      if (isMountedRef.current) {
+        setChores((prev) =>
+          sortChoresDescending(prev.map((c) => (c.id === updated.id ? updated : c)))
+        );
+        setPendingIds((prev) => {
+          const next = { ...prev };
+          delete next[params.choreId];
+          return next;
+        });
+      }
+      return updated;
+    } catch (err: unknown) {
+      const message = extractErrorMessage(err, 'Failed to update chore. Changes were rolled back.');
+      if (isMountedRef.current) {
+        if (previousSnapshot) {
+          setChores((prev) =>
+            sortChoresDescending(prev.map((c) => (c.id === params.choreId ? previousSnapshot : c)))
+          );
+        }
+        setPendingIds((prev) => {
+          const next = { ...prev };
+          delete next[params.choreId];
           return next;
         });
         setMutationError(message);
@@ -162,6 +234,7 @@ export function useChores(householdId?: string | null) {
     mutationError,
     refetch: fetchChores,
     createChoreOptimistic,
+    updateChoreOptimistic,
     clearMutationError,
   };
 }
