@@ -1,13 +1,15 @@
 import React, { useEffect, useState } from 'react';
-import { AccessibilityInfo, Animated, Easing, StyleSheet, View } from 'react-native';
+import { AccessibilityInfo, Animated, Easing, Platform, StyleSheet, View } from 'react-native';
 import Svg, { Circle, Ellipse, Path, Polygon } from 'react-native-svg';
 import { borderRadius, colors, spacing } from '../../theme';
+
+const USE_NATIVE_DRIVER = Platform.OS !== 'web';
 
 function startCloudLoop(anim: Animated.Value, duration: number): Animated.CompositeAnimation {
   const loop = Animated.loop(
     Animated.sequence([
-      Animated.timing(anim, { toValue: -170, duration, easing: Easing.linear, useNativeDriver: true }),
-      Animated.timing(anim, { toValue: 170, duration: 0, useNativeDriver: true }),
+      Animated.timing(anim, { toValue: -170, duration, easing: Easing.linear, useNativeDriver: USE_NATIVE_DRIVER }),
+      Animated.timing(anim, { toValue: 170, duration: 0, useNativeDriver: USE_NATIVE_DRIVER }),
     ])
   );
   loop.start();
@@ -49,15 +51,15 @@ export function FlyingBirdIllustration() {
 
     const flightLoop = Animated.loop(
       Animated.sequence([
-        Animated.timing(flightProgress, { toValue: 1, duration: 360, easing: Easing.out(Easing.quad), useNativeDriver: true }),
-        Animated.timing(flightProgress, { toValue: 2, duration: 440, easing: Easing.in(Easing.quad), useNativeDriver: true }),
-        Animated.timing(flightProgress, { toValue: 0, duration: 240, easing: Easing.out(Easing.sin), useNativeDriver: true }),
+        Animated.timing(flightProgress, { toValue: 1, duration: 360, easing: Easing.out(Easing.quad), useNativeDriver: USE_NATIVE_DRIVER }),
+        Animated.timing(flightProgress, { toValue: 2, duration: 440, easing: Easing.in(Easing.quad), useNativeDriver: USE_NATIVE_DRIVER }),
+        Animated.timing(flightProgress, { toValue: 0, duration: 240, easing: Easing.out(Easing.sin), useNativeDriver: USE_NATIVE_DRIVER }),
       ])
     );
     const wingLoop = Animated.loop(
       Animated.sequence([
-        Animated.timing(wingProgress, { toValue: 1, duration: 180, easing: Easing.inOut(Easing.ease), useNativeDriver: true }),
-        Animated.timing(wingProgress, { toValue: 0, duration: 180, easing: Easing.inOut(Easing.ease), useNativeDriver: true }),
+        Animated.timing(wingProgress, { toValue: 1, duration: 180, easing: Easing.inOut(Easing.ease), useNativeDriver: USE_NATIVE_DRIVER }),
+        Animated.timing(wingProgress, { toValue: 0, duration: 180, easing: Easing.inOut(Easing.ease), useNativeDriver: USE_NATIVE_DRIVER }),
       ])
     );
 
